@@ -2,21 +2,26 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#2196f3',
-      light: '#64b5f6',
-      dark: '#1976d2',
+      main: '#ff6740', // Orange/red color similar to MangaPlus logo
+      light: '#ff8a65',
+      dark: '#e64a19',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#f50057',
-      light: '#ff4081',
-      dark: '#c51162',
-      contrastText: '#ffffff',
+      main: '#ffeb3b', // Yellow accent color
+      light: '#fff176',
+      dark: '#fbc02d',
+      contrastText: '#000000',
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: '#121212', // Dark background
+      paper: '#1e1e1e',    // Slightly lighter dark for cards/papers
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: '#b0b0b0',
     },
   },
   typography: {
