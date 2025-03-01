@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Container, Grid, Typography, Box, Pagination, Paper, Divider, Button, Stack, Avatar } from '@mui/material';
-import { TrendingUp, Update, Whatshot } from '@mui/icons-material';
+import { Container, Grid, Typography, Box, Pagination, Paper, Divider, Button, Stack, Avatar, InputBase } from '@mui/material';
+import { TrendingUp, Update, Whatshot, Search as SearchIcon } from '@mui/icons-material';
+import { alpha } from '@mui/material/styles';
 import MangaCard from '../components/MangaCard';
 import FeaturedCarousel from '../components/FeaturedCarousel';
 import { Link } from 'react-router-dom';
@@ -10,7 +11,7 @@ const mockMangas = [
   {
     id: 1,
     title: 'One Piece',
-    cover: 'https://m.media-amazon.com/images/I/51FXs5gTmdL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Eiichiro Oda',
     rating: 4.8,
     views: '353691',
@@ -19,7 +20,7 @@ const mockMangas = [
   {
     id: 2,
     title: 'Naruto',
-    cover: 'https://m.media-amazon.com/images/I/51uYlDqRHhL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Masashi Kishimoto',
     rating: 4.7,
     views: '339747',
@@ -37,7 +38,7 @@ const mockMangas = [
   {
     id: 4,
     title: 'My Hero Academia',
-    cover: 'https://m.media-amazon.com/images/I/51uE3jDzsFL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Kohei Horikoshi',
     rating: 4.6,
     views: '226328',
@@ -46,7 +47,7 @@ const mockMangas = [
   {
     id: 5,
     title: 'Demon Slayer',
-    cover: 'https://m.media-amazon.com/images/I/51rRBpYSPSL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Koyoharu Gotouge',
     rating: 4.8,
     views: '202821',
@@ -55,7 +56,7 @@ const mockMangas = [
   {
     id: 6,
     title: 'Jujutsu Kaisen',
-    cover: 'https://m.media-amazon.com/images/I/51QUzC1IeYL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Gege Akutami',
     rating: 4.7,
     views: '171212',
@@ -64,7 +65,7 @@ const mockMangas = [
   {
     id: 7,
     title: 'Dragon Ball',
-    cover: 'https://m.media-amazon.com/images/I/51xQWQ7lWwL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Akira Toriyama',
     rating: 4.8,
     views: '168421',
@@ -73,7 +74,34 @@ const mockMangas = [
   {
     id: 8,
     title: 'Death Note',
-    cover: 'https://m.media-amazon.com/images/I/51SkIDTd9rL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
+    author: 'Tsugumi Ohba',
+    rating: 4.9,
+    views: '156324',
+    genres: ['Mystery', 'Psychological', 'Supernatural']
+  },
+  {
+    id: 9,
+    title: 'Death Note',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
+    author: 'Tsugumi Ohba',
+    rating: 4.9,
+    views: '156324',
+    genres: ['Mystery', 'Psychological', 'Supernatural']
+  },
+  {
+    id: 10,
+    title: 'Death Note',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
+    author: 'Tsugumi Ohba',
+    rating: 4.9,
+    views: '156324',
+    genres: ['Mystery', 'Psychological', 'Supernatural']
+  },
+  {
+    id: 11,
+    title: 'Death Note',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     author: 'Tsugumi Ohba',
     rating: 4.9,
     views: '156324',
@@ -86,14 +114,14 @@ const dailyUpdates = [
   {
     id: 1,
     title: 'One Piece',
-    cover: 'https://m.media-amazon.com/images/I/51FXs5gTmdL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     chapter: 1084,
     updatedAt: '2 hours ago'
   },
   {
     id: 2,
     title: 'Naruto',
-    cover: 'https://m.media-amazon.com/images/I/51uYlDqRHhL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     chapter: 702,
     updatedAt: '5 hours ago'
   },
@@ -107,7 +135,7 @@ const dailyUpdates = [
   {
     id: 4,
     title: 'My Hero Academia',
-    cover: 'https://m.media-amazon.com/images/I/51uE3jDzsFL._SY445_SX342_.jpg',
+    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
     chapter: 362,
     updatedAt: '2 days ago'
   }
@@ -147,6 +175,53 @@ const Home = () => {
   return (
     <>
       <FeaturedCarousel />
+      
+      {/* Search Area */}
+      <Box sx={{ backgroundColor: 'background.paper', py: 3, boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+        <Container maxWidth="xl">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: alpha('#ffffff', 0.15),
+              borderRadius: 2,
+              overflow: 'hidden',
+              maxWidth: 700,
+              mx: 'auto',
+              '&:hover': {
+                backgroundColor: alpha('#ffffff', 0.25),
+              },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, px: 2 }}>
+              <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+              <InputBase
+                placeholder="Search by title or author..."
+                sx={{
+                  color: 'text.primary',
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    py: 1.5,
+                  },
+                }}
+              />
+            </Box>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              sx={{ 
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                py: 1.5,
+                minWidth: '100px'
+              }}
+            >
+              Search
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+      
       <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         <Grid container spacing={3}>
           {/* Main Content Area - 9 columns on large screens */}

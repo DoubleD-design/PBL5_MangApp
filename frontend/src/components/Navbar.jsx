@@ -106,16 +106,33 @@ const Navbar = () => {
             </Button>
           </Box>
 
-          {/* Search */}
-          <Search sx={{ flexGrow: 0, width: 'auto', ml: 2 }}>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search by title or author"
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search>
+          {/* Auth Buttons */}
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              sx={{
+                color: '#fff',
+                borderColor: '#fff',
+                '&:hover': {
+                  borderColor: '#ff6740',
+                  backgroundColor: 'rgba(255, 103, 64, 0.1)'
+                }
+              }}
+            >
+              LOG IN
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: '#ff6740',
+                '&:hover': {
+                  backgroundColor: '#ff8a65'
+                }
+              }}
+            >
+              REGISTER
+            </Button>
+          </Box>
         </Toolbar>
       </Container>
     </AppBar>
