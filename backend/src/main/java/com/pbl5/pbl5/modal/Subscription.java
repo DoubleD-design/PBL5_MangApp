@@ -13,8 +13,7 @@ public class Subscription {
     @Column(name = "user_id")
     private Integer userId;
     
-    @Column(name = "manga_id")
-    private Integer mangaId;
+    // Removed manga_id as per correction
     
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -31,8 +30,8 @@ public class Subscription {
     private User user;
     
     @ManyToOne
-    @JoinColumn(name = "manga_id", insertable = false, updatable = false)
-    private Manga manga;
+    @JoinColumn(name = "payment_id", insertable = false, updatable = false)
+    private Payment payment;
     
     // Getters and Setters
     public Integer getId() {
@@ -51,13 +50,7 @@ public class Subscription {
         this.userId = userId;
     }
 
-    public Integer getMangaId() {
-        return mangaId;
-    }
-
-    public void setMangaId(Integer mangaId) {
-        this.mangaId = mangaId;
-    }
+    // Manga ID getter and setter removed
 
     public LocalDate getStartDate() {
         return startDate;
@@ -91,11 +84,11 @@ public class Subscription {
         this.user = user;
     }
 
-    public Manga getManga() {
-        return manga;
+    public Payment getPayment() {
+        return payment;
     }
 
-    public void setManga(Manga manga) {
-        this.manga = manga;
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 }
