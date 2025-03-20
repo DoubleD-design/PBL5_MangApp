@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import MangaDetail from './pages/MangaDetail';
 import ChapterReader from './components/ChapterReader';
+import Ranking from './pages/Ranking';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/manga/:id" element={<MangaDetail />} />
               <Route path="/manga/:mangaId/chapter/:chapterNumber" element={<ChapterReader />} />
+              <Route path="/ranking" element={<Ranking />} />
             </Routes>
           </Box>
         </Box>
