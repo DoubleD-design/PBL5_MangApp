@@ -13,7 +13,7 @@ public class MangaService {
     @Autowired
     private MangaRepository mangaRepository;
 
-    public List<Manga> getAllManga() {
+    public List<Manga> getAllMangas() {
         return mangaRepository.findAll();
     }
 

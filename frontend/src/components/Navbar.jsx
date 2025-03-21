@@ -83,8 +83,10 @@ const Navbar = () => {
               FAVORITED
             </Button>
             <Button
+              component={Link}
+              to="/about-us"
               color="inherit"
-              sx={{ mx: 1, whiteSpace: "nowrap", minWidth: "auto" }}
+              sx={{ mx: 1 }}
             >
               ABOUT US
             </Button>
@@ -93,6 +95,8 @@ const Navbar = () => {
           {/* Auth Buttons */}
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
+              component={Link}
+              to="/login"
               variant="outlined"
               sx={{
                 color: "#fff",
@@ -106,6 +110,8 @@ const Navbar = () => {
               LOG IN
             </Button>
             <Button
+              component={Link}
+              to="/register"
               variant="contained"
               sx={{
                 backgroundColor: "#ff6740",
