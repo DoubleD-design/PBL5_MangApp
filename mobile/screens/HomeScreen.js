@@ -1,7 +1,7 @@
 import { View, ScrollView, StyleSheet } from 'react-native';
 import SearchBar from '../components/SearchBar';
 import BannerSlider from '../components/BannerSlider';
-import MangaList from '../components/MangaList';
+import MangaList from '../components/MangaLists';
 import BottomNav from '../components/BottomNav';
 
 export default function HomeScreen() {

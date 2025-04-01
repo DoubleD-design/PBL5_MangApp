@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import SplashScreen from './src/screens/SplashScreen';
-import HomeScreen from './src/screens/HomeScreen';
+import SplashScreen from './screens/SplashScreen';
+import HomeScreen from './screens/HomeScreen';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);

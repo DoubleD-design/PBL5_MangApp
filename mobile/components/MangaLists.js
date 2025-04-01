@@ -3,8 +3,8 @@ import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
 const mangaData = [
   { id: '1', title: 'Attack on Titan', chap: 'Chap 139', image: require('../assets/aot.jpg') },
   { id: '2', title: 'Oyasumi, Punpun', chap: 'Chap 147', image: require('../assets/punpun.jpg') },
-  { id: '3', title: 'Jujutsu Kaisen', chap: 'Chap 253', image: require('../assets/jujutsu.jpg') }, // Thêm nhiều dữ liệu để test lướt ngang
-  { id: '4', title: 'One Piece', chap: 'Chap 1108', image: require('../assets/onepiece.jpg') },
+  { id: '3', title: 'Violet Evergarden', chap: 'Chap 253', image: require('../assets/ve.jpg') }, // Thêm nhiều dữ liệu để test lướt ngang
+  { id: '4', title: 'To Your Eternity', chap: 'Chap 1108', image: require('../assets/tye.jpg') },
 ];
 
 export default function MangaList({ title }) {
