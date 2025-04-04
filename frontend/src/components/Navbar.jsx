@@ -7,10 +7,30 @@ import {
   InputBase,
   Box,
   Container,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import categories from "../data/categories";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleCategoryOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCategoryClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleCategoryClick = (categorySlug) => {
+    navigate(`/category/${categorySlug}`);
+    handleCategoryClose();
+  };
+
   return (
     <AppBar
       position="static"
@@ -45,39 +65,91 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <Box sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1 }}>
-            <Button 
-              component={Link}
-              to="/"
-              color="inherit" 
-              sx={{ mx: 1 }}
-            >
+            <Button component={Link} to="/" color="inherit" sx={{ mx: 1 }}>
               HOME
             </Button>
-            <Button color="inherit" sx={{ mx: 1 }}>
+            <Button
+              color="inherit"
+              sx={{ mx: 1 }}
+              onMouseEnter={handleCategoryOpen}
+              aria-controls="categories-menu"
+              aria-haspopup="true"
+            >
+              CATEGORIES
+            </Button>
+            <Menu
+              id="categories-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleCategoryClose}
+              MenuListProps={{
+                onMouseLeave: handleCategoryClose,
+              }}
+              PaperProps={{
+                style: {
+                  maxWidth: "none",
+                  width: "600px",
+                  maxHeight: "400px",
+                  padding: "10px",
+                  backgroundColor: "#1a1a1a",
+                  color: "#fff",
+                  marginTop: "8px",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: 1,
+                  p: 1,
+                }}
+              >
+                {categories.map((category) => (
+                  <MenuItem
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category.slug)}
+                    sx={{
+                      py: 1,
+                      borderRadius: "4px",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Box>
+            </Menu>
+            <Button 
+              color="inherit" 
+              component={Link}
+              to="/updates"
+              sx={{ mx: 1 }}
+            >
               UPDATES
             </Button>
             <Button
+              color="inherit"
               component={Link}
               to="/ranking"
-              color="inherit"
-              sx={{ mx: 1 }}
+              sx={{ mx: 1, whiteSpace: "nowrap", minWidth: "auto" }}
             >
               RANKING
             </Button>
             <Button
               color="inherit"
-              sx={{ mx: 1, whiteSpace: 'nowrap', minWidth: 'auto' }}
+              sx={{ mx: 1, whiteSpace: "nowrap", minWidth: "auto" }}
             >
               SUGGEST
             </Button>
             <Button
               color="inherit"
-              sx={{ mx: 1, whiteSpace: "nowrap", minWidth: "auto" }}
-            >
-              CREATORS
-            </Button>
-            <Button
-              color="inherit"
+              component={Link}
+              to="/favorites"
               sx={{ mx: 1, whiteSpace: "nowrap", minWidth: "auto" }}
             >
               FAVORITED
@@ -96,7 +168,7 @@ const Navbar = () => {
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
               component={Link}
-              to="/login"
+              to="/signin"
               variant="outlined"
               sx={{
                 color: "#fff",
@@ -111,7 +183,7 @@ const Navbar = () => {
             </Button>
             <Button
               component={Link}
-              to="/register"
+              to="/signup"
               variant="contained"
               sx={{
                 backgroundColor: "#ff6740",

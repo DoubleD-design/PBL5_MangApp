@@ -24,6 +24,7 @@ public class JwtTokenProvider {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + 86400000))
                 .claim("email", auth.getName())
+                .claim("authorities", populateAuthorities(auth.getAuthorities()))
                 .signWith(key)
                 .compact();
 

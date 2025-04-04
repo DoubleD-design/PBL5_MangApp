@@ -6,10 +6,26 @@ import {
   Box,
   Rating,
   Chip,
+  IconButton,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { Bookmark, BookmarkBorder } from "@mui/icons-material";
+import { useFavorites } from "../context/FavoritesContext";
 
 const MangaCard = ({ manga }) => {
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const mangaIsFavorite = isFavorite(manga.id);
+  
+  const handleFavoriteClick = (e) => {
+    e.preventDefault(); // Prevent navigation to manga detail
+    e.stopPropagation();
+    
+    if (mangaIsFavorite) {
+      removeFavorite(manga.id);
+    } else {
+      addFavorite(manga);
+    }
+  };
   return (
     <Card
       component={Link}
@@ -48,19 +64,37 @@ const MangaCard = ({ manga }) => {
         },
       }}
     >
-      <CardMedia
-        component="img"
-        image={manga.cover}
-        alt={manga.title}
-        sx={{
-          height: 280,
-          width: "100%",
-          objectFit: "cover",
-          zIndex: 1,
-          position: "relative",
-          borderRadius: "8px",
-        }}
-      />
+      <Box sx={{ position: "relative" }}>
+        <CardMedia
+          component="img"
+          image={manga.cover}
+          alt={manga.title}
+          sx={{
+            height: 280,
+            width: "100%",
+            objectFit: "cover",
+            zIndex: 1,
+            position: "relative",
+            borderRadius: "8px",
+          }}
+        />
+        <IconButton
+          onClick={handleFavoriteClick}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            color: mangaIsFavorite ? "#ff6740" : "white",
+            "&:hover": {
+              backgroundColor: "rgba(0,0,0,0.7)",
+            },
+            zIndex: 2,
+          }}
+        >
+          {mangaIsFavorite ? <Bookmark /> : <BookmarkBorder />}
+        </IconButton>
+      </Box>
       <Box
         className="manga-info"
         sx={{

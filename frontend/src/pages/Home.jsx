@@ -319,6 +319,8 @@ const Home = () => {
                 {dailyUpdates.map((manga) => (
                   <Grid item key={manga.id} xs={6} sm={3}>
                     <Paper
+                      component={Link}
+                      to={`/manga/${manga.id}`}
                       elevation={2}
                       sx={{
                         position: "relative",
@@ -326,6 +328,9 @@ const Home = () => {
                         borderRadius: 2,
                         transition: "transform 0.3s",
                         bgcolor: "#1e1e1e",
+                        textDecoration: "none",
+                        display: "block",
+                        cursor: "pointer",
                         "&:hover": {
                           transform: "translateY(-5px)",
                           "& .chapter-info": { backgroundColor: "#ff6740" },

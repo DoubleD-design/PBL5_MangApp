@@ -3,6 +3,7 @@ package com.pbl5.pbl5.controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/chapters")
 public class ChapterController {
     // Display chapters
     @GetMapping("/display")

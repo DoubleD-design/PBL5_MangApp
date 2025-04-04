@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Container,
@@ -14,10 +14,55 @@ import {
   ListItemText,
   Divider,
   Tab,
-  Tabs
+  Tabs,
+  TextField,
+  Avatar,
+  Card,
+  CardContent,
+  CardHeader,
+  IconButton
 } from '@mui/material';
-import { Bookmark, BookmarkBorder, ArrowBack } from '@mui/icons-material';
+import { Bookmark, BookmarkBorder, ArrowBack, Send, ThumbUp, ThumbUpOutlined } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import { useFavorites } from '../context/FavoritesContext';
+import categories from '../data/categories';
+
+// Mock data for reviews
+const mockReviews = [
+  {
+    id: 1,
+    userId: 101,
+    username: 'MangaLover42',
+    avatar: 'https://mui.com/static/images/avatar/1.jpg',
+    rating: 5,
+    comment: 'One of the best manga ever created! The world-building is incredible and the character development over the years has been amazing to follow.',
+    date: '2023-04-15T10:30:00',
+    likes: 24,
+    userLiked: false
+  },
+  {
+    id: 2,
+    userId: 102,
+    username: 'PirateKing',
+    avatar: 'https://mui.com/static/images/avatar/2.jpg',
+    rating: 4.5,
+    comment: "I've been following this series for years. The story arcs keep getting better and better. Can't wait to see how it all ends!",
+    date: '2023-05-02T15:45:00',
+    likes: 18,
+    userLiked: true
+  },
+  {
+    id: 3,
+    userId: 103,
+    username: 'StrawHatFan',
+    avatar: 'https://mui.com/static/images/avatar/3.jpg',
+    rating: 5,
+    comment: 'The character development in this manga is unmatched. Each arc introduces amazing new characters while developing the existing ones.',
+    date: '2023-05-10T09:20:00',
+    likes: 32,
+    userLiked: false
+  }
+];
 
 // Mock data for a single manga
 const mockMangaDetails = {
@@ -50,17 +95,59 @@ const mockMangaDetails = {
 const MangaDetail = () => {
   const { id } = useParams();
   const [tabValue, setTabValue] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const [reviews, setReviews] = useState(mockReviews);
+  const [newReview, setNewReview] = useState('');
+  const [userRating, setUserRating] = useState(5);
   
   // In a real app, you would fetch the manga details based on the ID
   const manga = mockMangaDetails[id] || mockMangaDetails[1]; // Fallback to first manga if ID not found
+  
+  const mangaIsFavorite = isFavorite(manga.id);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
   const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+    if (mangaIsFavorite) {
+      removeFavorite(manga.id);
+    } else {
+      addFavorite(manga);
+    }
+  };
+
+  const handleReviewSubmit = () => {
+    if (newReview.trim() === '') return;
+    
+    const newReviewObj = {
+      id: reviews.length + 1,
+      userId: 999, // Assuming current user id
+      username: 'CurrentUser', // Assuming current username
+      avatar: 'https://mui.com/static/images/avatar/4.jpg', // Assuming current user avatar
+      rating: userRating,
+      comment: newReview,
+      date: new Date().toISOString(),
+      likes: 0,
+      userLiked: false
+    };
+    
+    setReviews([newReviewObj, ...reviews]);
+    setNewReview('');
+  };
+
+  const handleLikeReview = (reviewId) => {
+    setReviews(reviews.map(review => {
+      if (review.id === reviewId) {
+        const newLikeStatus = !review.userLiked;
+        return {
+          ...review,
+          likes: newLikeStatus ? review.likes + 1 : review.likes - 1,
+          userLiked: newLikeStatus
+        };
+      }
+      return review;
+    }));
   };
 
   return (
@@ -95,10 +182,10 @@ const MangaDetail = () => {
               fullWidth
               color="primary"
               sx={{ mt: 2 }}
-              startIcon={isFavorite ? <Bookmark /> : <BookmarkBorder />}
+              startIcon={mangaIsFavorite ? <Bookmark /> : <BookmarkBorder />}
               onClick={toggleFavorite}
             >
-              {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+              {mangaIsFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
             </Button>
           </Grid>
           
@@ -120,9 +207,28 @@ const MangaDetail = () => {
             </Box>
             
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-              {manga.genres.map((genre, index) => (
-                <Chip key={index} label={genre} color="primary" variant="outlined" />
-              ))}
+              {manga.genres.map((genre, index) => {
+                // Find the category slug for the genre
+                const category = categories.find(
+                  (cat) => cat.name.toLowerCase() === genre.toLowerCase()
+                );
+                const categorySlug = category ? category.slug : '';
+                
+                return (
+                  <Link 
+                    key={index} 
+                    to={`/category/${categorySlug}`} 
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <Chip 
+                      label={genre} 
+                      color="primary" 
+                      variant="outlined" 
+                      clickable
+                    />
+                  </Link>
+                );
+              })}
             </Box>
             
             <Typography variant="body1" paragraph>
@@ -165,9 +271,104 @@ const MangaDetail = () => {
         <div role="tabpanel" hidden={tabValue !== 1}>
           {tabValue === 1 && (
             <Box sx={{ p: 3 }}>
-              <Typography variant="body1">
-                Reviews will be displayed here.
+              {/* Review submission form */}
+              <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+                <Typography variant="h6" gutterBottom>
+                  Write a Review
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Typography component="legend" sx={{ mr: 1 }}>
+                    Your Rating:
+                  </Typography>
+                  <Rating
+                    name="user-rating"
+                    value={userRating}
+                    precision={0.5}
+                    onChange={(event, newValue) => {
+                      setUserRating(newValue);
+                    }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', mb: 2 }}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    placeholder="Share your thoughts about this manga..."
+                    variant="outlined"
+                    value={newReview}
+                    onChange={(e) => setNewReview(e.target.value)}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    endIcon={<Send />}
+                    onClick={handleReviewSubmit}
+                    disabled={newReview.trim() === ''}
+                  >
+                    Post Review
+                  </Button>
+                </Box>
+              </Paper>
+              
+              {/* Reviews list */}
+              <Typography variant="h6" gutterBottom sx={{ mt: 4, mb: 2 }}>
+                Reader Reviews ({reviews.length})
               </Typography>
+              
+              {reviews.length > 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {reviews.map((review) => (
+                    <Card key={review.id} sx={{ mb: 2 }}>
+                      <CardHeader
+                        avatar={
+                          <Avatar src={review.avatar} alt={review.username}>
+                            {review.username.charAt(0)}
+                          </Avatar>
+                        }
+                        title={review.username}
+                        subheader={
+                          <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                            <Rating value={review.rating} precision={0.5} size="small" readOnly />
+                            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                              {new Date(review.date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                      <CardContent sx={{ pt: 0 }}>
+                        <Typography variant="body1" paragraph>
+                          {review.comment}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                          <IconButton 
+                            size="small" 
+                            onClick={() => handleLikeReview(review.id)}
+                            color={review.userLiked ? 'primary' : 'default'}
+                          >
+                            {review.userLiked ? <ThumbUp /> : <ThumbUpOutlined />}
+                          </IconButton>
+                          <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                            {review.likes}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No reviews yet. Be the first to share your thoughts!
+                  </Typography>
+                </Box>
+              )}
             </Box>
           )}
         </div>

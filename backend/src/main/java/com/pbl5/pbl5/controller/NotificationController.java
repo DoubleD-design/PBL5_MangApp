@@ -3,6 +3,7 @@ package com.pbl5.pbl5.controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/notifications")
 public class NotificationController {
     // Display notifications
     @GetMapping("/display")
