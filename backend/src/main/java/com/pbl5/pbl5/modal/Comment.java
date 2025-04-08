@@ -22,6 +22,9 @@ public class Comment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
@@ -86,5 +89,13 @@ public class Comment {
 
     public void setManga(Manga manga) {
         this.manga = manga;
+    }
+    
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

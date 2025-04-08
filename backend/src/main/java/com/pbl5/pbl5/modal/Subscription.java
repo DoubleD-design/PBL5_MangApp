@@ -2,6 +2,7 @@ package com.pbl5.pbl5.modal;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "subscriptions")
@@ -23,6 +24,12 @@ public class Subscription {
     
     @Column(name = "payment_id")
     private Integer paymentId;
+    
+    @Column(name = "status")
+    private String status;
+    
+    @Column(name = "duration")
+    private Integer duration;
     
     // Relationships
     @ManyToOne
@@ -74,6 +81,22 @@ public class Subscription {
 
     public void setPaymentId(Integer paymentId) {
         this.paymentId = paymentId;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public Integer getDuration() {
+        return duration;
+    }
+    
+    public void setDuration(Integer duration) {
+        this.duration = duration;
     }
 
     public User getUser() {

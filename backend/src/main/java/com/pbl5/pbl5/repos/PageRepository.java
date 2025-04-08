@@ -7,6 +7,7 @@ import java.util.List;
 
 @Repository
 public interface PageRepository extends JpaRepository<Page, Integer> {
+    List<Page> findByChapterId(Integer chapterId);
     List<Page> findByChapterIdOrderByPageNumberAsc(Integer chapterId);
 }
 

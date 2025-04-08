@@ -1,35 +1,58 @@
 package com.pbl5.pbl5.controller;
 
+import com.pbl5.pbl5.modal.Chapter;
+import com.pbl5.pbl5.service.ChapterService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/chapters")
+@RequestMapping("/api/chapters")
 public class ChapterController {
-    // Display chapters
-    @GetMapping("/display")
-    public String displayChapters() {
-        // Logic to display chapters
-        return "Chapters are displayed.";
+    @Autowired
+    private ChapterService chapterService;
+
+    @GetMapping
+    public ResponseEntity<List<Chapter>> getAllChapters() {
+        List<Chapter> chapters = chapterService.getAllChapters();
+        return new ResponseEntity<>(chapters, HttpStatus.OK);
     }
 
-    // Add a new chapter
-    @PostMapping("/add")
-    public String addChapter(@RequestParam String chapterName) {
-        // Logic to add a new chapter
-        return "Chapter " + chapterName + " has been added.";
+    @GetMapping("/{id}")
+    public ResponseEntity<Chapter> getChapterById(@PathVariable Integer id) {
+        Optional<Chapter> chapter = chapterService.getChapterById(id);
+        return chapter.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update a chapter
-    @PutMapping("/update")
-    public String updateChapter(@RequestParam Long chapterId, @RequestParam String newChapterName) {
-        // Logic to update a chapter
-        return "Chapter with ID " + chapterId + " has been updated to " + newChapterName + ".";
+    @GetMapping("/manga/{mangaId}")
+    public ResponseEntity<List<Chapter>> getChaptersByMangaId(@PathVariable Integer mangaId) {
+        List<Chapter> chapters = chapterService.getChaptersByMangaId(mangaId);
+        return new ResponseEntity<>(chapters, HttpStatus.OK);
     }
 
-    // Delete a chapter
-    @DeleteMapping("/delete")
-    public String deleteChapter(@RequestParam Long chapterId) {
-        // Logic to delete a chapter
-        return "Chapter with ID " + chapterId + " has been deleted.";
+    @PostMapping
+    public ResponseEntity<Chapter> createChapter(@RequestBody Chapter chapter) {
+        Chapter newChapter = chapterService.createChapter(chapter);
+        return new ResponseEntity<>(newChapter, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Chapter> updateChapter(@PathVariable Integer id, @RequestBody Chapter chapter) {
+        Chapter updatedChapter = chapterService.updateChapter(id, chapter);
+        if (updatedChapter != null) {
+            return new ResponseEntity<>(updatedChapter, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteChapter(@PathVariable Integer id) {
+        chapterService.deleteChapter(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

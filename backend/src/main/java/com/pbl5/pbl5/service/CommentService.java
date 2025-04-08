@@ -5,6 +5,7 @@ import com.pbl5.pbl5.repos.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,9 +21,26 @@ public class CommentService {
     public Optional<Comment> getCommentById(Integer id) {
         return commentRepository.findById(id);
     }
+    
+    public List<Comment> getCommentsByMangaId(Integer mangaId) {
+        return commentRepository.findByMangaIdOrderByCreatedAtDesc(mangaId);
+    }
+    
+    public List<Comment> getCommentsByUserId(Integer userId) {
+        return commentRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
 
     public Comment createComment(Comment comment) {
+        comment.setCreatedAt(LocalDateTime.now());
         return commentRepository.save(comment);
+    }
+    
+    public Comment updateComment(Integer id, Comment commentDetails) {
+        return commentRepository.findById(id).map(comment -> {
+            comment.setContent(commentDetails.getContent());
+            comment.setUpdatedAt(LocalDateTime.now());
+            return commentRepository.save(comment);
+        }).orElse(null);
     }
 
     public void deleteComment(Integer id) {

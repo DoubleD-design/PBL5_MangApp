@@ -20,13 +20,20 @@ public class PageService {
     public Optional<Page> getPageById(Integer id) {
         return pageRepository.findById(id);
     }
+    
+    public List<Page> getPagesByChapterId(Integer chapterId) {
+        return pageRepository.findByChapterIdOrderByPageNumberAsc(chapterId);
+    }
 
     public Page createPage(Page page) {
         return pageRepository.save(page);
     }
-
+    
     public Page updatePage(Integer id, Page pageDetails) {
         return pageRepository.findById(id).map(page -> {
+            page.setImageUrl(pageDetails.getImageUrl());
+            page.setPageNumber(pageDetails.getPageNumber());
+            page.setChapter(pageDetails.getChapter());
             return pageRepository.save(page);
         }).orElse(null);
     }

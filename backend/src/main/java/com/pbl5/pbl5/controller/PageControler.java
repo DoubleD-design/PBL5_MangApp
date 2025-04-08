@@ -1,35 +1,58 @@
 package com.pbl5.pbl5.controller;
 
+import com.pbl5.pbl5.modal.Page;
+import com.pbl5.pbl5.service.PageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/pages")
+@RequestMapping("/api/pages")
 public class PageControler {
-    // Display page
-    @GetMapping("/display")
-    public String displayPage() {
-        // Logic to display page
-        return "Page is displayed.";
+    @Autowired
+    private PageService pageService;
+    
+    @GetMapping
+    public ResponseEntity<List<Page>> getAllPages() {
+        List<Page> pages = pageService.getAllPages();
+        return new ResponseEntity<>(pages, HttpStatus.OK);
     }
-
-    // Create a new page
-    @PostMapping("/create")
-    public String createPage(@RequestParam Long userId, @RequestParam String title) {
-        // Logic to create a new page
-        return "Page with title " + title + " has been created for user with ID " + userId + ".";
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Page> getPageById(@PathVariable Integer id) {
+        Optional<Page> page = pageService.getPageById(id);
+        return page.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
-    // Update a page
-    @PutMapping("/update")
-    public String updatePage(@RequestParam Long pageId, @RequestParam String title) {
-        // Logic to update a page
-        return "Page with ID " + pageId + " has been updated with new title: " + title + ".";
+    
+    @GetMapping("/chapter/{chapterId}")
+    public ResponseEntity<List<Page>> getPagesByChapterId(@PathVariable Integer chapterId) {
+        List<Page> pages = pageService.getPagesByChapterId(chapterId);
+        return new ResponseEntity<>(pages, HttpStatus.OK);
     }
-
-    // Delete a page
-    @DeleteMapping("/delete")
-    public String deletePage(@RequestParam Long pageId) {
-        // Logic to delete a page
-        return "Page with ID " + pageId + " has been deleted.";
+    
+    @PostMapping
+    public ResponseEntity<Page> createPage(@RequestBody Page page) {
+        Page newPage = pageService.createPage(page);
+        return new ResponseEntity<>(newPage, HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Page> updatePage(@PathVariable Integer id, @RequestBody Page page) {
+        Page updatedPage = pageService.updatePage(id, page);
+        if (updatedPage != null) {
+            return new ResponseEntity<>(updatedPage, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePage(@PathVariable Integer id) {
+        pageService.deletePage(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

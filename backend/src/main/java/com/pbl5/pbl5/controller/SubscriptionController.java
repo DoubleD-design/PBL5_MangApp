@@ -1,28 +1,58 @@
 package com.pbl5.pbl5.controller;
 
+import com.pbl5.pbl5.modal.Subscription;
+import com.pbl5.pbl5.service.SubscriptionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/subscriptions")
+@RequestMapping("/api/subscriptions")
 public class SubscriptionController {
-    // Display subscriptions
-    @GetMapping("/display")
-    public String displaySubscriptions() {
-        // Logic to display subscriptions
-        return "Subscriptions are displayed.";
+    @Autowired
+    private SubscriptionService subscriptionService;
+    
+    @GetMapping
+    public ResponseEntity<List<Subscription>> getAllSubscriptions() {
+        List<Subscription> subscriptions = subscriptionService.getAllSubscriptions();
+        return new ResponseEntity<>(subscriptions, HttpStatus.OK);
     }
-
-    // Add a new subscription
-    @PostMapping("/add")
-    public String addSubscription(@RequestParam Long userId, @RequestParam Long channelId) {
-        // Logic to add a new subscription
-        return "Channel with ID " + channelId + " has been subscribed by user with ID " + userId + ".";
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Subscription> getSubscriptionById(@PathVariable Integer id) {
+        Optional<Subscription> subscription = subscriptionService.getSubscriptionById(id);
+        return subscription.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
-    // Remove a subscription
-    @DeleteMapping("/remove")
-    public String removeSubscription(@RequestParam Long userId, @RequestParam Long channelId) {
-        // Logic to remove a subscription
-        return "Channel with ID " + channelId + " has been unsubscribed by user with ID " + userId + ".";
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Subscription>> getSubscriptionsByUserId(@PathVariable Integer userId) {
+        List<Subscription> subscriptions = subscriptionService.getSubscriptionsByUserId(userId);
+        return new ResponseEntity<>(subscriptions, HttpStatus.OK);
+    }
+    
+    @PostMapping
+    public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription subscription) {
+        Subscription newSubscription = subscriptionService.createSubscription(subscription);
+        return new ResponseEntity<>(newSubscription, HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Subscription> updateSubscription(@PathVariable Integer id, @RequestBody Subscription subscription) {
+        Subscription updatedSubscription = subscriptionService.updateSubscription(id, subscription);
+        if (updatedSubscription != null) {
+            return new ResponseEntity<>(updatedSubscription, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSubscription(@PathVariable Integer id) {
+        subscriptionService.deleteSubscription(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

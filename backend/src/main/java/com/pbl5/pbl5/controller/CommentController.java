@@ -1,35 +1,64 @@
 package com.pbl5.pbl5.controller;
 
+import com.pbl5.pbl5.modal.Comment;
+import com.pbl5.pbl5.service.CommentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/comments")  
+@RequestMapping("/api/comments")  
 public class CommentController {
-    // Display comments
-    @GetMapping("/display")
-    public String displayComments() {
-        // Logic to display comments
-        return "Comments are displayed.";
+    @Autowired
+    private CommentService commentService;
+    
+    @GetMapping
+    public ResponseEntity<List<Comment>> getAllComments() {
+        List<Comment> comments = commentService.getAllComments();
+        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-
-    // Add a new comment
-    @PostMapping("/add")
-    public String addComment(@RequestParam String commentText) {
-        // Logic to add a new comment
-        return "Comment " + commentText + " has been added.";
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Comment> getCommentById(@PathVariable Integer id) {
+        Optional<Comment> comment = commentService.getCommentById(id);
+        return comment.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
-    // Update a comment
-    @PutMapping("/update")
-    public String updateComment(@RequestParam Long commentId, @RequestParam String newCommentText) {
-        // Logic to update a comment
-        return "Comment with ID " + commentId + " has been updated to " + newCommentText + ".";
+    
+    @GetMapping("/manga/{mangaId}")
+    public ResponseEntity<List<Comment>> getCommentsByMangaId(@PathVariable Integer mangaId) {
+        List<Comment> comments = commentService.getCommentsByMangaId(mangaId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-
-    // Delete a comment
-    @DeleteMapping("/delete")
-    public String deleteComment(@RequestParam Long commentId) {
-        // Logic to delete a comment
-        return "Comment with ID " + commentId + " has been deleted.";
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Comment>> getCommentsByUserId(@PathVariable Integer userId) {
+        List<Comment> comments = commentService.getCommentsByUserId(userId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
+    
+    @PostMapping
+    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
+        Comment newComment = commentService.createComment(comment);
+        return new ResponseEntity<>(newComment, HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Comment> updateComment(@PathVariable Integer id, @RequestBody Comment comment) {
+        Comment updatedComment = commentService.updateComment(id, comment);
+        if (updatedComment != null) {
+            return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Integer id) {
+        commentService.deleteComment(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ChapterRepository extends JpaRepository<Chapter, Integer> {
-    // Lấy danh sách chương theo mangaId, sắp xếp theo chapterNumber tăng dần
+    List<Chapter> findByMangaId(Integer mangaId);
     List<Chapter> findByMangaIdOrderByChapterNumberAsc(Integer mangaId);
 }
