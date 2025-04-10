@@ -26,6 +26,7 @@ public class AppConfig {
                 .and()
                 .authorizeHttpRequests(Authorize -> Authorize
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/manga/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -39,13 +40,12 @@ public class AppConfig {
                         CorsConfiguration cfg = new CorsConfiguration();
 
                         cfg.setAllowedOrigins(Arrays.asList(
-
-                                        "http://localhost:3000",
+                                        "http://localhost:5173",
                                         "http://localhost:4000",
                                         "http://localhost:4200",
                                         "https://shopwithzosh.vercel.app",
-                                        "https://ecommerce-angular-blue.vercel.app/"
-
+                                        "https://ecommerce-angular-blue.vercel.app/",
+                                        "http://localhost:8080"
                                 )
                         );
                         //cfg.setAllowedMethods(Arrays.asList("GET", "POST","DELETE","PUT"));

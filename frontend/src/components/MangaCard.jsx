@@ -7,26 +7,86 @@ import {
   Rating,
   Chip,
   IconButton,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Bookmark, BookmarkBorder } from "@mui/icons-material";
 import { useFavorites } from "../context/FavoritesContext";
+import { useState, useEffect } from "react";
+import authService from "../services/authService";
 
 const MangaCard = ({ manga }) => {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const mangaIsFavorite = isFavorite(manga.id);
+  const [favoriteStatus, setFavoriteStatus] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   
-  const handleFavoriteClick = (e) => {
+  // Check favorite status when component mounts
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (authService.isAuthenticated()) {
+        const status = isFavorite(manga.id);
+        setFavoriteStatus(status);
+      }
+    };
+    
+    checkFavoriteStatus();
+  }, [manga.id, isFavorite]);
+  
+  const handleFavoriteClick = async (e) => {
     e.preventDefault(); // Prevent navigation to manga detail
     e.stopPropagation();
     
-    if (mangaIsFavorite) {
-      removeFavorite(manga.id);
-    } else {
-      addFavorite(manga);
+    // If not authenticated, show login message
+    if (!authService.isAuthenticated()) {
+      setSnackbarMessage('Please log in to add favorites');
+      setSnackbarSeverity('info');
+      setOpenSnackbar(true);
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      if (favoriteStatus) {
+        const success = await removeFavorite(manga.id);
+        if (success) {
+          setFavoriteStatus(false);
+          setSnackbarMessage('Removed from favorites');
+          setSnackbarSeverity('success');
+        } else {
+          setSnackbarMessage('Failed to remove from favorites');
+          setSnackbarSeverity('error');
+        }
+      } else {
+        const success = await addFavorite(manga);
+        if (success) {
+          setFavoriteStatus(true);
+          setSnackbarMessage('Added to favorites');
+          setSnackbarSeverity('success');
+        } else {
+          setSnackbarMessage('Failed to add to favorites');
+          setSnackbarSeverity('error');
+        }
+      }
+    } catch (error) {
+      setSnackbarMessage('An error occurred');
+      setSnackbarSeverity('error');
+    } finally {
+      setLoading(false);
+      setOpenSnackbar(true);
     }
   };
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+  
   return (
+    <>
     <Card
       component={Link}
       to={`/manga/${manga.id}`}
@@ -85,14 +145,21 @@ const MangaCard = ({ manga }) => {
             top: 8,
             right: 8,
             backgroundColor: "rgba(0,0,0,0.5)",
-            color: mangaIsFavorite ? "#ff6740" : "white",
+            color: favoriteStatus ? "#ff6740" : "white",
             "&:hover": {
               backgroundColor: "rgba(0,0,0,0.7)",
             },
             zIndex: 2,
           }}
+          disabled={loading}
         >
-          {mangaIsFavorite ? <Bookmark /> : <BookmarkBorder />}
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : favoriteStatus ? (
+            <Bookmark />
+          ) : (
+            <BookmarkBorder />
+          )}
         </IconButton>
       </Box>
       <Box
@@ -138,6 +205,12 @@ const MangaCard = ({ manga }) => {
         </Typography>
       </Box>
     </Card>
+    <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+      <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        {snackbarMessage}
+      </Alert>
+    </Snackbar>
+    </>
   );
 };
 

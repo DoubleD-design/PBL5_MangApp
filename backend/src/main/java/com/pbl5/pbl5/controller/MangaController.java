@@ -11,14 +11,80 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/mangas")
+@RequestMapping("/api/manga")
 public class MangaController {
     @Autowired
     private MangaService mangaService;
+    
+    @GetMapping("/featured")
+    public ResponseEntity<?> getFeaturedMangas() {
+        try {
+            List<Manga> featuredMangas = mangaService.getFeaturedMangas();
+            return ResponseEntity.ok(featuredMangas);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching featured mangas: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatestUpdates(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        try {
+            List<Manga> latestMangas = mangaService.getLatestUpdates();
+            
+            // Manual pagination
+            int start = page * size;
+            int end = Math.min(start + size, latestMangas.size());
+            
+            if (start > latestMangas.size()) {
+                start = 0;
+                end = Math.min(size, latestMangas.size());
+            }
+            
+            List<Manga> paginatedMangas = latestMangas.subList(start, end);
+            
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("content", paginatedMangas);
+            response.put("currentPage", page);
+            response.put("totalItems", latestMangas.size());
+            response.put("totalPages", (int) Math.ceil((double) latestMangas.size() / size));
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching latest mangas: " + e.getMessage());
+        }
+    }
 
     @GetMapping
-    public List<Manga> getAllMangas() {
-        return mangaService.getAllMangas();
+    public ResponseEntity<?> getAllMangas(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        try {
+            List<Manga> mangas = mangaService.getAllMangas();
+            
+            // Manual pagination since we don't have Spring Data pagination
+            int start = page * size;
+            int end = Math.min(start + size, mangas.size());
+            
+            if (start > mangas.size()) {
+                start = 0;
+                end = Math.min(size, mangas.size());
+            }
+            
+            List<Manga> paginatedMangas = mangas.subList(start, end);
+            
+            // Create a response object with pagination info
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("content", paginatedMangas);
+            response.put("currentPage", page);
+            response.put("totalItems", mangas.size());
+            response.put("totalPages", (int) Math.ceil((double) mangas.size() / size));
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching mangas: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
@@ -39,6 +105,37 @@ public class MangaController {
     @DeleteMapping("/{id}")
     public void deleteManga(@PathVariable Integer id) {
         mangaService.deleteManga(id);
+    }
+    
+    @GetMapping("/search")
+    public ResponseEntity<?> searchMangas(
+        @RequestParam String query,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        try {
+            List<Manga> searchResults = mangaService.searchByTitle(query);
+            
+            // Manual pagination
+            int start = page * size;
+            int end = Math.min(start + size, searchResults.size());
+            
+            if (start > searchResults.size()) {
+                start = 0;
+                end = Math.min(size, searchResults.size());
+            }
+            
+            List<Manga> paginatedResults = searchResults.subList(start, end);
+            
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("content", paginatedResults);
+            response.put("currentPage", page);
+            response.put("totalItems", searchResults.size());
+            response.put("totalPages", (int) Math.ceil((double) searchResults.size() / size));
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error searching mangas: " + e.getMessage());
+        }
     }
 }
 

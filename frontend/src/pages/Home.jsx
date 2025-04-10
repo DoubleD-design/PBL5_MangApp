@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Grid,
@@ -11,6 +11,8 @@ import {
   Stack,
   Avatar,
   InputBase,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {
   TrendingUp,
@@ -22,9 +24,11 @@ import { alpha } from "@mui/material/styles";
 import MangaCard from "../components/MangaCard";
 import FeaturedCarousel from "../components/FeaturedCarousel";
 import { Link } from "react-router-dom";
+import mangaService from "../services/mangaService";
+import categoryService from "../services/categoryService";
 
-// Mock data for manga list
-const mockMangas = [
+// This will be replaced with API data
+/*const mockMangas = [
   {
     id: 1,
     title: "One Piece",
@@ -228,26 +232,98 @@ const promotions = [
     image:
       "https://cdn.pixabay.com/photo/2023/05/28/05/34/ai-generated-8022486_1280.jpg",
   },
-];
+];*/
 
 const Home = () => {
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mangas, setMangas] = useState([]);
+  const [featuredMangas, setFeaturedMangas] = useState([]);
+  const [latestMangas, setLatestMangas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
   const mangasPerPage = 8;
-  const totalPages = Math.ceil(mockMangas.length / mangasPerPage);
+
+  // Fetch mangas when component mounts
+  useEffect(() => {
+    const fetchMangas = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch all mangas with pagination
+        const mangasData = await mangaService.getAllMangas(
+          currentPage - 1,
+          mangasPerPage
+        );
+        if (mangasData && mangasData.content) {
+          setMangas(mangasData.content);
+        } else {
+          setMangas([]);
+        }
+        setTotalPages(mangasData.totalPages);
+
+        // Fetch featured mangas
+        const featuredData = await mangaService.getFeaturedMangas();
+        setFeaturedMangas(featuredData);
+
+        // Fetch latest updates
+        const latestData = await mangaService.getLatestUpdates(0, 10);
+        setLatestMangas(latestData.content);
+
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching mangas:", err);
+        setError("Failed to load manga data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMangas();
+  }, [currentPage]);
+
+  // Handle search
+  useEffect(() => {
+    const searchMangas = async () => {
+      if (searchQuery.trim() === "") return;
+
+      try {
+        setLoading(true);
+        const searchResults = await mangaService.searchMangas(
+          searchQuery,
+          0,
+          mangasPerPage
+        );
+        setMangas(searchResults.content);
+        setTotalPages(searchResults.totalPages);
+      } catch (err) {
+        console.error("Error searching mangas:", err);
+        setError("Failed to search manga");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      if (searchQuery.trim() !== "") {
+        searchMangas();
+      }
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
 
   const handlePageChange = (event, value) => {
-    setPage(value);
+    setCurrentPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Get current mangas
-  const indexOfLastManga = page * mangasPerPage;
-  const indexOfFirstManga = indexOfLastManga - mangasPerPage;
-  const currentMangas = mockMangas.slice(indexOfFirstManga, indexOfLastManga);
-
   return (
     <>
-      <FeaturedCarousel />
+      <FeaturedCarousel
+        mangas={featuredMangas.length > 0 ? featuredMangas : []}
+      />
 
       {/* Search Area */}
       <Box
@@ -316,7 +392,7 @@ const Home = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                {dailyUpdates.map((manga) => (
+                {latestMangas.map((manga) => (
                   <Grid item key={manga.id} xs={6} sm={3}>
                     <Paper
                       component={Link}
@@ -385,17 +461,42 @@ const Home = () => {
                   ALL MANGA
                 </Typography>
               </Box>
-              <Grid container spacing={3}>
-                {mockMangas.map((manga) => (
-                  <Grid item key={manga.id} xs={12} sm={6} md={4} lg={4}>
-                    <MangaCard manga={manga} />
-                  </Grid>
-                ))}
-              </Grid>
+              {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                  <CircularProgress size={60} />
+                </Box>
+              ) : error ? (
+                <Box sx={{ py: 4 }}>
+                  <Alert severity="error">{error}</Alert>
+                </Box>
+              ) : mangas.length > 0 ? (
+                <Grid container spacing={3}>
+                  {mangas.map((manga) => (
+                    <Grid item key={manga.id} xs={12} sm={6} md={4} lg={4}>
+                      <MangaCard manga={manga} />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "30vh",
+                  }}
+                >
+                  <Typography variant="h5" color="text.secondary">
+                    {searchQuery
+                      ? "No manga found matching your search"
+                      : "No manga available"}
+                  </Typography>
+                </Box>
+              )}
               <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                 <Pagination
                   count={totalPages}
-                  page={page}
+                  page={currentPage}
                   onChange={handlePageChange}
                   color="primary"
                   size="large"
@@ -416,7 +517,7 @@ const Home = () => {
                   </Typography>
                 </Box>
                 <Stack spacing={2}>
-                  {mockMangas.slice(0, 7).map((manga, index) => (
+                  {mangas.slice(0, 7).map((manga, index) => (
                     <Paper
                       key={manga.id}
                       component={Link}
@@ -485,7 +586,24 @@ const Home = () => {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Stack spacing={2}>
-                  {promotions.map((promo) => (
+                  {[
+                    {
+                      id: 1,
+                      title: "Manga Plus Subscription",
+                      description:
+                        "Get unlimited access to all manga for just $4.99/month",
+                      image:
+                        "https://cdn.pixabay.com/photo/2016/12/28/08/15/hatsune-miku-1935674_1280.png",
+                    },
+                    {
+                      id: 2,
+                      title: "New Releases",
+                      description:
+                        "Check out the latest manga releases this week",
+                      image:
+                        "https://cdn.pixabay.com/photo/2023/05/28/05/34/ai-generated-8022486_1280.jpg",
+                    },
+                  ].map((promo) => (
                     <Paper
                       key={promo.id}
                       elevation={1}

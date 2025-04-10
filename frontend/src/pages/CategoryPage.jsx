@@ -8,14 +8,16 @@ import {
   Pagination,
   Breadcrumbs,
   Link as MuiLink,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import MangaCard from "../components/MangaCard";
-import categories from "../data/categories";
+import categoryService from "../services/categoryService";
+import mangaService from "../services/mangaService";
 
-// Import mock data from Home.jsx
-// In a real application, this would come from an API
-const mockMangas = [
+// This will be replaced with API data
+/*const mockMangas = [
   {
     id: 1,
     title: "One Piece",
@@ -88,37 +90,57 @@ const mockMangas = [
     views: "156324",
     genres: ["Mystery", "Psychological", "Supernatural"],
   },
-];
+];*/
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
-  const [filteredMangas, setFilteredMangas] = useState([]);
+  const [mangas, setMangas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [categoryName, setCategoryName] = useState("");
+  const [categoryId, setCategoryId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
   const mangasPerPage = 8;
 
   useEffect(() => {
-    // Find the category name from the slug
-    const category = categories.find((cat) => cat.slug === categorySlug);
-    if (category) {
-      setCategoryName(category.name);
-    }
-
-    // Filter mangas by category
-    const filtered = mockMangas.filter((manga) =>
-      manga.genres.some(
-        (genre) => genre.toLowerCase() === (category?.name || "").toLowerCase()
-      )
-    );
-    setFilteredMangas(filtered);
-    setCurrentPage(1); // Reset to first page when category changes
-  }, [categorySlug]);
-
-  // Calculate pagination
-  const indexOfLastManga = currentPage * mangasPerPage;
-  const indexOfFirstManga = indexOfLastManga - mangasPerPage;
-  const currentMangas = filteredMangas.slice(indexOfFirstManga, indexOfLastManga);
-  const totalPages = Math.ceil(filteredMangas.length / mangasPerPage);
+    const fetchCategoryAndMangas = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch all categories
+        const categoriesData = await categoryService.getAllCategories();
+        
+        // Find the category by slug
+        const category = categoriesData.find((cat) => cat.slug === categorySlug);
+        
+        if (category) {
+          setCategoryName(category.name);
+          setCategoryId(category.id);
+          
+          // Fetch mangas by category
+          const mangasData = await mangaService.getMangasByCategory(
+            category.id,
+            currentPage - 1,
+            mangasPerPage
+          );
+          
+          setMangas(mangasData.content);
+          setTotalPages(mangasData.totalPages);
+          setError(null);
+        } else {
+          setError('Category not found');
+        }
+      } catch (err) {
+        console.error('Error fetching category data:', err);
+        setError('Failed to load category data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCategoryAndMangas();
+  }, [categorySlug, currentPage]);
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -144,55 +166,61 @@ const CategoryPage = () => {
       </Typography>
 
       {/* Manga grid */}
-      {filteredMangas.length > 0 ? (
-        <>
-          <Grid container spacing={3}>
-            {currentMangas.map((manga) => (
-              <Grid item key={manga.id} xs={12} sm={6} md={4} lg={3}>
-                <MangaCard manga={manga} />
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                mt: 4,
-              }}
-            >
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    color: "#fff",
-                  },
-                  "& .Mui-selected": {
-                    backgroundColor: "#ff6740 !important",
-                  },
-                }}
-              />
-            </Box>
-          )}
-        </>
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : error ? (
+        <Box sx={{ py: 4 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      ) : mangas.length > 0 ? (
+        <Grid container spacing={3}>
+          {mangas.map((manga) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={manga.id}>
+              <MangaCard manga={manga} />
+            </Grid>
+          ))}
+        </Grid>
       ) : (
         <Box
           sx={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "50vh",
+            height: "30vh",
           }}
         >
           <Typography variant="h5" color="text.secondary">
-            No manga found in this category.
+            No manga found in this category
           </Typography>
+        </Box>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && totalPages > 1 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mt: 4,
+          }}
+        >
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            sx={{
+              "& .MuiPaginationItem-root": {
+                color: "#fff",
+              },
+              "& .Mui-selected": {
+                backgroundColor: "#ff6740 !important",
+              },
+            }}
+          />
         </Box>
       )}
     </Container>

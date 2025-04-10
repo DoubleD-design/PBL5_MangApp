@@ -1,4 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import favoriteService from '../services/favoriteService';
+import authService from '../services/authService';
 
 // Create context
 const FavoritesContext = createContext();
@@ -6,40 +8,87 @@ const FavoritesContext = createContext();
 // Create provider component
 export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load favorites from localStorage when component mounts
+  // Load favorites from API when component mounts
   useEffect(() => {
-    const storedFavorites = localStorage.getItem('mangaFavorites');
-    if (storedFavorites) {
-      setFavorites(JSON.parse(storedFavorites));
-    }
+    const fetchFavorites = async () => {
+      // Only fetch favorites if user is authenticated
+      if (authService.isAuthenticated()) {
+        try {
+          setLoading(true);
+          const data = await favoriteService.getUserFavorites();
+          setFavorites(data);
+          setError(null);
+        } catch (err) {
+          console.error('Error fetching favorites:', err);
+          setError('Failed to load favorites');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setFavorites([]);
+        setLoading(false);
+      }
+    };
+
+    fetchFavorites();
   }, []);
 
-  // Save favorites to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('mangaFavorites', JSON.stringify(favorites));
-  }, [favorites]);
-
   // Add manga to favorites
-  const addFavorite = (manga) => {
-    setFavorites((prevFavorites) => {
-      // Check if manga is already in favorites to avoid duplicates
-      if (!prevFavorites.some((fav) => fav.id === manga.id)) {
-        return [...prevFavorites, manga];
-      }
-      return prevFavorites;
-    });
+  const addFavorite = async (manga) => {
+    // Only add to favorites if user is authenticated
+    if (!authService.isAuthenticated()) {
+      // Redirect to login or show message
+      return false;
+    }
+
+    try {
+      await favoriteService.addToFavorites(manga.id);
+      // Update local state after successful API call
+      setFavorites((prevFavorites) => {
+        if (!prevFavorites.some((fav) => fav.id === manga.id)) {
+          return [...prevFavorites, manga];
+        }
+        return prevFavorites;
+      });
+      return true;
+    } catch (err) {
+      console.error('Error adding to favorites:', err);
+      setError('Failed to add to favorites');
+      return false;
+    }
   };
 
   // Remove manga from favorites
-  const removeFavorite = (mangaId) => {
-    setFavorites((prevFavorites) => 
-      prevFavorites.filter((manga) => manga.id !== mangaId)
-    );
+  const removeFavorite = async (mangaId) => {
+    // Only remove from favorites if user is authenticated
+    if (!authService.isAuthenticated()) {
+      return false;
+    }
+
+    try {
+      await favoriteService.removeFromFavorites(mangaId);
+      // Update local state after successful API call
+      setFavorites((prevFavorites) => 
+        prevFavorites.filter((manga) => manga.id !== mangaId)
+      );
+      return true;
+    } catch (err) {
+      console.error('Error removing from favorites:', err);
+      setError('Failed to remove from favorites');
+      return false;
+    }
   };
 
   // Check if a manga is in favorites
   const isFavorite = (mangaId) => {
+    // If not authenticated, nothing is favorite
+    if (!authService.isAuthenticated()) {
+      return false;
+    }
+    
     return favorites.some((manga) => manga.id === mangaId);
   };
 
