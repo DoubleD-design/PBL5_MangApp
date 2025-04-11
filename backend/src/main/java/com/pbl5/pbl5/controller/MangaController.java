@@ -3,6 +3,8 @@ package com.pbl5.pbl5.controller;
 import com.pbl5.pbl5.modal.*;
 import com.pbl5.pbl5.service.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,10 +38,14 @@ public class MangaController {
             // Manual pagination
             int start = page * size;
             int end = Math.min(start + size, latestMangas.size());
-            
-            if (start > latestMangas.size()) {
-                start = 0;
-                end = Math.min(size, latestMangas.size());
+
+            if (start >= latestMangas.size()) {
+                return ResponseEntity.ok(new HashMap<String, Object>() {{
+                    put("content", new ArrayList<>());
+                    put("currentPage", page);
+                    put("totalItems", latestMangas.size());
+                    put("totalPages", (int) Math.ceil((double) latestMangas.size() / size));
+                }});
             }
             
             List<Manga> paginatedMangas = latestMangas.subList(start, end);
@@ -66,13 +72,13 @@ public class MangaController {
             // Manual pagination since we don't have Spring Data pagination
             int start = page * size;
             int end = Math.min(start + size, mangas.size());
+            List<Manga> paginatedMangas;
             
-            if (start > mangas.size()) {
+            if (start >= mangas.size()) {
                 start = 0;
                 end = Math.min(size, mangas.size());
             }
-            
-            List<Manga> paginatedMangas = mangas.subList(start, end);
+            paginatedMangas = mangas.subList(start, end);
             
             // Create a response object with pagination info
             java.util.Map<String, Object> response = new java.util.HashMap<>();

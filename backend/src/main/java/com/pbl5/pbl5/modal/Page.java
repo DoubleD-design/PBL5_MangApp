@@ -1,5 +1,7 @@
 package com.pbl5.pbl5.modal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -21,6 +23,7 @@ public class Page {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "chapter_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Chapter chapter;
     
     // Getters and Setters

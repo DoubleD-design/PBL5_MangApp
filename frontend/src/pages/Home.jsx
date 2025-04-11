@@ -256,20 +256,57 @@ const Home = () => {
           currentPage - 1,
           mangasPerPage
         );
+        console.log("Mangas data:", mangasData);
+
+        // Check if the response has the expected structure with content array
         if (mangasData && mangasData.content) {
-          setMangas(mangasData.content);
+          // Ensure content is always treated as an array
+          if (Array.isArray(mangasData.content)) {
+            console.log(
+              "Content is an array with",
+              mangasData.content.length,
+              "items"
+            );
+            // Make sure we're setting all items from the content array
+            setMangas(mangasData.content);
+          } else {
+            // If content exists but is not an array (possibly a single object), convert to array
+            console.log("Content is not an array, converting to array");
+            setMangas([mangasData.content]);
+          }
+          // Set total pages from the API response
+          setTotalPages(mangasData.totalPages || 1);
+        } else if (Array.isArray(mangasData)) {
+          // If the response itself is an array, use it directly
+          console.log("Response is an array, using directly");
+          setMangas(mangasData);
+          // Calculate total pages if not provided
+          setTotalPages(Math.ceil(mangasData.length / mangasPerPage) || 1);
+        } else if (mangasData) {
+          // If response is an object but not in expected format, wrap it
+          console.log("Response is not in expected format, wrapping in array");
+          setMangas([mangasData]);
+          setTotalPages(1);
         } else {
+          console.log("No valid data found, setting empty array");
           setMangas([]);
+          setTotalPages(1);
         }
-        setTotalPages(mangasData.totalPages);
 
         // Fetch featured mangas
         const featuredData = await mangaService.getFeaturedMangas();
         setFeaturedMangas(featuredData);
 
         // Fetch latest updates
-        const latestData = await mangaService.getLatestUpdates(0, 10);
-        setLatestMangas(latestData.content);
+        const latestData = await mangaService.getLatestUpdates(0, 4);
+        console.log("Dữ liệu latestData:", latestData); // ← 🟡 đặt ở đây
+
+        if (latestData && Array.isArray(latestData.content)) {
+          setLatestMangas(latestData.content);
+        } else {
+          console.warn("Không tìm thấy content hợp lệ:", latestData);
+          setLatestMangas([]);
+        }
 
         setError(null);
       } catch (err) {
@@ -392,7 +429,7 @@ const Home = () => {
                 </Typography>
               </Box>
               <Grid container spacing={2}>
-                {latestMangas.map((manga) => (
+                {latestMangas?.map((manga) => (
                   <Grid item key={manga.id} xs={6} sm={3}>
                     <Paper
                       component={Link}
@@ -415,7 +452,7 @@ const Home = () => {
                     >
                       <Box
                         component="img"
-                        src={manga.cover}
+                        src={manga.coverImage}
                         alt={manga.title}
                         sx={{
                           width: "100%",
@@ -469,7 +506,7 @@ const Home = () => {
                 <Box sx={{ py: 4 }}>
                   <Alert severity="error">{error}</Alert>
                 </Box>
-              ) : mangas.length > 0 ? (
+              ) : mangas && mangas.length > 0 ? (
                 <Grid container spacing={3}>
                   {mangas.map((manga) => (
                     <Grid item key={manga.id} xs={12} sm={6} md={4} lg={4}>
@@ -548,7 +585,7 @@ const Home = () => {
                       </Avatar>
                       <Box
                         component="img"
-                        src={manga.cover}
+                        src={manga.coverImage}
                         alt={manga.title}
                         sx={{
                           width: 50,
@@ -592,16 +629,16 @@ const Home = () => {
                       title: "Manga Plus Subscription",
                       description:
                         "Get unlimited access to all manga for just $4.99/month",
-                      image:
-                        "https://cdn.pixabay.com/photo/2016/12/28/08/15/hatsune-miku-1935674_1280.png",
+                      // image:
+                      //   "https://cdn.pixabay.com/photo/2016/12/28/08/15/hatsune-miku-1935674_1280.png",
                     },
                     {
                       id: 2,
                       title: "New Releases",
                       description:
                         "Check out the latest manga releases this week",
-                      image:
-                        "https://cdn.pixabay.com/photo/2023/05/28/05/34/ai-generated-8022486_1280.jpg",
+                      // image:
+                      //   "https://cdn.pixabay.com/photo/2023/05/28/05/34/ai-generated-8022486_1280.jpg",
                     },
                   ].map((promo) => (
                     <Paper
@@ -616,8 +653,8 @@ const Home = () => {
                       }}
                     >
                       <Box
-                        component="img"
-                        src={promo.image}
+                        // component="img"
+                        // src={promo.image}
                         alt={promo.title}
                         sx={{
                           width: "100%",

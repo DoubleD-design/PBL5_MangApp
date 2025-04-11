@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "chapters")
 public class Chapter {
@@ -26,9 +29,11 @@ public class Chapter {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "manga_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Manga manga;
     
     @OneToMany(mappedBy = "chapter")
+    @JsonManagedReference
     private List<Page> pages;
     
     // Getters and Setters

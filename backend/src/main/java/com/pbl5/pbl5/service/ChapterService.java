@@ -43,4 +43,7 @@ public class ChapterService {
     public void deleteChapter(Integer id) {
         chapterRepository.deleteById(id);
     }
+    public Optional<Chapter> getChapterByMangaIdAndChapterNumber(Integer mangaId, Integer chapterNumber) {
+        return chapterRepository.findByMangaIdAndChapterNumber(mangaId, chapterNumber);
+    }
 }

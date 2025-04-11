@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "mangas")
 public class Manga {
@@ -32,12 +34,9 @@ public class Manga {
     
     @Column(name = "admin_id")
     private Integer adminId;
-    
-    @Column(name = "category_id")
-    private Integer categoryId;
-    
     // Relationships
     @OneToMany(mappedBy = "manga")
+    @JsonManagedReference
     private List<Chapter> chapters;
     
     @OneToMany(mappedBy = "manga")
@@ -130,14 +129,6 @@ public class Manga {
 
     public void setAdminId(Integer adminId) {
         this.adminId = adminId;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
     }
 
     public List<Chapter> getChapters() {

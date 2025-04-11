@@ -3,6 +3,8 @@ package com.pbl5.pbl5.modal;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -15,6 +17,7 @@ public class Category {
     
     // Relationships
     @ManyToMany(mappedBy = "categories")
+    @JsonBackReference(value = "manga-category")
     private List<Manga> mangas;
     
     // Getters and Setters

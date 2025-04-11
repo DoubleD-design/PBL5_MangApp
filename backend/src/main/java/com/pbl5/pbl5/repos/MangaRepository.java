@@ -10,6 +10,16 @@ public interface MangaRepository extends JpaRepository<Manga, Integer> {
     List<Manga> findByStatus(Manga.MangaStatus status);
     List<Manga> findByAuthorContainingIgnoreCase(String author);
     List<Manga> findByTitleContainingIgnoreCase(String title);
+    // Get all Manga entities without loading chapters
+    default List<Manga> getAllMangas() {
+        List<Manga> mangas = findAll();
+        // Clear chapters to avoid loading them in the response
+        for (Manga manga : mangas) {
+            manga.setChapters(null);
+        }
+        return mangas;
+    }
+
 
     // Add a Manga entity
     default Manga addManga(Manga manga) {

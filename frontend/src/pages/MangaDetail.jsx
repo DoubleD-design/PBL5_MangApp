@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import mangaService from "../services/mangaService";
+import authService from "../services/authService";
 import {
   Container,
   Grid,
@@ -74,47 +76,6 @@ const mockReviews = [
   },
 ];
 
-// Mock data for a single manga
-const mockMangaDetails = {
-  1: {
-    id: 1,
-    title: "One Piece",
-    cover: "https://m.media-amazon.com/images/I/51FXs5gTmdL._SY445_SX342_.jpg",
-    author: "Eiichiro Oda",
-    rating: 4.8,
-    genres: ["Adventure", "Action", "Fantasy"],
-    status: "Ongoing",
-    releaseYear: 1999,
-    description:
-      'Gol D. Roger was known as the "Pirate King," the strongest and most infamous being to have sailed the Grand Line. The capture and execution of Roger by the World Government brought a change throughout the world. His last words before his death revealed the existence of the greatest treasure in the world, One Piece. It was this revelation that brought about the Grand Age of Pirates, men who dreamed of finding One Piece—which promises an unlimited amount of riches and fame—and quite possibly the pinnacle of glory and the title of the Pirate King.',
-    chapters: [
-      { number: 1, title: "Romance Dawn", date: "1999-07-22" },
-      {
-        number: 2,
-        title: 'They Call Him "Straw Hat Luffy"',
-        date: "1999-07-29",
-      },
-      { number: 3, title: "Morgan versus Luffy", date: "1999-08-05" },
-      {
-        number: 4,
-        title: "Marine Captain Axe-Hand Morgan",
-        date: "1999-08-12",
-      },
-      {
-        number: 5,
-        title: "Pirate King and Great Swordsman",
-        date: "1999-08-19",
-      },
-      { number: 6, title: "The First Person", date: "1999-08-26" },
-      { number: 7, title: "Friends", date: "1999-09-02" },
-      { number: 8, title: "Introducing Nami", date: "1999-09-09" },
-      { number: 9, title: "The Devil Girl", date: "1999-09-16" },
-      { number: 10, title: "The Incident at the Bar", date: "1999-09-23" },
-    ],
-  },
-  // Add more manga details as needed
-};
-
 const MangaDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -134,18 +95,19 @@ const MangaDetail = () => {
     const fetchMangaDetails = async () => {
       try {
         setLoadingManga(true);
+        console.log("Current ID:", id);
         const data = await mangaService.getMangaById(id);
-        setManga(data);
+        console.log("Fetched manga:", data);
+        setManga(data); // kiểm tra nếu cần set data.manga
         setError(null);
 
-        // Check if manga is in favorites
         if (authService.isAuthenticated()) {
           const status = isFavorite(parseInt(id));
           setFavoriteStatus(status);
         }
       } catch (err) {
         console.error("Error fetching manga details:", err);
-        setError("Failed to load manga details");
+        setError(err?.message || "Failed to load manga details");
       } finally {
         setLoadingManga(false);
       }
@@ -221,6 +183,64 @@ const MangaDetail = () => {
     );
   };
 
+  // Show loading state or error message if applicable
+  if (loadingManga) {
+    return (
+      <Container
+        maxWidth="lg"
+        sx={{
+          mt: 4,
+          mb: 4,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "50vh",
+        }}
+      >
+        <Typography variant="h5">Loading manga details...</Typography>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Button
+          component={Link}
+          to="/"
+          startIcon={<ArrowBack />}
+          sx={{ mb: 2 }}
+        >
+          Back to Browse
+        </Button>
+        <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h5" color="error">
+            {error}
+          </Typography>
+        </Paper>
+      </Container>
+    );
+  }
+
+  // Don't render the content if manga is null
+  if (!manga) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Button
+          component={Link}
+          to="/"
+          startIcon={<ArrowBack />}
+          sx={{ mb: 2 }}
+        >
+          Back to Browse
+        </Button>
+        <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h5">Manga not found</Typography>
+        </Paper>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Button component={Link} to="/" startIcon={<ArrowBack />} sx={{ mb: 2 }}>
@@ -233,7 +253,7 @@ const MangaDetail = () => {
           <Grid item xs={12} md={4}>
             <Box
               component="img"
-              src={manga.cover}
+              src={manga.coverImage}
               alt={manga.title}
               sx={{
                 width: "100%",
@@ -248,7 +268,15 @@ const MangaDetail = () => {
               fullWidth
               color="primary"
               sx={{ mt: 2 }}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : favoriteStatus ? <Bookmark /> : <BookmarkBorder />}
+              startIcon={
+                loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : favoriteStatus ? (
+                  <Bookmark />
+                ) : (
+                  <BookmarkBorder />
+                )
+              }
               onClick={handleFavoriteClick}
               disabled={loading || loadingManga}
             >
@@ -274,28 +302,32 @@ const MangaDetail = () => {
             </Box>
 
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 3 }}>
-              {manga.genres.map((genre, index) => {
-                // Find the category slug for the genre
-                const category = categories.find(
-                  (cat) => cat.name.toLowerCase() === genre.toLowerCase()
-                );
-                const categorySlug = category ? category.slug : "";
+              {Array.isArray(manga.categories) &&
+                manga.categories.map((category) => {
+                  // Tìm slug tương ứng trong danh sách categories tổng thể
+                  const matchedCategory = categories.find(
+                    (cat) =>
+                      cat.name.toLowerCase() === category.name.toLowerCase()
+                  );
+                  const categorySlug = matchedCategory
+                    ? matchedCategory.slug
+                    : "";
 
-                return (
-                  <Link
-                    key={index}
-                    to={`/category/${categorySlug}`}
-                    style={{ textDecoration: "none" }}
-                  >
-                    <Chip
-                      label={genre}
-                      color="primary"
-                      variant="outlined"
-                      clickable
-                    />
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={category.id}
+                      to={`/category/${categorySlug}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <Chip
+                        label={category.name}
+                        color="primary"
+                        variant="outlined"
+                        clickable
+                      />
+                    </Link>
+                  );
+                })}
             </Box>
 
             <Typography variant="body1" paragraph>
@@ -324,15 +356,17 @@ const MangaDetail = () => {
           {tabValue === 0 && (
             <List>
               {manga.chapters.map((chapter, index) => (
-                <div key={chapter.number}>
+                <div key={chapter.id}>
                   <ListItem
                     button
                     component={Link}
-                    to={`/manga/${manga.id}/chapter/${chapter.number}`}
+                    to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
                   >
                     <ListItemText
-                      primary={`Chapter ${chapter.number}: ${chapter.title}`}
-                      secondary={`Released: ${chapter.date}`}
+                      primary={`${chapter.title}`}
+                      secondary={`Released: ${new Date(
+                        chapter.createdAt
+                      ).toLocaleDateString()}`}
                     />
                   </ListItem>
                   {index < manga.chapters.length - 1 && <Divider />}

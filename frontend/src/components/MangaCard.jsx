@@ -127,7 +127,7 @@ const MangaCard = ({ manga }) => {
       <Box sx={{ position: "relative" }}>
         <CardMedia
           component="img"
-          image={manga.cover}
+          image={manga.coverImage}
           alt={manga.title}
           sx={{
             height: 280,
