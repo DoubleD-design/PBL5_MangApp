@@ -1,10 +1,10 @@
-import api from './api';
+import api from "./api";
 
 const categoryService = {
   // Get all categories
   getAllCategories: async () => {
     try {
-      const response = await api.get('/category');
+      const response = await api.get("/categories");
       return response.data;
     } catch (error) {
       throw error;
@@ -14,12 +14,12 @@ const categoryService = {
   // Get category by ID
   getCategoryById: async (id) => {
     try {
-      const response = await api.get(`/category/${id}`);
+      const response = await api.get(`/categories/${id}`);
       return response.data;
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
 export default categoryService;

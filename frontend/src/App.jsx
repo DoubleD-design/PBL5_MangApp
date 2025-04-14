@@ -10,6 +10,7 @@ import AboutUs from "./pages/AboutUs";
 import Register from "./pages/Register";
 import Login from "./pages/LogIn";
 import CategoryPage from "./pages/CategoryPage";
+import CategoriesPage from "./pages/CategoriesPage";
 import UpdatesPage from "./pages/UpdatesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import { FavoritesProvider } from "./context/FavoritesContext";
@@ -36,6 +37,7 @@ function App() {
               <Route path="/signin" element={<Login />} />
               <Route path="/about-us" element={<AboutUs />} />
               <Route path="/signup" element={<Register />} />
+              <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/category/:categorySlug" element={<CategoryPage />} />
               <Route path="/updates" element={<UpdatesPage />} />
               <Route path="/favorites" element={<FavoritesPage />} />

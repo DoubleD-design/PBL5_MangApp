@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import mangaService from "../services/mangaService";
 import authService from "../services/authService";
@@ -90,6 +90,10 @@ const MangaDetail = () => {
   const [newReview, setNewReview] = useState("");
   const [userRating, setUserRating] = useState(5);
 
+  // Use a ref instead of state to track if view has been counted
+  // This will persist across re-renders and prevent double counting
+  const viewCountedRef = useRef(false);
+
   // Fetch manga details when component mounts
   useEffect(() => {
     const fetchMangaDetails = async () => {
@@ -105,6 +109,13 @@ const MangaDetail = () => {
           const status = isFavorite(parseInt(id));
           setFavoriteStatus(status);
         }
+        
+        // Only increment view count once per manga view session
+        // Using ref instead of state to prevent double counting
+        if (!viewCountedRef.current) {
+          await mangaService.incrementViews(id);
+          viewCountedRef.current = true;
+        }
       } catch (err) {
         console.error("Error fetching manga details:", err);
         setError(err?.message || "Failed to load manga details");
@@ -114,7 +125,7 @@ const MangaDetail = () => {
     };
 
     fetchMangaDetails();
-  }, [id, isFavorite]);
+  }, [id]); // Remove isFavorite from dependency array to prevent double execution
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);

@@ -11,12 +11,33 @@ import {
   MenuItem,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import categories from "../data/categories";
+import { useState, useEffect } from "react";
+import categoryService from "../services/categoryService";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const categoriesData = await categoryService.getAllCategories();
+        setCategories(categoriesData);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        setError("Failed to load categories");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleCategoryOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -27,7 +48,7 @@ const Navbar = () => {
   };
 
   const handleCategoryClick = (categorySlug) => {
-    navigate(`/category/${categorySlug}`);
+    navigate(`/categories/${categorySlug}`);
     handleCategoryClose();
   };
 
@@ -69,6 +90,8 @@ const Navbar = () => {
               HOME
             </Button>
             <Button
+              component={Link}
+              to="/categories"
               color="inherit"
               sx={{ mx: 1 }}
               onMouseEnter={handleCategoryOpen}
@@ -106,26 +129,51 @@ const Navbar = () => {
                   p: 1,
                 }}
               >
-                {categories.map((category) => (
-                  <MenuItem
-                    key={category.id}
-                    onClick={() => handleCategoryClick(category.slug)}
+                {loading ? (
+                  <Box
+                    sx={{ p: 2, textAlign: "center", gridColumn: "1 / span 3" }}
+                  >
+                    Loading categories...
+                  </Box>
+                ) : error ? (
+                  <Box
                     sx={{
-                      py: 1,
-                      borderRadius: "4px",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 103, 64, 0.1)",
-                        color: "#ff6740",
-                      },
+                      p: 2,
+                      textAlign: "center",
+                      gridColumn: "1 / span 3",
+                      color: "error.main",
                     }}
                   >
-                    {category.name}
-                  </MenuItem>
-                ))}
+                    {error}
+                  </Box>
+                ) : categories.length > 0 ? (
+                  categories.map((category) => (
+                    <MenuItem
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.name)}
+                      sx={{
+                        py: 1,
+                        borderRadius: "4px",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 103, 64, 0.1)",
+                          color: "#ff6740",
+                        },
+                      }}
+                    >
+                      {category.name}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <Box
+                    sx={{ p: 2, textAlign: "center", gridColumn: "1 / span 3" }}
+                  >
+                    No categories found
+                  </Box>
+                )}
               </Box>
             </Menu>
-            <Button 
-              color="inherit" 
+            <Button
+              color="inherit"
               component={Link}
               to="/updates"
               sx={{ mx: 1 }}

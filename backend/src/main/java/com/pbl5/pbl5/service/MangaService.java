@@ -76,4 +76,23 @@ public class MangaService {
             })
             .toList();
     }
+    
+    public Manga incrementViews(Integer id) {
+        return mangaRepository.findById(id).map(manga -> {
+            Integer currentViews = manga.getViews();
+            manga.setViews(currentViews == null ? 1 : currentViews + 1);
+            return mangaRepository.save(manga);
+        }).orElse(null);
+    }
+    
+    public List<Manga> getMostViewedMangas(int limit) {
+        return mangaRepository.findAll().stream()
+            .sorted((m1, m2) -> {
+                Integer views1 = m1.getViews() == null ? 0 : m1.getViews();
+                Integer views2 = m2.getViews() == null ? 0 : m2.getViews();
+                return views2.compareTo(views1); // Sort in descending order
+            })
+            .limit(limit)
+            .toList();
+    }
 }

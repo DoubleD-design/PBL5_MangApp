@@ -7,12 +7,15 @@ import {
   Pagination,
   Breadcrumbs,
   Link as MuiLink,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import MangaCard from "../components/MangaCard";
+import mangaService from "../services/mangaService";
 
-// Mock data for manga list with update dates
-const mockMangas = [
+// This mock data will be replaced with API data
+/*const mockMangas = [
   {
     id: 1,
     title: "One Piece",
@@ -146,25 +149,45 @@ const mockMangas = [
     lastChapter: 348,
   },
 ];
+*/
 
 const UpdatesPage = () => {
-  const [sortedMangas, setSortedMangas] = useState([]);
+  const [mangas, setMangas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
   const mangasPerPage = 8;
 
   useEffect(() => {
-    // Sort mangas by update date (newest first)
-    const sorted = [...mockMangas].sort((a, b) => 
-      new Date(b.updatedAt) - new Date(a.updatedAt)
-    );
-    setSortedMangas(sorted);
-  }, []);
+    const fetchLatestUpdates = async () => {
+      try {
+        setLoading(true);
+        // Fetch latest manga updates from API
+        const latestData = await mangaService.getLatestUpdates(currentPage - 1, mangasPerPage);
+        
+        if (latestData && Array.isArray(latestData.content)) {
+          setMangas(latestData.content);
+          setTotalPages(latestData.totalPages || 1);
+          setError(null);
+        } else {
+          console.warn("Invalid data format received:", latestData);
+          setMangas([]);
+          setTotalPages(1);
+          setError("Failed to load manga updates. Please try again later.");
+        }
+      } catch (err) {
+        console.error("Error fetching latest updates:", err);
+        setError("Failed to load manga updates. Please try again later.");
+        setMangas([]);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Calculate pagination
-  const indexOfLastManga = currentPage * mangasPerPage;
-  const indexOfFirstManga = indexOfLastManga - mangasPerPage;
-  const currentMangas = sortedMangas.slice(indexOfFirstManga, indexOfLastManga);
-  const totalPages = Math.ceil(sortedMangas.length / mangasPerPage);
+    fetchLatestUpdates();
+  }, [currentPage]);
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -186,16 +209,24 @@ const UpdatesPage = () => {
         Latest Manga Updates
       </Typography>
 
-      {/* Manga grid */}
-      {sortedMangas.length > 0 ? (
+      {/* Loading state */}
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : error ? (
+        <Box sx={{ py: 4 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      ) : mangas.length > 0 ? (
         <>
           <Grid container spacing={3}>
-            {currentMangas.map((manga) => (
+            {mangas.map((manga) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={manga.id}>
                 <MangaCard manga={manga} />
                 <Box sx={{ mt: 1, mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
-                    Chapter {manga.lastChapter} • Updated {new Date(manga.updatedAt).toLocaleDateString()}
+                    Chapter {manga.lastChapter || "N/A"} • Updated {new Date(manga.updatedAt).toLocaleDateString()}
                   </Typography>
                 </Box>
               </Grid>

@@ -240,6 +240,7 @@ const Home = () => {
   const [mangas, setMangas] = useState([]);
   const [featuredMangas, setFeaturedMangas] = useState([]);
   const [latestMangas, setLatestMangas] = useState([]);
+  const [hottestMangas, setHottestMangas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
@@ -298,7 +299,7 @@ const Home = () => {
         setFeaturedMangas(featuredData);
 
         // Fetch latest updates
-        const latestData = await mangaService.getLatestUpdates(0, 4);
+        const latestData = await mangaService.getLatestUpdates(0, 8);
         console.log("Dữ liệu latestData:", latestData); // ← 🟡 đặt ở đây
 
         if (latestData && Array.isArray(latestData.content)) {
@@ -306,6 +307,16 @@ const Home = () => {
         } else {
           console.warn("Không tìm thấy content hợp lệ:", latestData);
           setLatestMangas([]);
+        }
+        
+        // Fetch most viewed mangas for HOTTEST section
+        try {
+          const hottestData = await mangaService.getMostViewedMangas(7);
+          setHottestMangas(hottestData);
+          console.log("Hottest manga data:", hottestData);
+        } catch (error) {
+          console.error("Error fetching hottest mangas:", error);
+          setHottestMangas([]);
         }
 
         setError(null);
@@ -554,7 +565,7 @@ const Home = () => {
                   </Typography>
                 </Box>
                 <Stack spacing={2}>
-                  {mangas.slice(0, 7).map((manga, index) => (
+                  {(hottestMangas.length > 0 ? hottestMangas : mangas.slice(0, 7)).map((manga, index) => (
                     <Paper
                       key={manga.id}
                       component={Link}

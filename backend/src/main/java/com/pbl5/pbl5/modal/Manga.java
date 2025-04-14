@@ -34,6 +34,9 @@ public class Manga {
     
     @Column(name = "admin_id")
     private Integer adminId;
+    
+    @Column(name = "views")
+    private Integer views = 0;
     // Relationships
     @OneToMany(mappedBy = "manga")
     @JsonManagedReference
@@ -177,5 +180,13 @@ public class Manga {
 
     public void setCategories(List<Category> categories) {
         this.categories = categories;
+    }
+    
+    public Integer getViews() {
+        return views;
+    }
+
+    public void setViews(Integer views) {
+        this.views = views;
     }
 }

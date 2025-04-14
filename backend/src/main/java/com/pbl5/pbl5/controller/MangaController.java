@@ -143,5 +143,64 @@ public class MangaController {
             return ResponseEntity.badRequest().body("Error searching mangas: " + e.getMessage());
         }
     }
+    
+    @PostMapping("/{id}/increment-views")
+    public ResponseEntity<?> incrementViews(@PathVariable Integer id) {
+        try {
+            Manga updatedManga = mangaService.incrementViews(id);
+            if (updatedManga != null) {
+                return ResponseEntity.ok(updatedManga);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error incrementing views: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/most-viewed")
+    public ResponseEntity<?> getMostViewedMangas(@RequestParam(defaultValue = "7") int limit) {
+        try {
+            List<Manga> mostViewedMangas = mangaService.getMostViewedMangas(limit);
+            return ResponseEntity.ok(mostViewedMangas);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching most viewed mangas: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/ranking")
+    public ResponseEntity<?> getRankedMangas(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "12") int size,
+        @RequestParam(defaultValue = "40") int limit) {
+        try {
+            List<Manga> rankedMangas = mangaService.getMostViewedMangas(limit);
+            
+            // Manual pagination
+            int start = page * size;
+            int end = Math.min(start + size, rankedMangas.size());
+            
+            if (start >= rankedMangas.size()) {
+                return ResponseEntity.ok(new HashMap<String, Object>() {{
+                    put("content", new ArrayList<>());
+                    put("currentPage", page);
+                    put("totalItems", rankedMangas.size());
+                    put("totalPages", (int) Math.ceil((double) rankedMangas.size() / size));
+                }});
+            }
+            
+            List<Manga> paginatedMangas = rankedMangas.subList(start, end);
+            
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("content", paginatedMangas);
+            response.put("currentPage", page);
+            response.put("totalItems", rankedMangas.size());
+            response.put("totalPages", (int) Math.ceil((double) rankedMangas.size() / size));
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching ranked mangas: " + e.getMessage());
+        }
+    }
 }
 

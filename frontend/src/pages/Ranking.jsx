@@ -1,119 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Grid,
   Typography,
   Box,
   Pagination,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import MangaCard from '../components/MangaCard';
-
-// Mock data for ranked manga list
-const mockRankedMangas = [
-  {
-    id: 1,
-    title: 'One Piece',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Eiichiro Oda',
-    rating: 4.8,
-    views: 353691,
-    genres: ['Adventure', 'Action', 'Fantasy'],
-  },
-  {
-    id: 2,
-    title: 'Naruto',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Masashi Kishimoto',
-    rating: 4.7,
-    views: 339747,
-    genres: ['Action', 'Adventure', 'Fantasy'],
-  },
-  {
-    id: 3,
-    title: 'Attack on Titan',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Hajime Isayama',
-    rating: 4.9,
-    views: 283968,
-    genres: ['Action', 'Drama', 'Fantasy'],
-  },
-  {
-    id: 4,
-    title: 'My Hero Academia',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Kohei Horikoshi',
-    rating: 4.6,
-    views: 226328,
-    genres: ['Action', 'Superhero', 'School'],
-  },
-  {
-    id: 5,
-    title: 'Demon Slayer',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Koyoharu Gotouge',
-    rating: 4.8,
-    views: 202821,
-    genres: ['Action', 'Supernatural', 'Historical'],
-  },
-  {
-    id: 6,
-    title: 'Jujutsu Kaisen',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Gege Akutami',
-    rating: 4.7,
-    views: 171212,
-    genres: ['Action', 'Supernatural', 'School'],
-  },
-  {
-    id: 7,
-    title: 'Dragon Ball',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Akira Toriyama',
-    rating: 4.8,
-    views: 168421,
-    genres: ['Action', 'Adventure', 'Fantasy'],
-  },
-  {
-    id: 8,
-    title: 'Death Note',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Tsugumi Ohba',
-    rating: 4.9,
-    views: 156324,
-    genres: ['Mystery', 'Psychological', 'Supernatural'],
-  },
-  {
-    id: 9,
-    title: 'Black Clover',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Yūki Tabata',
-    rating: 4.5,
-    views: 145632,
-    genres: ['Action', 'Fantasy', 'Magic'],
-  },
-  {
-    id: 10,
-    title: 'Tokyo Ghoul',
-    cover: 'https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg',
-    author: 'Sui Ishida',
-    rating: 4.7,
-    views: 142789,
-    genres: ['Horror', 'Supernatural', 'Psychological'],
-  },
-  // Additional manga entries to complete top 40
-  // ... (entries 11-40 with decreasing view counts)
-].sort((a, b) => b.views - a.views); // Sort by views in descending order
+import mangaService from '../services/mangaService';
 
 const Ranking = () => {
   const [page, setPage] = useState(1);
+  const [mangas, setMangas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
   const mangasPerPage = 12;
+
+  useEffect(() => {
+    const fetchRankedMangas = async () => {
+      try {
+        setLoading(true);
+        // Fetch ranked manga from API
+        const response = await mangaService.getRankedMangas(page - 1, mangasPerPage);
+        
+        if (response && Array.isArray(response.content)) {
+          setMangas(response.content);
+          setTotalPages(response.totalPages || 1);
+          setError(null);
+        } else {
+          console.warn("Invalid data format received:", response);
+          setMangas([]);
+          setTotalPages(1);
+          setError("Failed to load ranked manga. Please try again later.");
+        }
+      } catch (err) {
+        console.error("Error fetching ranked manga:", err);
+        setError("Failed to load ranked manga. Please try again later.");
+        setMangas([]);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRankedMangas();
+  }, [page]);
 
   const handlePageChange = (event, value) => {
     setPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const startIndex = (page - 1) * mangasPerPage;
-  const displayedMangas = mockRankedMangas.slice(startIndex, startIndex + mangasPerPage);
 
   // Function to get medal color based on rank
   const getMedalColor = (rank) => {
@@ -141,8 +80,16 @@ const Ranking = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {displayedMangas.map((manga, index) => {
-            const rank = startIndex + index + 1;
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 5 }}>
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Box sx={{ width: '100%', py: 2 }}>
+              <Alert severity="error">{error}</Alert>
+            </Box>
+          ) : mangas.map((manga, index) => {
+            const rank = ((page - 1) * mangasPerPage) + index + 1;
             const gridSize = getGridSize(rank);
             const medalColor = getMedalColor(rank);
             
@@ -187,7 +134,7 @@ const Ranking = () => {
 
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination
-            count={Math.ceil(mockRankedMangas.length / mangasPerPage)}
+            count={totalPages}
             page={page}
             onChange={handlePageChange}
             color="primary"
