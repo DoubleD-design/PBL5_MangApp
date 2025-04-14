@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import authService from "../services/authService"; // Import authService
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
         birthday: '',
         gender: '',
-        emailOrPhone: '',
+        email: '',
         password: ''
     });
 
@@ -13,13 +16,19 @@ const Register = () => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Add logic to handle form submission, e.g., API call
-        console.log('Form submitted:', formData);
-    };
-
+        try {
+          const response = await authService.register(formData);
+          if (response.success) {
+            console.log("Registration successful");
+            navigate("/login"); // Chuyển hướng về trang đăng nhập
+          }
+        } catch (error) {
+          console.error('Registration failed:', error.response?.data || error.message);
+          alert(error.response?.data?.message || 'Registration failed. Please try again.');
+        }
+      };
     const styles = {
         container: {
             display: 'flex',
@@ -135,11 +144,11 @@ const Register = () => {
                         </select>
                     </div>
                     <div style={styles.formGroup}>
-                        <label htmlFor="emailOrPhone" style={styles.label}>Email or Phone Number</label>
+                        <label htmlFor="email" style={styles.label}>Email or Phone Number</label>
                         <input
-                            type="text"
-                            id="emailOrPhone"
-                            name="emailOrPhone"
+                            type="email"
+                            id="email"
+                            name="email"
                             value={formData.emailOrPhone}
                             onChange={handleChange}
                             required

@@ -2,7 +2,6 @@ package com.pbl5.pbl5.modal;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "subscriptions")

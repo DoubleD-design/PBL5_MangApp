@@ -60,8 +60,7 @@ public class AppConfig {
                 })
                 .and()
                 .httpBasic()
-                .and()
-                .formLogin();
+                .and();
 
         return http.build();
 

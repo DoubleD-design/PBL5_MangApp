@@ -17,7 +17,7 @@ public class MangaService {
     private MangaRepository mangaRepository;
     
     @Autowired
-    private ChapterService chapterService;
+    //private ChapterService chapterService;
 
     public List<Manga> getAllMangas() {
         return mangaRepository.findAll();

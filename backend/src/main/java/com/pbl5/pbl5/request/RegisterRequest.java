@@ -1,17 +1,20 @@
 package com.pbl5.pbl5.request;
 
-public class SignupRequest {
+public class RegisterRequest {
     private String username;
     private String email;
     private String password;
+    private String birthday;
+    private String gender;
 
-    public SignupRequest() {
+    public RegisterRequest() {
     }
-
-    public SignupRequest(String username, String email, String password) {
+    public RegisterRequest(String username, String email, String password, String birthday, String gender) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.birthday = birthday;
+        this.gender = gender;
     }
 
     public String getUsername() {
@@ -36,5 +39,21 @@ public class SignupRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

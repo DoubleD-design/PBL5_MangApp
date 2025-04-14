@@ -4,7 +4,7 @@ import com.pbl5.pbl5.config.JwtTokenProvider;
 import com.pbl5.pbl5.modal.User;
 import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.LoginRequest;
-import com.pbl5.pbl5.request.SignupRequest;
+import com.pbl5.pbl5.request.RegisterRequest;
 import com.pbl5.pbl5.response.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,21 +32,21 @@ public class AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    public AuthResponse signup(SignupRequest signupRequest) {
+    public AuthResponse register(RegisterRequest registerRequest) {
         // Check if username or email already exists
-        if (userRepository.existsByUsername(signupRequest.getUsername())) {
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new BadCredentialsException("Username already exists");
         }
 
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new BadCredentialsException("Email already exists");
         }
 
         // Create new user
         User user = new User();
-        user.setUsername(signupRequest.getUsername());
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(User.UserRole.READER); // Default role is READER
         user.setVipStatus(false); // Default VIP status is false
         user.setCreatedAt(LocalDateTime.now());
@@ -59,22 +59,22 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtTokenProvider.generateToken(authentication);
 
-        return new AuthResponse(jwt, "Signup successful", true);
+        return new AuthResponse(jwt, "Register successful", true);
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
         // Find user by email
-        Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
+        Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
 
         if (optionalUser.isEmpty()) {
-            throw new BadCredentialsException("Invalid email or password");
+            throw new BadCredentialsException("Invalid username");
         }
 
         User user = optionalUser.get();
 
         // Verify password
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid email or password");
+            throw new BadCredentialsException("Invalid username or password");
         }
 
         // Generate JWT token

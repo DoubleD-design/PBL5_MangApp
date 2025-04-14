@@ -5,12 +5,14 @@ const authService = {
   login: async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response.data?.jwt && response.data?.status) {
+        localStorage.setItem('token', response.data.jwt);
+        localStorage.setItem('user', JSON.stringify({ username: credentials.username }));
+        console.log("Login successful, redirecting...");
       }
       return response.data;
     } catch (error) {
+      console.error('Login failed:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -21,6 +23,7 @@ const authService = {
       const response = await api.post('/auth/register', userData);
       return response.data;
     } catch (error) {
+      console.error('Registration failed:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -29,6 +32,7 @@ const authService = {
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    window.location.href = "/login"; // Chuyển hướng về trang đăng nhập
   },
 
   // Get current user
@@ -40,7 +44,7 @@ const authService = {
   // Check if user is authenticated
   isAuthenticated: () => {
     return localStorage.getItem('token') !== null;
-  }
+  },
 };
 
 export default authService;

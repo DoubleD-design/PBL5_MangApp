@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import authService from "../services/authService"; // Import authService
 
 const LogIn = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    identifier: '', // Can be username, phone number, or email
+    username: '', // Can be username, phone number, or email
     password: '',
   });
 
@@ -12,16 +15,42 @@ const LogIn = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (!formData.identifier || !formData.password) {
+  //     console.error('Both identifier and password are required.');
+  //     return;
+  //   }
+  //   console.log('Form submitted:', formData);
+  //   // Add login logic here, e.g., API call
+  // };
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.identifier || !formData.password) {
-      console.error('Both identifier and password are required.');
+    console.log("Form submitted"); // Kiểm tra xem hàm có được gọi không
+    if (!formData.username || !formData.password) {
+      console.error("Both username and password are required.");
       return;
     }
-    console.log('Form submitted:', formData);
-    // Add login logic here, e.g., API call
-  };
 
+    try {
+      // Gửi yêu cầu đăng nhập
+      console.log("Sending login request...");
+      const response = await authService.login({
+        username: formData.username,
+        password: formData.password,
+      });
+      console.log("Login response:", response);
+
+      // Nếu đăng nhập thành công, chuyển hướng
+      if (authService.isAuthenticated()) {
+        console.log("Login successful:", response);
+        navigate("/"); // Chuyển hướng về trang chính
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Invalid usernamee or password.");
+    }
+  };
   const styles = {
     container: {
       display: 'flex',
@@ -117,14 +146,14 @@ const LogIn = () => {
         <h2 style={styles.heading}>Log In</h2>
         <form onSubmit={handleSubmit}>
           <div style={styles.formGroup}>
-            <label htmlFor="identifier" style={styles.label}>
+            <label htmlFor="username" style={styles.label}>
               Username, Phone Number, or Email
             </label>
             <input
               type="text"
-              id="identifier"
-              name="identifier"
-              value={formData.identifier}
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               required
               style={styles.input}

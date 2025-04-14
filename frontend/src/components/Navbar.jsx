@@ -13,6 +13,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import categoryService from "../services/categoryService";
+import { AccountCircle, Notifications } from "@mui/icons-material";
+import authService from "../services/authService"; // Import authService
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -20,6 +22,9 @@ const Navbar = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isAuthenticated = authService.isAuthenticated(); // Check authentication status
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
+  const [accountAnchorEl, setAccountAnchorEl] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -50,6 +55,34 @@ const Navbar = () => {
   const handleCategoryClick = (categorySlug) => {
     navigate(`/categories/${categorySlug}`);
     handleCategoryClose();
+  };
+
+  const handleNotificationOpen = (event) => {
+    setNotificationAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null);
+  };
+
+  const handleAccountOpen = (event) => {
+    setAccountAnchorEl(event.currentTarget);
+  };
+
+  const handleAccountClose = () => {
+    setAccountAnchorEl(null);
+  };
+
+  const handleAccountClick = (action) => {
+    if (action === "logout") {
+      authService.logout(); // Log out the user
+      navigate("/login");
+    } else if (action === "editProfile") {
+      navigate("/profile/edit");
+    } else if (action === "vipRegistration") {
+      navigate("/vip-registration");
+    }
+    handleAccountClose();
   };
 
   return (
@@ -218,34 +251,157 @@ const Navbar = () => {
 
           {/* Auth Buttons */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Button
-              component={Link}
-              to="/signin"
-              variant="outlined"
-              sx={{
-                color: "#fff",
-                borderColor: "#fff",
-                "&:hover": {
-                  borderColor: "#ff6740",
-                  backgroundColor: "rgba(255, 103, 64, 0.1)",
-                },
-              }}
-            >
-              LOG IN
-            </Button>
-            <Button
-              component={Link}
-              to="/signup"
-              variant="contained"
-              sx={{
-                backgroundColor: "#ff6740",
-                "&:hover": {
-                  backgroundColor: "#ff8a65",
-                },
-              }}
-            >
-              REGISTER
-            </Button>
+            {isAuthenticated ? (
+              <>
+                {/* Notification Icon */}
+                <IconButton
+                  onClick={handleNotificationOpen}
+                  sx={{
+                    color: "#fff",
+                    fontSize: "1.8rem",
+                    "&:hover": {
+                      color: "#ff6740",
+                    },
+                  }}
+                >
+                  <Notifications />
+                </IconButton>
+                <Menu
+                  anchorEl={notificationAnchorEl}
+                  open={Boolean(notificationAnchorEl)}
+                  onClose={handleNotificationClose}
+                  PaperProps={{
+                    style: {
+                      backgroundColor: "#1a1a1a",
+                      color: "#fff",
+                      marginTop: "8px",
+                    },
+                  }}
+                >
+                  <MenuItem
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    Notification 1
+                  </MenuItem>
+                  <MenuItem
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    Notification 2
+                  </MenuItem>
+                  <MenuItem
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    Notification 3
+                  </MenuItem>
+                </Menu>
+
+                {/* Account Icon */}
+                <IconButton
+                  onClick={handleAccountOpen}
+                  sx={{
+                    color: "#fff",
+                    fontSize: "2rem", // Increased size
+                    "&:hover": {
+                      color: "#ff6740",
+                    },
+                  }}
+                >
+                  <AccountCircle />
+                </IconButton>
+                <Menu
+                  anchorEl={accountAnchorEl}
+                  open={Boolean(accountAnchorEl)}
+                  onClose={handleAccountClose}
+                  PaperProps={{
+                    style: {
+                      backgroundColor: "#1a1a1a",
+                      color: "#fff",
+                      marginTop: "8px",
+                    },
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => handleAccountClick("editProfile")}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    Edit Profile
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => handleAccountClick("vipRegistration")}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    VIP Registration
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => handleAccountClick("logout")}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 103, 64, 0.1)",
+                        color: "#ff6740",
+                      },
+                    }}
+                  >
+                    Log Out
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Button
+                  component={Link}
+                  to="/login"
+                  variant="outlined"
+                  sx={{
+                    color: "#fff",
+                    borderColor: "#fff",
+                    "&:hover": {
+                      borderColor: "#ff6740",
+                      backgroundColor: "rgba(255, 103, 64, 0.1)",
+                    },
+                  }}
+                >
+                  LOG IN
+                </Button>
+                <Button
+                  component={Link}
+                  to="/register"
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#ff6740",
+                    "&:hover": {
+                      backgroundColor: "#ff8a65",
+                    },
+                  }}
+                >
+                  REGISTER
+                </Button>
+              </>
+            )}
           </Box>
         </Toolbar>
       </Container>

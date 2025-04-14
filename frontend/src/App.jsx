@@ -8,13 +8,18 @@ import ChapterReader from "./components/ChapterReader";
 import Ranking from "./pages/Ranking";
 import AboutUs from "./pages/AboutUs";
 import Register from "./pages/Register";
-import Login from "./pages/LogIn";
+import LogIn from "./pages/LogIn";
 import CategoryPage from "./pages/CategoryPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import UpdatesPage from "./pages/UpdatesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import { FavoritesProvider } from "./context/FavoritesContext";
-
+import { Navigate } from "react-router-dom";
+import authService from "./services/authService";
+// PrivateRoute component
+const PrivateRoute = ({ children }) => {
+  return authService.isAuthenticated() ? children : <Navigate to="/login" />;
+};
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -38,12 +43,21 @@ function App() {
                   element={<ChapterReader />}
                 />
                 <Route path="/ranking" element={<Ranking />} />
-                <Route path="/signin" element={<Login />} />
+                <Route path="/login" element={<LogIn />} />
                 <Route path="/about-us" element={<AboutUs />} />
-                <Route path="/signup" element={<Register />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/categories/:categorySlug" element={<CategoryPage />} />
                 <Route path="/updates" element={<UpdatesPage />} />
-                <Route path="/favorites" element={<FavoritesPage />} />
+                {/*<Route path="/favorites" element={<FavoritesPage />} />*/}
+                {/* Protect FavoritesPage with PrivateRoute */}
+                <Route
+                    path="/favorites"
+                    element={
+                      <PrivateRoute>
+                        <FavoritesPage />
+                      </PrivateRoute>
+                    }
+                  />
               </Routes>
             </Box>
           </Box>

@@ -134,7 +134,7 @@ const MangaDetail = () => {
   const handleFavoriteClick = async () => {
     // If not authenticated, redirect to login
     if (!authService.isAuthenticated()) {
-      navigate("/signin", { state: { from: `/manga/${id}` } });
+      navigate("/login", { state: { from: `/manga/${id}` } });
       return;
     }
 
