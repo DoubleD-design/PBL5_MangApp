@@ -112,8 +112,10 @@ const Navbar = () => {
               PaperProps={{
                 style: {
                   maxWidth: "none",
-                  width: "600px",
-                  maxHeight: "400px",
+                  width: `${Math.max(
+                    600,
+                    Math.ceil(categories.length / 8) * 200
+                  )}px`,
                   padding: "10px",
                   backgroundColor: "#1a1a1a",
                   color: "#fff",
@@ -124,7 +126,9 @@ const Navbar = () => {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gridTemplateColumns: `repeat(${Math.ceil(
+                    categories.length / 8
+                  )}, 1fr)`,
                   gap: 1,
                   p: 1,
                 }}
