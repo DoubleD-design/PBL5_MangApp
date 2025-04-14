@@ -22,29 +22,32 @@ function App() {
       <FavoritesProvider>
         <Router>
           <Box
-            sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+            }}
           >
             <Navbar />
             <Box component="main" sx={{ flexGrow: 1 }}>
               <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/manga/:id" element={<MangaDetail />} />
-              <Route
-                path="/manga/:mangaId/chapter/:chapterNumber"
-                element={<ChapterReader />}
-              />
-              <Route path="/ranking" element={<Ranking />} />
-              <Route path="/signin" element={<Login />} />
-              <Route path="/about-us" element={<AboutUs />} />
-              <Route path="/signup" element={<Register />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/category/:categorySlug" element={<CategoryPage />} />
-              <Route path="/updates" element={<UpdatesPage />} />
-              <Route path="/favorites" element={<FavoritesPage />} />
-            </Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/manga/:id" element={<MangaDetail />} />
+                <Route
+                  path="/manga/:mangaId/chapter/:chapterNumber"
+                  element={<ChapterReader />}
+                />
+                <Route path="/ranking" element={<Ranking />} />
+                <Route path="/signin" element={<Login />} />
+                <Route path="/about-us" element={<AboutUs />} />
+                <Route path="/signup" element={<Register />} />
+                <Route path="/categories/:categorySlug" element={<CategoryPage />} />
+                <Route path="/updates" element={<UpdatesPage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
+              </Routes>
+            </Box>
           </Box>
-        </Box>
-      </Router>
+        </Router>
       </FavoritesProvider>
     </ThemeProvider>
   );

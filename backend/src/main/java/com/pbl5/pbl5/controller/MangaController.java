@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -200,6 +202,28 @@ public class MangaController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching ranked mangas: " + e.getMessage());
+        }
+    }
+    
+    @GetMapping("/categories/{categoryId}/manga")
+    public ResponseEntity<?> getMangaByCategory(
+        @PathVariable Integer categoryId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "8") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            List<Manga> mangas = mangaService.findByCategoriesId(categoryId, pageable);
+            
+            // Create a response object with pagination info
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("content", mangas);
+            response.put("currentPage", page);
+            response.put("totalItems", mangas.size());
+            response.put("totalPages", (int) Math.ceil((double) mangas.size() / size));
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching mangas by category: " + e.getMessage());
         }
     }
 }

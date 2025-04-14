@@ -4,6 +4,7 @@ import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.repos.MangaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -95,4 +96,12 @@ public class MangaService {
             .limit(limit)
             .toList();
     }
+
+    public List<Manga> findByCategoriesId(Integer categoryId, Pageable pageable) {
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Category ID cannot be null");
+        }
+        return mangaRepository.findByCategoriesId(categoryId, pageable);
+    }
+
 }

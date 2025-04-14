@@ -14,7 +14,7 @@ const mangaService = {
       throw error;
     }
   },
-  
+
   // Get most viewed mangas
   getMostViewedMangas: async (limit = 7) => {
     try {
@@ -32,7 +32,7 @@ const mangaService = {
       const response = await api.get(`/manga/${id}`);
       return response.data;
     } catch (error) {
-        console.error("Error in getMangaById:", error);
+      console.error("Error in getMangaById:", error);
       throw error;
     }
   },
@@ -64,27 +64,29 @@ const mangaService = {
   // Get manga by category
   getMangasByCategory: async (categoryId, page = 0, size = 10) => {
     try {
-      console.log(`Fetching mangas for category ID: ${categoryId}, page: ${page}, size: ${size}`);
-      const response = await api.get(
-        `/category/${categoryId}/manga?page=${page}&size=${size}`
+      console.log(
+        `Fetching mangas for category ID: ${categoryId}, page: ${page}, size: ${size}`
       );
-      console.log('API response for category mangas:', response);
-      
+      const response = await api.get(
+        `/manga/categories/${categoryId}/manga?page=${page}&size=${size}`
+      );
+      console.log("API response for category mangas:", response);
+
       // If the API returns an empty array or no content property, format it properly
       if (Array.isArray(response.data)) {
         return {
           content: response.data,
-          totalPages: 1
+          totalPages: 1,
         };
       }
-      
+
       return response.data;
     } catch (error) {
       console.error(`Error fetching mangas for category ${categoryId}:`, error);
       // Return empty data structure instead of throwing to prevent UI crashes
       return {
         content: [],
-        totalPages: 0
+        totalPages: 0,
       };
     }
   },
@@ -126,7 +128,7 @@ const mangaService = {
       throw error;
     }
   },
-  
+
   // Increment manga view count
   incrementViews: async (mangaId) => {
     try {
@@ -138,11 +140,13 @@ const mangaService = {
       return null;
     }
   },
-  
+
   // Get ranked mangas by views with pagination
   getRankedMangas: async (page = 0, size = 12, limit = 40) => {
     try {
-      const response = await api.get(`/manga/ranking?page=${page}&size=${size}&limit=${limit}`);
+      const response = await api.get(
+        `/manga/ranking?page=${page}&size=${size}&limit=${limit}`
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching ranked mangas:", error);

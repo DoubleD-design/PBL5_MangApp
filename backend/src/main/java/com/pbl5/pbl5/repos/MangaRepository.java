@@ -2,6 +2,9 @@ package com.pbl5.pbl5.repos;
 
 import com.pbl5.pbl5.modal.Manga;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -35,6 +38,9 @@ public interface MangaRepository extends JpaRepository<Manga, Integer> {
     default void deleteMangaById(Integer id) {
         deleteById(id);
     }
+    @Query("SELECT DISTINCT m FROM Manga m JOIN m.categories c WHERE c.id = :categoryId")
+    List<Manga> findByCategoriesId(@Param("categoryId") Integer categoryId, Pageable pageable); // Method to fetch manga by category ID with pagination
     List<Manga> searchByTitle(String keyword);
+
 }
 

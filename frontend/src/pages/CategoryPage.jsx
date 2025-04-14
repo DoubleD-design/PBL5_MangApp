@@ -107,51 +107,55 @@ const CategoryPage = () => {
     const fetchCategoryAndMangas = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch all categories
         const categoriesData = await categoryService.getAllCategories();
-        console.log('Categories data:', categoriesData);
-        
+        console.log("Categories data:", categoriesData);
+
         // Find the category by slug
-        const category = categoriesData.find((cat) => cat.slug === categorySlug);
-        console.log('Found category:', category, 'for slug:', categorySlug);
-        
+        const category = categoriesData.find(
+          (cat) => cat.name === categorySlug
+        );
+        console.log("Found category:", category, "for slug:", categorySlug);
+
         if (category) {
           setCategoryName(category.name);
           setCategoryId(category.id);
-          
+
           // Fetch mangas by category
-          console.log('Fetching mangas for category ID:', category.id);
+          console.log("Fetching mangas for category ID:", category.id);
           const mangasData = await mangaService.getMangasByCategory(
             category.id,
             currentPage - 1,
             mangasPerPage
           );
-          
-          console.log('Manga data response:', mangasData);
-          
+
+          console.log("Manga data response:", mangasData);
+
           // Check if mangasData has the expected structure
           if (mangasData && mangasData.content) {
             setMangas(mangasData.content);
             setTotalPages(mangasData.totalPages || 1);
             setError(null);
           } else {
-            console.error('Unexpected manga data structure:', mangasData);
+            console.error("Unexpected manga data structure:", mangasData);
             setMangas(mangasData || []);
             setTotalPages(1);
             setError(null);
           }
         } else {
-          setError('Category not found');
+          setError("Category not found");
         }
       } catch (err) {
-        console.error('Error fetching category data:', err);
-        setError('Failed to load category data: ' + (err.message || 'Unknown error'));
+        console.error("Error fetching category data:", err);
+        setError(
+          "Failed to load category data: " + (err.message || "Unknown error")
+        );
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchCategoryAndMangas();
   }, [categorySlug, currentPage]);
 
