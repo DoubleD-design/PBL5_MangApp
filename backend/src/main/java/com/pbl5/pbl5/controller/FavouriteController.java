@@ -1,7 +1,9 @@
 package com.pbl5.pbl5.controller;
 
 import com.pbl5.pbl5.modal.Favourite;
+import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.modal.User;
+import com.pbl5.pbl5.repos.MangaRepository;
 import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.FavouriteRequest;
 import com.pbl5.pbl5.service.FavouriteService;
@@ -23,11 +25,18 @@ public class FavouriteController {
     private FavouriteService favouriteService;
     @Autowired
     private UserRepository userRepository;
-    
+    @Autowired
+    private MangaRepository mangaRepository;
+
     @GetMapping
-    public ResponseEntity<List<Favourite>> getAllFavourites() {
-        List<Favourite> favourites = favouriteService.getAllFavourites();
-        return new ResponseEntity<>(favourites, HttpStatus.OK);
+    public ResponseEntity<List<Manga>> getUserFavoriteMangas() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Manga> mangas = favouriteService.getFavouriteMangasByUserId(user.getId());
+        return new ResponseEntity<>(mangas, HttpStatus.OK);
     }
     
     @GetMapping("/{id}")

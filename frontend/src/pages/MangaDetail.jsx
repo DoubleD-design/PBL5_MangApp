@@ -23,6 +23,7 @@ import {
   CardContent,
   CardHeader,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import {
   Bookmark,
@@ -109,7 +110,7 @@ const MangaDetail = () => {
           const status = isFavorite(parseInt(id));
           setFavoriteStatus(status);
         }
-        
+
         // Only increment view count once per manga view session
         // Using ref instead of state to prevent double counting
         if (!viewCountedRef.current) {
