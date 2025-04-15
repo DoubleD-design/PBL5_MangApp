@@ -157,15 +157,18 @@ const UpdatesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
-  const mangasPerPage = 8;
+  const mangasPerPage = 12;
 
   useEffect(() => {
     const fetchLatestUpdates = async () => {
       try {
         setLoading(true);
         // Fetch latest manga updates from API
-        const latestData = await mangaService.getLatestUpdates(currentPage - 1, mangasPerPage);
-        
+        const latestData = await mangaService.getLatestUpdates(
+          currentPage - 1,
+          mangasPerPage
+        );
+
         if (latestData && Array.isArray(latestData.content)) {
           setMangas(latestData.content);
           setTotalPages(latestData.totalPages || 1);
@@ -224,11 +227,11 @@ const UpdatesPage = () => {
             {mangas.map((manga) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={manga.id}>
                 <MangaCard manga={manga} />
-                <Box sx={{ mt: 1, mb: 2 }}>
+                {/* <Box sx={{ mt: 1, mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
                     Chapter {manga.lastChapter || "N/A"} • Updated {new Date(manga.updatedAt).toLocaleDateString()}
                   </Typography>
-                </Box>
+                </Box> */}
               </Grid>
             ))}
           </Grid>

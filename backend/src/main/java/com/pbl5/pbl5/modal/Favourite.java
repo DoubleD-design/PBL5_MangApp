@@ -1,5 +1,6 @@
 package com.pbl5.pbl5.modal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -22,10 +23,12 @@ public class Favourite {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "reader_id", insertable = false, updatable = false)
+    @JsonBackReference
     private User user;
     
     @ManyToOne
     @JoinColumn(name = "manga_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Manga manga;
     
     // Getters and Setters

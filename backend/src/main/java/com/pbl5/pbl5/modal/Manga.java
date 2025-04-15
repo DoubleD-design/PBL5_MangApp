@@ -49,6 +49,7 @@ public class Manga {
     private List<Comment> comments;
     
     @OneToMany(mappedBy = "manga")
+    @JsonManagedReference
     private List<Favourite> favourites;
     
     @OneToMany(mappedBy = "manga")

@@ -16,6 +16,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { Navigate } from "react-router-dom";
 import authService from "./services/authService";
+import UserProfile from "./pages/UserProfile";
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/login" />;
@@ -46,18 +47,22 @@ function App() {
                 <Route path="/login" element={<LogIn />} />
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/categories/:categorySlug" element={<CategoryPage />} />
+                <Route
+                  path="/categories/:categorySlug"
+                  element={<CategoryPage />}
+                />
                 <Route path="/updates" element={<UpdatesPage />} />
+                <Route path="/profile/edit" element={<UserProfile />} />
                 {/*<Route path="/favorites" element={<FavoritesPage />} />*/}
                 {/* Protect FavoritesPage with PrivateRoute */}
                 <Route
-                    path="/favorites"
-                    element={
-                      <PrivateRoute>
-                        <FavoritesPage />
-                      </PrivateRoute>
-                    }
-                  />
+                  path="/favorites"
+                  element={
+                    <PrivateRoute>
+                      <FavoritesPage />
+                    </PrivateRoute>
+                  }
+                />
               </Routes>
             </Box>
           </Box>

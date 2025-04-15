@@ -13,10 +13,9 @@ const api = axios.create({
 
 // ✅ Thêm token vào headers bằng interceptor
 api.interceptors.request.use((config) => {
-  const jwt =
-    "eyJhbGciOiJIUzI1NiJ9.e30.BMrZ0PRF_-9azvcMMOuEKSX6YFKtuf-e5WUrVHmm0P4";
+  const jwt = localStorage.getItem("token");
   if (jwt) {
-    config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiJ9.e30.BMrZ0PRF_-9azvcMMOuEKSX6YFKtuf-e5WUrVHmm0P4`;
+    config.headers.Authorization = `Bearer ${jwt}`;
   }
   return config;
 });

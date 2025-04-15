@@ -1,5 +1,6 @@
 package com.pbl5.pbl5.modal;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +51,7 @@ public class User {
     private List<Comment> comments;
     
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private List<Favourite> favourites;
     
     @OneToMany(mappedBy = "user")
