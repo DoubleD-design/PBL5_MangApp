@@ -3,7 +3,6 @@ package com.pbl5.pbl5.controller;
 import com.pbl5.pbl5.modal.Favourite;
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.modal.User;
-import com.pbl5.pbl5.repos.MangaRepository;
 import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.FavouriteRequest;
 import com.pbl5.pbl5.service.FavouriteService;
@@ -25,8 +24,6 @@ public class FavouriteController {
     private FavouriteService favouriteService;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private MangaRepository mangaRepository;
 
     @GetMapping
     public ResponseEntity<List<Manga>> getUserFavoriteMangas() {
