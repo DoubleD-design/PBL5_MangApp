@@ -78,7 +78,7 @@ const Navbar = () => {
       authService.logout(); // Log out the user
       navigate("/login");
     } else if (action === "editProfile") {
-      navigate("/profile/edit");
+      navigate("/account");
     } else if (action === "vipRegistration") {
       navigate("/vip-registration");
     }

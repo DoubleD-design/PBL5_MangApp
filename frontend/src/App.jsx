@@ -17,6 +17,10 @@ import { FavoritesProvider } from "./context/FavoritesContext";
 import { Navigate } from "react-router-dom";
 import authService from "./services/authService";
 import UserProfile from "./pages/UserProfile";
+import ChangePass from "./pages/ChangePass";
+import ManageAccount from "./pages/ManageAccount";
+import MyComment from "./pages/MyComment"; // Import the MyComment component
+
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/login" />;
@@ -52,8 +56,10 @@ function App() {
                   element={<CategoryPage />}
                 />
                 <Route path="/updates" element={<UpdatesPage />} />
-                <Route path="/profile/edit" element={<UserProfile />} />
-                {/*<Route path="/favorites" element={<FavoritesPage />} />*/}
+                <Route path="/account" element={<ManageAccount />} />
+                <Route path="/account/profile/edit" element={<UserProfile />} />
+                <Route path="/account/password/edit" element={<ChangePass />} />
+                <Route path="/account/comments" element={<MyComment />} /> {/* New route for comments */}
                 {/* Protect FavoritesPage with PrivateRoute */}
                 <Route
                   path="/favorites"
