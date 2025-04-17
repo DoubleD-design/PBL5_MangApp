@@ -91,4 +91,14 @@ public class AuthService {
 
         return new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
     }
+
+    public void verifyPassword(User user, String rawPassword) {
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new BadCredentialsException("Old password is incorrect");
+        }
+    }
+
+    public String encodePassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
+    }
 }

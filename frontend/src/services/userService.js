@@ -53,7 +53,20 @@ const userService = {
     } catch (error) {
       throw error;
     }
-  }
+    },
+  // Change password
+  changePassword: async (passwordData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await api.put('/users/changepassword', passwordData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Password change failed:', error.response?.data || error.message);
+      throw error;
+    }
+  },
 };
 
 export default userService;

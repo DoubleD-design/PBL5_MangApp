@@ -44,6 +44,8 @@ const authService = {
   isAuthenticated: () => {
     return localStorage.getItem('token') !== null;
   },
+
+  
 };
 
 export default authService;

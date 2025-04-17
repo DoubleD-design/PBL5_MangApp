@@ -1,33 +1,45 @@
 import React, { useState } from "react";
 import { Container, Typography, TextField, Button, Divider } from "@mui/material";
+import userService from "../services/userService"; // Corrected import
+import authService from "../services/authService"; // Import authService
 
 const ChangePass = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const handlePasswordChange = () => {
-    if (password === confirmPassword) {
-      alert("Password changed successfully!");
+  const handlePasswordChange = async () => {
+    setError("");
+    setSuccess("");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    try {
+      await userService.changePassword({ oldPassword, password }); // Fixed payload key
+      setSuccess("Password changed successfully!");
       setOldPassword("");
       setPassword("");
       setConfirmPassword("");
-    } else {
-      alert("Passwords do not match!");
-    }
-  };
 
-  const handleLogout = () => {
-    alert("Logged out successfully!");
-    // Add logout logic here
+      // Automatically log out and redirect to login page
+      authService.logout();
+      window.location.href = "/login";
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to change password.");
+    }
   };
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
-      {/* Change Password Section */}
       <Typography variant="h6" gutterBottom>
         Change Password
       </Typography>
+      {error && <Typography color="error">{error}</Typography>}
+      {success && <Typography color="primary">{success}</Typography>}
       <TextField
         label="Old Password"
         type="password"
@@ -61,18 +73,7 @@ const ChangePass = () => {
       >
         Change Password
       </Button>
-
       <Divider sx={{ my: 3 }} />
-
-      {/* Logout Section */}
-      <Button
-        variant="outlined"
-        color="error"
-        fullWidth
-        onClick={handleLogout}
-      >
-        Logout
-      </Button>
     </Container>
   );
 };

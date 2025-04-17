@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.pbl5.pbl5.request.UserProfileRequest;
+import com.pbl5.pbl5.request.ChangePasswordRequest;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthService authService;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -64,6 +68,28 @@ public class UserController {
 
         User updatedUser = userService.saveUser(user);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @PutMapping("/changepassword")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Verify old password using AuthService
+        authService.verifyPassword(user, request.getOldPassword());
+
+        // Validate new password
+        if (request.getPassword() == null || request.getPassword().isEmpty()) { // Use request.getPassword()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("New password cannot be null or empty");
+        }
+
+        // Update to new password
+        user.setPassword(authService.encodePassword(request.getPassword())); // Use request.getPassword()
+        userService.saveUser(user);
+
+        return ResponseEntity.ok("Password changed successfully");
     }
 
     @DeleteMapping("/{id}")
