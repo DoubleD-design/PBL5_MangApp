@@ -10,20 +10,18 @@ import {
   ListItemText,
   ListItemIcon,
   Grid,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { AccountCircle, Lock, Comment, Logout } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import UserProfile from "./UserProfile";
 import ChangePass from "./ChangePass";
+import MyComment from "./MyComment";
 
 const ManageAccount = () => {
-  const navigate = useNavigate();
   const [selectedSection, setSelectedSection] = useState("profile");
-
-  const handleLogout = () => {
-    alert("Logged out successfully!");
-    // Add logout logic here
-  };
+  const { user, loading, error } = useUser();
 
   const renderContent = () => {
     switch (selectedSection) {
@@ -31,13 +29,38 @@ const ManageAccount = () => {
         return <UserProfile />;
       case "password":
         return <ChangePass />;
+      case "comments":
+        return <MyComment />;
       default:
-        return null;
+        return (
+          <Typography variant="body1">
+            Select an option from the left to manage your account.
+          </Typography>
+        );
     }
   };
 
+  if (loading) {
+    return (
+      <Container sx={{ py: 4 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Manage Account
+      </Typography>
       <Grid container spacing={2}>
         {/* Left Column */}
         <Grid item xs={4}>
@@ -47,15 +70,15 @@ const ManageAccount = () => {
               src="https://via.placeholder.com/100"
               alt="User Avatar"
             />
-            <Typography variant="h6">John Doe</Typography>
+            <Typography variant="h6">{user.username}</Typography>
             <Typography variant="body2" color="text.secondary">
-              johndoe@example.com
+              {user.email}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Phone: +123456789
+              Vip: {user.vipStatus ? "Yes" : "No"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Address: 123 Main Street, City, Country
+              Role: {user.role}
             </Typography>
           </Box>
           <Divider sx={{ my: 2 }} />
@@ -63,7 +86,7 @@ const ManageAccount = () => {
             {[
               { section: "profile", label: "Your Profile", icon: <AccountCircle /> },
               { section: "password", label: "Change Your Password", icon: <Lock /> },
-              { section: "comments", label: "Your Comments", icon: <Comment /> }, // Added "Your Comments"
+              { section: "comments", label: "Your Comments", icon: <Comment /> },
             ].map(({ section, label, icon }) => (
               <ListItem
                 button
@@ -74,7 +97,7 @@ const ManageAccount = () => {
                 <ListItemText primary={label} />
               </ListItem>
             ))}
-            <ListItem button onClick={handleLogout}>
+            <ListItem button>
               <ListItemIcon>
                 <Logout />
               </ListItemIcon>

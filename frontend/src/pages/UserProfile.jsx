@@ -6,170 +6,136 @@ import {
   Avatar,
   TextField,
   Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
+  CircularProgress,
+  Alert,
   Grid,
-  Fade,
 } from "@mui/material";
-import { AccountCircle, Lock, Comment, Logout } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 const UserProfile = () => {
-  const navigate = useNavigate();
-  const [selectedSection, setSelectedSection] = useState("profile");
-  const [userInfo, setUserInfo] = useState({
-    name: "John Doe",
-    email: "johndoe@example.com",
-    phone: "+123456789",
-    address: "123 Main Street, City, Country",
+  const { user, loading, error } = useUser();
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    username: user?.username || "",
+    email: user?.email || "",
+    vipStatus: user?.vipStatus || false,
+    role: user?.role || "",
   });
-  const [avatar, setAvatar] = useState("https://via.placeholder.com/100");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUserInfo({ ...userInfo, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSaveChanges = () => {
-    alert("User information updated successfully!");
-    // Add save logic here
+    // Add logic to save changes (e.g., API call)
+    console.log("Saved changes:", formData);
+    setEditMode(false);
   };
 
-  const handleLogout = () => {
-    alert("Logged out successfully!");
-    // Add logout logic here
+  const handleEditAvatar = () => {
+    // Add logic to edit avatar (e.g., file upload)
+    console.log("Edit Avatar clicked");
   };
 
-  const handleAvatarChange = () => {
-    const newAvatar = prompt("Enter the URL of your new avatar:");
-    if (newAvatar) {
-      setAvatar(newAvatar);
-      alert("Avatar updated successfully!");
-    }
-  };
+  if (loading) {
+    return (
+      <Container sx={{ py: 4 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
-  const userComments = [
-    "This is my first comment.",
-    "I love this app!",
-    "Looking forward to new features.",
-  ];
+  if (error) {
+    return (
+      <Container sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
 
-  const renderContent = () => {
-    switch (selectedSection) {
-      case "profile":
-        return (
-          <Fade in={true}>
-            <Box>
-              <Avatar
-                sx={{ width: 100, height: 100, mx: "auto", mb: 2 }}
-                src={avatar}
-                alt="User Avatar"
-              />
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={handleAvatarChange}
-                sx={{ display: "block", mx: "auto", mb: 2 }}
-              >
-                Edit Avatar
-              </Button>
-              <Typography variant="h5" gutterBottom>
-                Edit Profile
-              </Typography>
-              <TextField
-                label="Name"
-                name="name"
-                fullWidth
-                margin="normal"
-                value={userInfo.name}
-                onChange={handleInputChange}
-              />
-              <TextField
-                label="Email"
-                name="email"
-                fullWidth
-                margin="normal"
-                value={userInfo.email}
-                onChange={handleInputChange}
-              />
-              <TextField
-                label="Phone"
-                name="phone"
-                fullWidth
-                margin="normal"
-                value={userInfo.phone}
-                onChange={handleInputChange}
-              />
-              <TextField
-                label="Address"
-                name="address"
-                fullWidth
-                margin="normal"
-                value={userInfo.address}
-                onChange={handleInputChange}
-              />
+  return (
+    <Container sx={{ py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        User Profile
+      </Typography>
+      <Grid container spacing={4}>
+        {/* Avatar Section */}
+        <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
+          <Avatar
+            sx={{ width: 120, height: 120, mx: "auto", mb: 2 }}
+            src="https://via.placeholder.com/120"
+            alt="User Avatar"
+          />
+          <Button variant="outlined" onClick={handleEditAvatar}>
+            Edit Avatar
+          </Button>
+        </Grid>
+
+        {/* User Information Section */}
+        <Grid item xs={12} md={8}>
+          <Box component="form" noValidate autoComplete="off">
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Name"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              disabled={!editMode}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              disabled={!editMode}
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Vip"
+              name="vipStatus"
+              value={formData.vipStatus ? "Yes" : "No"}
+              disabled
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Role"
+              name="role"
+              value={formData.role}
+              disabled
+            />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Joined"
+              value={new Date(user.createdAt).toLocaleDateString()}
+              disabled
+            />
+          </Box>
+          <Box sx={{ mt: 2 }}>
+            {editMode ? (
               <Button
                 variant="contained"
                 color="primary"
-                fullWidth
-                sx={{ mt: 2 }}
                 onClick={handleSaveChanges}
               >
                 Save Changes
               </Button>
-            </Box>
-          </Fade>
-        );
-      case "password":
-        return (
-          <Fade in={true}>
-            <Box>
-              <Typography variant="h5" gutterBottom>
-                Change Your Password
-              </Typography>
+            ) : (
               <Button
                 variant="outlined"
-                color="secondary"
-                fullWidth
-                onClick={() => navigate("/change-password")}
+                color="primary"
+                onClick={() => setEditMode(true)}
               >
-                Go to Change Password
+                Edit Profile
               </Button>
-            </Box>
-          </Fade>
-        );
-      case "comments":
-        return (
-          <Fade in={true}>
-            <Box>
-              <Typography variant="h5" gutterBottom>
-                My Comments
-              </Typography>
-              <List>
-                {userComments.map((comment, index) => (
-                  <ListItem key={index}>
-                    <ListItemText primary={comment} />
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          </Fade>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Grid container spacing={2}>
-        {/* Right Column */}
-        <Grid item xs={12}>
-          {renderContent()}
+            )}
+          </Box>
         </Grid>
       </Grid>
     </Container>

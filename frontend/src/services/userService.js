@@ -4,7 +4,9 @@ const userService = {
   // Get user profile
   getUserProfile: async () => {
     try {
-      const response = await api.get('/user/profile');
+      const response = await api.get('/api/users/profile', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -14,7 +16,9 @@ const userService = {
   // Update user profile
   updateUserProfile: async (userData) => {
     try {
-      const response = await api.put('/user/profile', userData);
+      const response = await api.put('/api/users/profile', userData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -24,7 +28,9 @@ const userService = {
   // Get user reading history
   getReadingHistory: async () => {
     try {
-      const response = await api.get('/user/reading-history');
+      const response = await api.get('/api/users/reading-history', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -34,7 +40,11 @@ const userService = {
   // Add manga to reading history
   addToReadingHistory: async (mangaId, chapterId) => {
     try {
-      const response = await api.post('/reading-history', { mangaId, chapterId });
+      const response = await api.post(
+        '/api/users/reading-history',
+        { mangaId, chapterId },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
       return response.data;
     } catch (error) {
       throw error;

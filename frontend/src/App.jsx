@@ -20,59 +20,63 @@ import UserProfile from "./pages/UserProfile";
 import ChangePass from "./pages/ChangePass";
 import ManageAccount from "./pages/ManageAccount";
 import MyComment from "./pages/MyComment"; // Import the MyComment component
+import { UserProvider } from "./context/UserContext";
 
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/login" />;
 };
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <FavoritesProvider>
-        <Router>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "100vh",
-            }}
-          >
-            <Navbar />
-            <Box component="main" sx={{ flexGrow: 1 }}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/manga/:id" element={<MangaDetail />} />
-                <Route
-                  path="/manga/:mangaId/chapter/:chapterNumber"
-                  element={<ChapterReader />}
-                />
-                <Route path="/ranking" element={<Ranking />} />
-                <Route path="/login" element={<LogIn />} />
-                <Route path="/about-us" element={<AboutUs />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/categories/:categorySlug"
-                  element={<CategoryPage />}
-                />
-                <Route path="/updates" element={<UpdatesPage />} />
-                <Route path="/account" element={<ManageAccount />} />
-                <Route path="/account/profile/edit" element={<UserProfile />} />
-                <Route path="/account/password/edit" element={<ChangePass />} />
-                <Route path="/account/comments" element={<MyComment />} /> {/* New route for comments */}
-                {/* Protect FavoritesPage with PrivateRoute */}
-                <Route
-                  path="/favorites"
-                  element={
-                    <PrivateRoute>
-                      <FavoritesPage />
-                    </PrivateRoute>
-                  }
-                />
-              </Routes>
+        <UserProvider>
+          <Router>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100vh",
+              }}
+            >
+              <Navbar />
+              <Box component="main" sx={{ flexGrow: 1 }}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/manga/:id" element={<MangaDetail />} />
+                  <Route
+                    path="/manga/:mangaId/chapter/:chapterNumber"
+                    element={<ChapterReader />}
+                  />
+                  <Route path="/ranking" element={<Ranking />} />
+                  <Route path="/login" element={<LogIn />} />
+                  <Route path="/about-us" element={<AboutUs />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route
+                    path="/categories/:categorySlug"
+                    element={<CategoryPage />}
+                  />
+                  <Route path="/updates" element={<UpdatesPage />} />
+                  <Route path="/account" element={<ManageAccount />} />
+                  <Route path="/account/profile/edit" element={<UserProfile />} />
+                  <Route path="/account/password/edit" element={<ChangePass />} />
+                  <Route path="/account/comments" element={<MyComment />} /> {/* New route for comments */}
+                  {/* Protect FavoritesPage with PrivateRoute */}
+                  <Route
+                    path="/favorites"
+                    element={
+                      <PrivateRoute>
+                        <FavoritesPage />
+                      </PrivateRoute>
+                    }
+                  />
+                </Routes>
+              </Box>
             </Box>
-          </Box>
-        </Router>
+          </Router>
+        </UserProvider>
       </FavoritesProvider>
     </ThemeProvider>
   );
