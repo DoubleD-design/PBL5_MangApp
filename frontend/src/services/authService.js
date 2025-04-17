@@ -5,12 +5,11 @@ const authService = {
   login: async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      if (response.data?.jwt && response.data?.status) {
-        localStorage.setItem('token', response.data.jwt);
-        localStorage.setItem('user', JSON.stringify({ username: credentials.username }));
-        console.log("Login successful, redirecting...");
-      }
-      return response.data;
+      localStorage.setItem('token', response.data.jwt);
+      // Dispatch a custom event to notify login
+      window.dispatchEvent(new Event('user-logged-in'));
+      console.log("Login successful, redirecting...");
+      window.location.href = "/";
     } catch (error) {
       console.error('Login failed:', error.response?.data || error.message);
       throw error;

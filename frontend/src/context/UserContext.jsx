@@ -23,7 +23,25 @@ export const UserProvider = ({ children }) => {
       }
     };
 
+    // Listen for login event or token change
+    const handleLogin = () => {
+      fetchUserDetails();
+    };
+    window.addEventListener("user-logged-in", handleLogin);
+
+    // Also refetch when token changes
+    const tokenCheckInterval = setInterval(() => {
+      if (localStorage.getItem("token")) {
+        fetchUserDetails();
+        clearInterval(tokenCheckInterval);
+      }
+    }, 500);
+
     fetchUserDetails();
+    return () => {
+      window.removeEventListener("user-logged-in", handleLogin);
+      clearInterval(tokenCheckInterval);
+    };
   }, []);
 
   const updateUser = (updatedUser) => {

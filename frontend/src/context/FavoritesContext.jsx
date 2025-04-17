@@ -33,7 +33,24 @@ export const FavoritesProvider = ({ children }) => {
       }
     };
 
+    // Listen for login event or token change
+    const handleLogin = () => {
+      fetchFavorites();
+    };
+    window.addEventListener("user-logged-in", handleLogin);
+    // Also refetch when token changes
+    const tokenCheckInterval = setInterval(() => {
+      if (localStorage.getItem("token")) {
+        fetchFavorites();
+        clearInterval(tokenCheckInterval);
+      }
+    }, 500);
+
     fetchFavorites();
+    return () => {
+      window.removeEventListener("user-logged-in", handleLogin);
+      clearInterval(tokenCheckInterval);
+    };
   }, []);
 
   // Add manga to favorites
