@@ -2,6 +2,7 @@ package com.pbl5.pbl5.modal;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,60 +12,70 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(length = 255, nullable = false, unique = true)
     private String username;
+
     @Column(length = 255, nullable = false, unique = true)
     private String email;
-    
+
     @Column(length = 255, nullable = false)
     private String password;
-    
+
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
-    
+
     @Column(name = "vip_status")
     private Boolean vipStatus;
-    
+
     @Column(name = "vip_start_date")
     private LocalDateTime vipStartDate;
-    
+
     @Column(name = "vip_end_date")
     private LocalDateTime vipEndDate;
-    
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
+
+    @Column(name = "birthday")
+    private LocalDate birthday;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(length = 255)
+    private String avatarUrl;
+
     // Relationships
     @OneToMany(mappedBy = "user")
     private List<Subscription> subscriptions;
-    
+
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
-    
+
     @OneToMany(mappedBy = "user")
     private List<Rating> ratings;
-    
+
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
-    
+
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
     private List<Favourite> favourites;
-    
+
     @OneToMany(mappedBy = "user")
     private List<ReadingHistory> readingHistories;
-    
+
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications;
-    
+
     // Enum for user roles
     public enum UserRole {
         ADMIN,
         READER
     }
-    
+
     // Getters and Setters
     public Integer getId() {
         return id;
@@ -136,6 +147,30 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public List<Subscription> getSubscriptions() {

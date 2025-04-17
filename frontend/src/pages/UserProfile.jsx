@@ -21,6 +21,8 @@ const UserProfile = () => {
     email: user?.email || "",
     vipStatus: user?.vipStatus || false,
     role: user?.role || "",
+    birthday: user?.birthday || "",
+    gender: user?.gender || "",
   });
 
   const handleInputChange = (e) => {
@@ -32,8 +34,10 @@ const UserProfile = () => {
     try {
       const updatedUser = await userService.editUserProfile({
         username: formData.username,
-        email: formData.email
-      }); // Only send username and email
+        email: formData.email,
+        birthday: formData.birthday,
+        gender: formData.gender,
+      }); // Only send username, email, birthday, and gender
       console.log("Profile updated:", updatedUser);
       updateUser(updatedUser); // Update context with new user data
       setEditMode(false);
@@ -102,6 +106,36 @@ const UserProfile = () => {
               onChange={handleInputChange}
               disabled={!editMode}
             />
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Birthday"
+              name="birthday"
+              type="date"
+              value={formData.birthday}
+              onChange={handleInputChange}
+              disabled={!editMode}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              select
+              fullWidth
+              margin="normal"
+              label="Gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleInputChange}
+              disabled={!editMode}
+              SelectProps={{
+                native: true, // Use native select for consistent styling
+              }}
+              InputLabelProps={{ shrink: true }} // Ensure label stays above the field
+            >
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </TextField>
             <TextField
               fullWidth
               margin="normal"

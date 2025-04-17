@@ -19,7 +19,11 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-          const response = await authService.register(formData);
+          const response = await authService.register({
+            ...formData,
+            birthday: formData.birthday,
+            gender: formData.gender,
+          });
           if (response.success) {
             console.log("Registration successful");
             navigate("/login"); // Chuyển hướng về trang đăng nhập

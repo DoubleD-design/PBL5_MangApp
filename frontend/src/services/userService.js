@@ -16,7 +16,11 @@ const userService = {
   // Edit user profile
   editUserProfile: async (userData) => {
     try {
-      const response = await api.put('/users/changeinfo', userData, {
+      const response = await api.put('/users/changeinfo', {
+        ...userData,
+        gender: userData.gender,
+        birthday: userData.birthday,
+      }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return response.data;

@@ -75,6 +75,12 @@ const ManageAccount = () => {
               {user.email}
             </Typography>
             <Typography variant="body2" color="text.secondary">
+              Birthday: {new Date(user.birthday).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Gender: {user.gender}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               Vip: {user.vipStatus ? "Yes" : "No"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
