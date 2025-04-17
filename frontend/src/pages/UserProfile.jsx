@@ -11,9 +11,10 @@ import {
   Grid,
 } from "@mui/material";
 import { useUser } from "../context/UserContext";
+import userService from "../services/userService";
 
 const UserProfile = () => {
-  const { user, loading, error } = useUser();
+  const { user, loading, error, updateUser } = useUser();
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || "",
@@ -27,10 +28,18 @@ const UserProfile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveChanges = () => {
-    // Add logic to save changes (e.g., API call)
-    console.log("Saved changes:", formData);
-    setEditMode(false);
+  const handleSaveChanges = async () => {
+    try {
+      const updatedUser = await userService.editUserProfile({
+        username: formData.username,
+        email: formData.email
+      }); // Only send username and email
+      console.log("Profile updated:", updatedUser);
+      updateUser(updatedUser); // Update context with new user data
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   const handleEditAvatar = () => {

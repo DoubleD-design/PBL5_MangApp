@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.pbl5.pbl5.request.UserProfileRequest;
 
 import java.util.List;
 
@@ -44,6 +45,20 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User user) {
         return ResponseEntity.ok(userService.updateUser(id, user));
+    }
+
+    @PutMapping("/changeinfo")
+    public ResponseEntity<User> updateUserInfo(@RequestBody UserProfileRequest updatedUserRequest) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUsername(updatedUserRequest.getUsername());
+        user.setEmail(updatedUserRequest.getEmail());
+
+        User updatedUser = userService.saveUser(user);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping("/{id}")

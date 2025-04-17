@@ -16,7 +16,19 @@ const userService = {
   // Update user profile
   updateUserProfile: async (userData) => {
     try {
-      const response = await api.put('/api/users/profile', userData, {
+      const response = await api.put('/api/users/changeinfo', userData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Edit user profile
+  editUserProfile: async (userData) => {
+    try {
+      const response = await api.put('/api/users/changeinfo', userData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return response.data;
