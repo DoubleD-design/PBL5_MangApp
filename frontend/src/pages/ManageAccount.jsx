@@ -67,7 +67,7 @@ const ManageAccount = () => {
           <Box sx={{ textAlign: "center", mb: 2 }}>
             <Avatar
               sx={{ width: 100, height: 100, mx: "auto", mb: 1 }}
-              src={user.avatarUrl || "https://via.placeholder.com/100"}
+              src={"https://via.placeholder.com/100"}
               alt="User Avatar"
             />
             <Typography variant="h6">{user.username}</Typography>
