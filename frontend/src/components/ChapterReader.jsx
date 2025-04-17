@@ -54,21 +54,21 @@ const ChapterReader = () => {
       setError(null);
       try {
         // Fetch the current chapter
-        const chapterResponse = await api.get(
-          `/chapters/manga/${mangaId}/chapter/${chapterNumber}`
-        );
+        const chapterUrl = `/chapters/manga/${mangaId}/chapter/${chapterNumber}`;
+        console.log("Requesting chapter URL:", chapterUrl); // Log URL
+        const chapterResponse = await api.get(chapterUrl);
         setChapter(chapterResponse.data);
 
         // Fetch chapter pages
-        const pagesResponse = await api.get(
-          `/chapters/manga/${mangaId}/chapter/${chapterNumber}/pages`
-        );
+        const pagesUrl = `/chapters/manga/${mangaId}/chapter/${chapterNumber}/pages`;
+        console.log("Requesting pages URL:", pagesUrl); // Log URL
+        const pagesResponse = await api.get(pagesUrl);
         setPages(pagesResponse.data);
 
         // Fetch all chapters for this manga for navigation
-        const chaptersResponse = await api.get(
-          `/chapters/manga/${mangaId}`
-        );
+        const allChaptersUrl = `/chapters/manga/${mangaId}`;
+        console.log("Requesting all chapters URL:", allChaptersUrl); // Log URL
+        const chaptersResponse = await api.get(allChaptersUrl);
         setAllChapters(chaptersResponse.data);
 
         // Determine next and previous chapters

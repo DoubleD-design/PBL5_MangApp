@@ -31,6 +31,9 @@ public class UserController {
     @GetMapping("/details")
     public ResponseEntity<User> getUserDetails() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.ok(null);
+        }
         String email = auth.getName();
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

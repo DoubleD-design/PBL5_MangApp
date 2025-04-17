@@ -26,8 +26,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem("token");
-      // Prevent redirect loop by checking if we're already on the login page
-      if (!window.location.pathname.includes('/login')) {
+      // Only redirect to login if the user is on a protected route
+      const protectedRoutes = ["/favorite", "/profile", "/edit-profile"];
+      const isProtected = protectedRoutes.some(route => window.location.pathname.startsWith(route));
+      if (isProtected && !window.location.pathname.includes('/login')) {
         window.location.href = "/login";
       }
     }

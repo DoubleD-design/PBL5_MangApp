@@ -27,6 +27,9 @@ public class AppConfig {
                 .authorizeHttpRequests(Authorize -> Authorize
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/manga/**").permitAll()
+                        .requestMatchers("/api/categories/**").permitAll()
+                        .requestMatchers("/api/chapters/**").permitAll()
+                        .requestMatchers("/api/users/details").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
