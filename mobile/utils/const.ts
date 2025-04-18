@@ -10,10 +10,9 @@ export const globalStyles = StyleSheet.create({
 
 export const GRADIENTS = {
     BLACK_WHITE_HALF: {
-        colors: ['#000000', '#FFFFFF'],
-        locations: [0, 0.5],
+        colors: ['#000000', '#FFFFF0'] as const,  
         start: { x: 0, y: 0 },
-        end: { x: 0, y: 1 },
+        end: { x: 0, y: 1 }
     },
     BACKGROUND: {
         colors: ['b55528', '#FFFFFF'],

@@ -15,16 +15,16 @@ import { useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 
 const bannerData = [
-  { id: '1', title: 'Attack on Titan', image: require('./assets/aot.jpg') },
-  { id: '2', title: 'Punpun', image: require('./assets/punpun.jpg') },
-  { id: '3', title: 'Abyss', image: require('./assets/abyss.jpg') },
+  { id: '1', title: 'Attack on Titan', image: require('../../assets/aot.jpg') },
+  { id: '2', title: 'Punpun', image: require('../../assets/aot.jpg') },
+  { id: '3', title: 'Abyss', image: require('../../assets/aot.jpg') },
 ];
 
 const mangaData = [
-  { id: '1', title: 'Attack on Titan', chapter: 'Chap 139', image: require('./assets/aot.jpg') },
-  { id: '2', title: 'Oyasumi, Punpun', chapter: 'Chap 147', image: require('./assets/punpun.jpg') },
-  { id: '3', title: 'Shounen no Abyss', chapter: 'Chap 173', image: require('./assets/abyss.jpg') },
-  { id: '4', title: 'Made in Abyss', chapter: 'Chap 62', image: require('./assets/madeinabyss.jpg') },
+  { id: '1', title: 'Attack on Titan', chapter: 'Chap 139', image: require('../../assets/aot.jpg') },
+  { id: '2', title: 'Oyasumi, Punpun', chapter: 'Chap 147', image: require('../../assets/aot.jpg') },
+  { id: '3', title: 'Shounen no Abyss', chapter: 'Chap 173', image: require('../../assets/aot.jpg') },
+  { id: '4', title: 'Made in Abyss', chapter: 'Chap 62', image: require('../../assets/aot.jpg') },
 ];
 
 const HomeScreen = () => {
@@ -107,12 +107,12 @@ const HomeScreen = () => {
         }}
       >
         <TextInput
-          placeholder="Tìm kiếm..."
+          placeholder="Searching..."
           placeholderTextColor="#aaa"
           style={{ flex: 1, color: '#fff' }}
         />
         <Image
-          source={require('./assets/search_icon.png')}
+          source={require('../../assets/aot.jpg')}
           style={{ width: 20, height: 20, tintColor: '#fff' }}
         />
       </View>
@@ -129,10 +129,10 @@ const HomeScreen = () => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Section title="Lượt đọc nhiều" data={popularData} />
-        <Section title="Được yêu thích" data={favoriteData} />
-        <Section title="Mới cập nhật" data={updatedData} />
-        <Section title="Toàn bộ truyện" data={allData} />
+        <Section title="Most views" data={popularData} />
+        <Section title="Most favourites" data={favoriteData} />
+        <Section title="Latest update" data={updatedData} />
+        <Section title="All mangas" data={allData} />
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>

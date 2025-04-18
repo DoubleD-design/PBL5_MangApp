@@ -13,7 +13,7 @@ const App = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="UpdateList" component={UpdateListScreen} />
+        {/* <Stack.Screen name="UpdateList" component={UpdateListScreen} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
