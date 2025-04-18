@@ -71,7 +71,7 @@ const HomeScreen = () => {
     title: string;
     data: any[];
   }) => (
-    <View >
+    <View style = {{marginTop: 5}}>
       <View
         style={{
           flexDirection: 'row',
@@ -109,7 +109,7 @@ const HomeScreen = () => {
 
   return (
     <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
-      <View style={{ flex: 1, backgroundColor: '#1c1c1e' }}>
+      <View style={{ flex: 1, backgroundColor: '#2c1a0e' }}>
         <View
           style={{
             marginTop: 50,
