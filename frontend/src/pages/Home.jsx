@@ -27,212 +27,6 @@ import { Link } from "react-router-dom";
 import mangaService from "../services/mangaService";
 import categoryService from "../services/categoryService";
 
-// This will be replaced with API data
-/*const mockMangas = [
-  {
-    id: 1,
-    title: "One Piece",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Eiichiro Oda",
-    rating: 4.8,
-    views: "353691",
-    genres: ["Adventure", "Action", "Fantasy"],
-  },
-  {
-    id: 2,
-    title: "Naruto",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Masashi Kishimoto",
-    rating: 4.7,
-    views: "339747",
-    genres: ["Action", "Adventure", "Fantasy"],
-  },
-  {
-    id: 3,
-    title: "Attack on Titan",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Hajime Isayama",
-    rating: 4.9,
-    views: "283968",
-    genres: ["Action", "Drama", "Fantasy"],
-  },
-  {
-    id: 4,
-    title: "My Hero Academia",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Kohei Horikoshi",
-    rating: 4.6,
-    views: "226328",
-    genres: ["Action", "Superhero", "School"],
-  },
-  {
-    id: 5,
-    title: "Demon Slayer",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Koyoharu Gotouge",
-    rating: 4.8,
-    views: "202821",
-    genres: ["Action", "Supernatural", "Historical"],
-  },
-  {
-    id: 6,
-    title: "Jujutsu Kaisen",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Gege Akutami",
-    rating: 4.7,
-    views: "171212",
-    genres: ["Action", "Supernatural", "School"],
-  },
-  {
-    id: 7,
-    title: "Dragon Ball",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Akira Toriyama",
-    rating: 4.8,
-    views: "168421",
-    genres: ["Action", "Adventure", "Fantasy"],
-  },
-  {
-    id: 8,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 9,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 10,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 11,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 12,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 13,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 14,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 15,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 16,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-  {
-    id: 17,
-    title: "Death Note",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    author: "Tsugumi Ohba",
-    rating: 4.9,
-    views: "156324",
-    genres: ["Mystery", "Psychological", "Supernatural"],
-  },
-];
-
-// Mock data for daily updates
-const dailyUpdates = [
-  {
-    id: 1,
-    title: "One Piece",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    chapter: 1084,
-    updatedAt: "2 hours ago",
-  },
-  {
-    id: 2,
-    title: "Naruto",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    chapter: 702,
-    updatedAt: "5 hours ago",
-  },
-  {
-    id: 3,
-    title: "Attack on Titan",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    chapter: 139,
-    updatedAt: "1 day ago",
-  },
-  {
-    id: 4,
-    title: "My Hero Academia",
-    cover: "https://m.media-amazon.com/images/I/91M9VaZWxOL._SY466_.jpg",
-    chapter: 362,
-    updatedAt: "2 days ago",
-  },
-];
-
-// Mock promotional content
-const promotions = [
-  {
-    id: 1,
-    title: "Manga Plus Subscription",
-    description: "Get unlimited access to all manga for just $4.99/month",
-    image:
-      "https://cdn.pixabay.com/photo/2016/12/28/08/15/hatsune-miku-1935674_1280.png",
-  },
-  {
-    id: 2,
-    title: "New Releases",
-    description: "Check out the latest manga releases this week",
-    image:
-      "https://cdn.pixabay.com/photo/2023/05/28/05/34/ai-generated-8022486_1280.jpg",
-  },
-];*/
 
 const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -308,7 +102,7 @@ const Home = () => {
           console.warn("Không tìm thấy content hợp lệ:", latestData);
           setLatestMangas([]);
         }
-        
+
         // Fetch most viewed mangas for HOTTEST section
         try {
           const hottestData = await mangaService.getMostViewedMangas(7);
@@ -487,7 +281,12 @@ const Home = () => {
                           {manga.title}
                         </Typography>
                         <Typography variant="caption" display="block">
-                          Chapter {manga.chapter} • {manga.updatedAt}
+                          Chapter {manga.chapters && manga.chapters.length > 0
+                            ? Math.max(...manga.chapters.map(c => c.chapterNumber))
+                            : "N/A"} •{" "}
+                          {manga.createdAt
+                            ? new Date(manga.createdAt).toLocaleDateString()
+                            : "Recent"}
                         </Typography>
                       </Box>
                     </Paper>
@@ -565,7 +364,10 @@ const Home = () => {
                   </Typography>
                 </Box>
                 <Stack spacing={2}>
-                  {(hottestMangas.length > 0 ? hottestMangas : mangas.slice(0, 7)).map((manga, index) => (
+                  {(hottestMangas.length > 0
+                    ? hottestMangas
+                    : mangas.slice(0, 7)
+                  ).map((manga, index) => (
                     <Paper
                       key={manga.id}
                       component={Link}

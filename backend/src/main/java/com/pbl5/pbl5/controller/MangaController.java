@@ -63,6 +63,7 @@ public class MangaController {
             return ResponseEntity.badRequest().body("Error fetching latest mangas: " + e.getMessage());
         }
     }
+    
 
     @GetMapping
     public ResponseEntity<?> getAllMangas(
