@@ -1,5 +1,6 @@
 package com.pbl5.pbl5.modal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -19,20 +20,19 @@ public class Rating {
     @Column
     private Integer rating;
     
-    @Column
-    private String comment;
-    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonBackReference("rating-user")
     private User user;
-    
+
     @ManyToOne
     @JoinColumn(name = "manga_id", insertable = false, updatable = false)
-    private Manga manga;
+    @JsonBackReference("rating-manga")
+    private Manga manga;;
     
     // Getters and Setters
     public Integer getId() {
@@ -65,14 +65,6 @@ public class Rating {
 
     public void setRating(Integer rating) {
         this.rating = rating;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
     }
 
     public LocalDateTime getCreatedAt() {

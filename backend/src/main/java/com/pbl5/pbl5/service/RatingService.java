@@ -28,4 +28,19 @@ public class RatingService {
     public void deleteRating(Integer id) {
         ratingRepository.deleteById(id);
     }
+    
+    public RatingRepository getRatingRepository() {
+        return ratingRepository;
+    }
+    
+    public double getAverageRatingForManga(Integer mangaId) {
+        List<Rating> ratings = ratingRepository.findByMangaId(mangaId);
+        if (ratings.isEmpty()) {
+            return 0.0;
+        }
+        double sum = ratings.stream()
+                .mapToDouble(Rating::getRating)
+                .sum();
+        return sum / ratings.size();
+    }
 }

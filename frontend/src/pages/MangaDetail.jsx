@@ -38,7 +38,6 @@ import { useFavorites } from "../context/FavoritesContext";
 import categories from "../data/categories";
 import CommentSection from "../components/CommentSection";
 
-
 // Mock data for reviews
 const mockReviews = [
   {
@@ -91,8 +90,12 @@ const MangaDetail = () => {
   const [loadingManga, setLoadingManga] = useState(true);
   const [error, setError] = useState(null);
   const [newReview, setNewReview] = useState("");
-  const [userRating, setUserRating] = useState(5);
-
+  const [userRating, setUserRating] = useState(0);
+  const [ratingLoading, setRatingLoading] = useState(false);
+  const [ratingSuccess, setRatingSuccess] = useState(false);
+  const [ratingError, setRatingError] = useState(null);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
   // Use a ref instead of state to track if view has been counted
   // This will persist across re-renders and prevent double counting
   const viewCountedRef = useRef(false);
@@ -108,9 +111,34 @@ const MangaDetail = () => {
         setManga(data); // kiểm tra nếu cần set data.manga
         setError(null);
 
+        // Fetch average rating and total ratings from API
+        try {
+          const avg = await mangaService.getAverageRating(id);
+          setAverageRating(avg || 0);
+        } catch (err) {
+          setAverageRating(0);
+        }
+        try {
+          const ratings = await mangaService.getMangaRatings(id);
+          setTotalRatings(Array.isArray(ratings) ? ratings.length : 0);
+        } catch (err) {
+          setTotalRatings(0);
+        }
+
         if (authService.isAuthenticated()) {
           const status = isFavorite(parseInt(id));
           setFavoriteStatus(status);
+
+          // Fetch user's current rating for this manga
+          try {
+            const userRatingData = await mangaService.getUserRating(id);
+            if (userRatingData && userRatingData.rating) {
+              setUserRating(userRatingData.rating);
+            }
+          } catch (ratingErr) {
+            console.error("Error fetching user rating:", ratingErr);
+            // Don't set error state here to avoid blocking the UI
+          }
         }
 
         // Only increment view count once per manga view session
@@ -309,10 +337,89 @@ const MangaDetail = () => {
             </Typography>
 
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Rating value={manga.rating} precision={0.1} readOnly />
+              <Rating value={averageRating || 0} precision={0.1} readOnly />
               <Typography variant="body2" sx={{ ml: 1 }}>
-                {manga.rating} / 5
+                {(averageRating || 0).toFixed(1)} / 5 ({totalRatings || 0}{" "}
+                ratings)
               </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <Rating
+                name="user-manga-rating"
+                value={userRating}
+                precision={1}
+                onChange={async (event, newValue) => {
+                  if (!authService.isAuthenticated()) {
+                    navigate("/login", { state: { from: `/manga/${id}` } });
+                    return;
+                  }
+
+                  setUserRating(newValue);
+                  setRatingLoading(true);
+                  setRatingSuccess(false);
+                  setRatingError(null);
+
+                  try {
+                    await mangaService.rateManga(id, newValue);
+                    // Refresh manga details to update average rating
+                    const updatedManga = await mangaService.getMangaById(id);
+                    setManga(updatedManga);
+                    // Refresh average rating and total ratings
+                    try {
+                      const avg = await mangaService.getAverageRating(id);
+                      setAverageRating(avg || 0);
+                    } catch (err) {
+                      setAverageRating(0);
+                    }
+                    try {
+                      const ratings = await mangaService.getMangaRatings(id);
+                      setTotalRatings(
+                        Array.isArray(ratings) ? ratings.length : 0
+                      );
+                    } catch (err) {
+                      setTotalRatings(0);
+                    }
+                    setRatingSuccess(true);
+
+                    // Clear success message after 3 seconds
+                    setTimeout(() => setRatingSuccess(false), 3000);
+                  } catch (error) {
+                    console.error("Error rating manga:", error);
+                    setRatingError(
+                      "Failed to save your rating. Please try again."
+                    );
+
+                    // Clear error message after 3 seconds
+                    setTimeout(() => setRatingError(null), 3000);
+                  } finally {
+                    setRatingLoading(false);
+                  }
+                }}
+                disabled={!authService.isAuthenticated() || ratingLoading}
+              />
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography variant="body2" sx={{ ml: 1 }}>
+                  {authService.isAuthenticated()
+                    ? "Your rating"
+                    : "Login to rate"}
+                </Typography>
+                {ratingLoading && <CircularProgress size={16} sx={{ ml: 1 }} />}
+                {ratingSuccess && (
+                  <Typography
+                    variant="body2"
+                    color="success.main"
+                    sx={{ ml: 1 }}
+                  >
+                    Rating saved!
+                  </Typography>
+                )}
+                {ratingError && (
+                  <Typography variant="body2" color="error" sx={{ ml: 1 }}>
+                    {ratingError}
+                  </Typography>
+                )}
+              </Box>
             </Box>
 
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 3 }}>

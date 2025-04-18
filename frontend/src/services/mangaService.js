@@ -153,6 +153,57 @@ const mangaService = {
       throw error;
     }
   },
+
+  // Submit or update a user's rating for a manga
+  rateManga: async (mangaId, rating) => {
+    try {
+      const response = await api.post(
+        `/ratings/add`,
+        {
+          mangaId: Number(mangaId),
+          rating: Number(rating),
+          userId: Number(localStorage.getItem("userId") || 1),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error rating manga:", error);
+      throw error;
+    }
+  },
+
+  // Get the current user's rating for a manga
+  getUserRating: async (mangaId) => {
+    try {
+      const response = await api.get(`/ratings/user-rating?mangaId=${mangaId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user rating:", error);
+      return null;
+    }
+  },
+
+  // Get all ratings for a manga (for calculating average, etc.)
+  getMangaRatings: async (mangaId) => {
+    try {
+      const response = await api.get(`/ratings/manga/${mangaId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching manga ratings:", error);
+      return [];
+    }
+  },
+
+  // Get average rating for a manga
+  getAverageRating: async (mangaId) => {
+    try {
+      const response = await api.get(`/ratings/manga/${mangaId}/average`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching average rating:", error);
+      return 0;
+    }
+  },
 };
 
 export default mangaService;

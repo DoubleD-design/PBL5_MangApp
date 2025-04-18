@@ -55,14 +55,15 @@ public class User {
     private List<Payment> payments;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference("rating-user")
     private List<Rating> ratings;
 
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
+    @JsonManagedReference("comment-user")
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference
+    @JsonManagedReference("favourite-user")
     private List<Favourite> favourites;
 
     @OneToMany(mappedBy = "user")
