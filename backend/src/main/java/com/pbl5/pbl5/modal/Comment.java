@@ -1,5 +1,9 @@
 package com.pbl5.pbl5.modal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -28,10 +32,13 @@ public class Comment {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = false)
     private User user;
     
     @ManyToOne
     @JoinColumn(name = "manga_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Manga manga;
     
     // Getters and Setters

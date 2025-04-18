@@ -36,6 +36,8 @@ import {
 import { Link } from "react-router-dom";
 import { useFavorites } from "../context/FavoritesContext";
 import categories from "../data/categories";
+import CommentSection from "../components/CommentSection";
+
 
 // Mock data for reviews
 const mockReviews = [
@@ -388,140 +390,12 @@ const MangaDetail = () => {
           )}
         </div>
 
-        {/* Reviews Tab */}
+        {/* Comments Tab */}
         <div role="tabpanel" hidden={tabValue !== 1}>
           {tabValue === 1 && (
             <Box sx={{ p: 3 }}>
-              {/* Review submission form */}
-              <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-                <Typography variant="h6" gutterBottom>
-                  Write a Review
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Typography component="legend" sx={{ mr: 1 }}>
-                    Your Rating:
-                  </Typography>
-                  <Rating
-                    name="user-rating"
-                    value={userRating}
-                    precision={0.5}
-                    onChange={(event, newValue) => {
-                      setUserRating(newValue);
-                    }}
-                  />
-                </Box>
-                <Box sx={{ display: "flex", mb: 2 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="Share your thoughts about this manga..."
-                    variant="outlined"
-                    value={newReview}
-                    onChange={(e) => setNewReview(e.target.value)}
-                  />
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    endIcon={<Send />}
-                    onClick={handleReviewSubmit}
-                    disabled={newReview.trim() === ""}
-                  >
-                    Post Review
-                  </Button>
-                </Box>
-              </Paper>
-
-              {/* Reviews list */}
-              <Typography variant="h6" gutterBottom sx={{ mt: 4, mb: 2 }}>
-                Reader Reviews ({reviews.length})
-              </Typography>
-
-              {reviews.length > 0 ? (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {reviews.map((review) => (
-                    <Card key={review.id} sx={{ mb: 2 }}>
-                      <CardHeader
-                        avatar={
-                          <Avatar src={review.avatar} alt={review.username}>
-                            {review.username.charAt(0)}
-                          </Avatar>
-                        }
-                        title={review.username}
-                        subheader={
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mt: 0.5,
-                            }}
-                          >
-                            <Rating
-                              value={review.rating}
-                              precision={0.5}
-                              size="small"
-                              readOnly
-                            />
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ ml: 1 }}
-                            >
-                              {new Date(review.date).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                }
-                              )}
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                      <CardContent sx={{ pt: 0 }}>
-                        <Typography variant="body1" paragraph>
-                          {review.comment}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={() => handleLikeReview(review.id)}
-                            color={review.userLiked ? "primary" : "default"}
-                          >
-                            {review.userLiked ? (
-                              <ThumbUp />
-                            ) : (
-                              <ThumbUpOutlined />
-                            )}
-                          </IconButton>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ ml: 0.5 }}
-                          >
-                            {review.likes}
-                          </Typography>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              ) : (
-                <Box sx={{ textAlign: "center", py: 4 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No reviews yet. Be the first to share your thoughts!
-                  </Typography>
-                </Box>
-              )}
+              {/* Import and use the CommentSection component */}
+              <CommentSection mangaId={id} />
             </Box>
           )}
         </div>

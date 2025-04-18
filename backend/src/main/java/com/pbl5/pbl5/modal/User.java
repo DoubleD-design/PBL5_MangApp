@@ -58,6 +58,7 @@ public class User {
     private List<Rating> ratings;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "user")

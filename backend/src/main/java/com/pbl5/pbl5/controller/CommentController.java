@@ -1,10 +1,15 @@
 package com.pbl5.pbl5.controller;
 
 import com.pbl5.pbl5.modal.Comment;
+import com.pbl5.pbl5.modal.User;
+import com.pbl5.pbl5.repos.UserRepository;
+import com.pbl5.pbl5.request.CommentRequest;
 import com.pbl5.pbl5.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +20,8 @@ import java.util.Optional;
 public class CommentController {
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private UserRepository userRepository;
     
     @GetMapping
     public ResponseEntity<List<Comment>> getAllComments() {
@@ -40,11 +47,26 @@ public class CommentController {
         List<Comment> comments = commentService.getCommentsByUserId(userId);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
-    
+
     @PostMapping
-    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
-        Comment newComment = commentService.createComment(comment);
-        return new ResponseEntity<>(newComment, HttpStatus.CREATED);
+    public ResponseEntity<Comment> createComment(@RequestBody CommentRequest request) {
+        // Lấy username từ token
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        // Tìm user trong DB
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Tạo comment
+        Comment comment = new Comment();
+        comment.setUserId(user.getId());
+        comment.setMangaId(request.getMangaId());
+        comment.setContent(request.getContent());
+        comment.setCreatedAt(request.getCreatedAt());
+
+        Comment saved = commentService.createComment(comment);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
     
     @PutMapping("/{id}")
