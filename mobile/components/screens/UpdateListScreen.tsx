@@ -10,37 +10,37 @@ const mangaData = [
     id: '1',
     title: 'Attack on Titan',
     chapter: 'Chap 139',
-    image: require('../assets/manga/aot.jpg'),
+    image: require('../../assets/aot.jpg'),
   },
   {
     id: '2',
     title: 'Oyasumi, Punpun',
     chapter: 'Chap 147',
-    image: require('../assets/manga/punpun.jpg'),
+    image: require('../../assets/aot.jpg'),
   },
   {
     id: '3',
     title: 'Shounen no Abyss',
     chapter: 'Chap 173',
-    image: require('../assets/manga/abyss.jpg'),
+    image: require('../../assets/aot.jpg'),
   },
   {
     id: '4',
     title: 'Kimi no koto nado',
     chapter: 'Chap 40',
-    image: require('../assets/manga/kimi.jpg'),
+    image: require('../../assets/aot.jpg'),
   },
   {
     id: '5',
     title: 'Kimetsu no Yaiba',
     chapter: 'Chap 189',
-    image: require('../assets/manga/kimetsu.jpg'),
+    image: require('../../assets/aot.jpg'),
   },
   {
     id: '6',
     title: 'Jujutsu Kaisen',
     chapter: 'Chap 256',
-    image: require('../assets/manga/jujutsu.jpg'),
+    image: require('../../assets/aot.jpg'),
   },
 ];
 

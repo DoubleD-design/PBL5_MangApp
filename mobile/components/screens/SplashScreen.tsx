@@ -9,8 +9,9 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
   useEffect(() => {
+    console.log('[HomeScreen] Mounted!');
     const timer = setTimeout(() => {
-      navigation.replace('Home'); 
+      navigation.navigate("Home")
     }, 2000); 
 
     return () => clearTimeout(timer);
