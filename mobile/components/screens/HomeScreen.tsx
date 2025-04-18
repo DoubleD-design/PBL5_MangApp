@@ -81,7 +81,17 @@ const HomeScreen = () => {
       >
         <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{title}</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('MangaListScreen', { title, data })}
+          onPress={() => {
+            if (title === 'Latest update') {
+              navigation.navigate('UpdateList', { title, data });
+            } else if (title === 'All mangas') {
+              navigation.navigate('MangaList', { title, data });
+            } else if (title === 'Most views') {
+              navigation.navigate('MostViewsList', { title, data });
+            } else if (title === 'Most favourites') {
+              navigation.navigate('MostFavouritesList', { title, data });
+            } 
+          }}
         >
           <Text style={{ color: '#bbb' }}>See more {'>>'} </Text>
         </TouchableOpacity>
