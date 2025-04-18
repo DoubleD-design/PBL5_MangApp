@@ -437,7 +437,7 @@ const MangaDetail = () => {
                   return (
                     <Link
                       key={category.id}
-                      to={`/category/${categorySlug}`}
+                      to={`/categories/${category.name}`}
                       style={{ textDecoration: "none" }}
                     >
                       <Chip
