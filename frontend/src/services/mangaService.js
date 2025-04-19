@@ -190,6 +190,7 @@ const mangaService = {
       return response.data;
     } catch (error) {
       console.error("Error fetching manga ratings:", error);
+      // Return empty array for any error, including authentication errors
       return [];
     }
   },
@@ -201,6 +202,7 @@ const mangaService = {
       return response.data;
     } catch (error) {
       console.error("Error fetching average rating:", error);
+      // Return 0 for any error, including authentication errors
       return 0;
     }
   },

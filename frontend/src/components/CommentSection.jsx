@@ -47,7 +47,12 @@ const CommentSection = ({ mangaId }) => {
         setError(null);
       } catch (err) {
         console.error("Error fetching comments:", err);
-        setError("Failed to load comments. Please try again later.");
+        // Don't show error to user if it's an authentication error
+        if (err.response && err.response.status === 401) {
+          setComments([]);
+        } else {
+          setError("Failed to load comments. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
