@@ -46,7 +46,7 @@ const mangaData = [
 
 const ITEM_WIDTH = width / 3 - 16;
 
-const UpdateListScreen = () => {
+const MangaListScreen = () => {
   const navigation = useNavigation();
 
   const renderItem = ({ item }: any) => (
@@ -75,7 +75,7 @@ const UpdateListScreen = () => {
 
       {/* Title */}
       <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginTop: 50, marginBottom: 10, alignSelf: 'center' }}>
-        Latest Update
+        Manga List
       </Text>
 
       {/* Manga Grid */}
@@ -91,4 +91,4 @@ const UpdateListScreen = () => {
   );
 };
 
-export default UpdateListScreen;
+export default MangaListScreen;

@@ -8,23 +8,28 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  StyleSheet
 } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
+import Carousel from 'react-native-reanimated-carousel';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GRADIENTS } from '../../utils/const';
+import { BlurView } from 'expo-blur';
 
 const { width } = Dimensions.get('window');
 
 const bannerData = [
-  { id: '1', title: 'Attack on Titan', image: require('../../assets/aot.jpg') },
-  { id: '2', title: 'Punpun', image: require('../../assets/aot.jpg') },
-  { id: '3', title: 'Abyss', image: require('../../assets/aot.jpg') },
+  { id: '1', title: 'Attack on Titan', author: 'Hajime Isayama', image: require('../../assets/manga/aot.jpg') },
+  { id: '2', title: 'Oyasumi, Punpun', author: 'Asano Inio', image: require('../../assets/manga/punpun.jpg') },
+  { id: '3', title: 'Shounen no Abyss', author: 'Minenami Ryo', image: require('../../assets/manga/sna.jpg') },
+  { id: '4', title: 'Made in Abyss', author: 'Akihito Tsukushi', image: require('../../assets/manga/mia.jpg') },
 ];
 
 const mangaData = [
-  { id: '1', title: 'Attack on Titan', chapter: 'Chap 139', image: require('../../assets/aot.jpg') },
-  { id: '2', title: 'Oyasumi, Punpun', chapter: 'Chap 147', image: require('../../assets/aot.jpg') },
-  { id: '3', title: 'Shounen no Abyss', chapter: 'Chap 173', image: require('../../assets/aot.jpg') },
-  { id: '4', title: 'Made in Abyss', chapter: 'Chap 62', image: require('../../assets/aot.jpg') },
+  { id: '1', title: 'Attack on Titan', chapter: 'Chap 139', image: require('../../assets/manga/aot.jpg') },
+  { id: '2', title: 'Oyasumi, Punpun', chapter: 'Chap 147', image: require('../../assets/manga/punpun.jpg') },
+  { id: '3', title: 'Shounen no Abyss', chapter: 'Chap 173', image: require('../../assets/manga/sna.jpg') },
+  { id: '4', title: 'Made in Abyss', chapter: 'Chap 62', image: require('../../assets/manga/mia.jpg') },
 ];
 
 const HomeScreen = () => {
@@ -66,7 +71,7 @@ const HomeScreen = () => {
     title: string;
     data: any[];
   }) => (
-    <View style={{ marginTop: 20 }}>
+    <View style = {{marginTop: 5}}>
       <View
         style={{
           flexDirection: 'row',
@@ -76,9 +81,19 @@ const HomeScreen = () => {
       >
         <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{title}</Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('MangaListScreen', { title, data })}
+          onPress={() => {
+            if (title === 'Latest update') {
+              navigation.navigate('UpdateList', { title, data });
+            } else if (title === 'All mangas') {
+              navigation.navigate('MangaList', { title, data });
+            } else if (title === 'Most views') {
+              navigation.navigate('MostViewsList', { title, data });
+            } else if (title === 'Most favourites') {
+              navigation.navigate('MostFavouritesList', { title, data });
+            } 
+          }}
         >
-          <Text style={{ color: '#bbb' }}>Xem thêm</Text>
+          <Text style={{ color: '#bbb' }}>See more {'>>'} </Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -87,56 +102,105 @@ const HomeScreen = () => {
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, marginTop: 10 }}
+        contentContainerStyle={{ paddingHorizontal: 10, marginTop: 10 }}
       />
     </View>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#1c1c1e' }}>
-      <View
-        style={{
-          marginTop: 50,
-          marginHorizontal: 20,
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: '#333',
-          borderRadius: 10,
-          paddingHorizontal: 10,
-          height: 40,
-        }}
-      >
-        <TextInput
-          placeholder="Searching..."
-          placeholderTextColor="#aaa"
-          style={{ flex: 1, color: '#fff' }}
-        />
-        <Image
-          source={require('../../assets/aot.jpg')}
-          style={{ width: 20, height: 20, tintColor: '#fff' }}
-        />
-      </View>
+    <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
+      <View style={{ flex: 1, backgroundColor: '#2c1a0e' }}>
+        <View
+          style={{
+            marginTop: 50,
+            marginHorizontal: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#333',
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            height: 40,
+          }}
+        >
+          <TextInput
+            placeholder="Searching..."
+            placeholderTextColor="#aaa"
+            style={{ flex: 1, color: '#fff' }}
+          />
+        </View>
 
-      <View style={{ marginTop: 20 }}>
-        <Carousel
-          data={bannerData}
-          renderItem={renderCarouselItem}
-          sliderWidth={width}
-          itemWidth={width - 40}
-          autoplay
-          loop
-        />
+        {bannerData.length > 0 && (
+          <View style={{ marginTop: 10, marginBottom: 20 }}>
+            <Carousel
+              width={width}
+              height={250}
+              data={bannerData}
+              renderItem={({ item }) => (
+                <View>
+                  <Image
+                    source={item.image}
+                    style={{ width: width, height: 250, borderRadius: 10 }}
+                    resizeMode="cover"
+                  />
+                  <LinearGradient
+                    colors={['transparent', 'rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.6)']}
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 100,
+                      borderBottomLeftRadius: 10,
+                      borderBottomRightRadius: 10,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <BlurView
+                      intensity={20} // độ mờ từ 0 -> 100
+                      tint="light" // hoặc 'dark', 'default'
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: 10,
+                        borderBottomLeftRadius: 10,
+                        borderBottomRightRadius: 10,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 23 }}>
+                        {item.title}
+                      </Text><Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>
+                        {item.author}
+                      </Text>
+                    </BlurView>
+                  </LinearGradient>
+                </View>
+              )}
+              autoPlay
+              loop
+            />
+          </View>
+        )}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Section title="Most views" data={popularData} />
+          <Section title="Most favourites" data={favoriteData} />
+          <Section title="Latest update" data={updatedData} />
+          <Section title="All mangas" data={allData} />
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Section title="Most views" data={popularData} />
-        <Section title="Most favourites" data={favoriteData} />
-        <Section title="Latest update" data={updatedData} />
-        <Section title="All mangas" data={allData} />
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </View>
+    </LinearGradient>
   );
 };
+
+const styles = StyleSheet.create({
+  gradient: {
+    flex: 1, // Chiếm toàn bộ màn hình
+    justifyContent: 'center', // Canh giữa theo chiều dọc
+    alignItems: 'center', // Canh giữa theo chiều ngang
+  }
+});
 
 export default HomeScreen;
