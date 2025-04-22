@@ -32,8 +32,7 @@ public class Comment {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = false)
+    @JsonBackReference("comment-user")
     private User user;
     
     @ManyToOne

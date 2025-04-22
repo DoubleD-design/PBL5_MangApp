@@ -17,7 +17,13 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { ThumbUp, ThumbUpOutlined, Edit, Delete, Send } from "@mui/icons-material";
+import {
+  ThumbUp,
+  ThumbUpOutlined,
+  Edit,
+  Delete,
+  Send,
+} from "@mui/icons-material";
 import { format } from "date-fns";
 import commentService from "../services/commentService";
 import authService from "../services/authService";
@@ -75,7 +81,7 @@ const CommentSection = ({ mangaId }) => {
       setSubmitting(true);
 
       // Ensure user and user.id are valid before proceeding
-      if (!user || typeof user.id !== 'number') {
+      if (!user || typeof user.id !== "number") {
         setError("User information is missing. Please log in again.");
         setSubmitting(false);
         return;
@@ -89,7 +95,7 @@ const CommentSection = ({ mangaId }) => {
       };
 
       const createdComment = await commentService.createComment(commentData);
-      
+
       // Add the new comment to the list
       setComments([createdComment, ...comments]);
       setNewComment("");
@@ -191,7 +197,11 @@ const CommentSection = ({ mangaId }) => {
               fullWidth
               multiline
               rows={3}
-              placeholder={authService.isAuthenticated() ? "Write a comment..." : "Please log in to comment"}
+              placeholder={
+                authService.isAuthenticated()
+                  ? "Write a comment..."
+                  : "Please log in to comment"
+              }
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               disabled={!authService.isAuthenticated() || submitting}
@@ -202,7 +212,11 @@ const CommentSection = ({ mangaId }) => {
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={!newComment.trim() || submitting || !authService.isAuthenticated()}
+                disabled={
+                  !newComment.trim() ||
+                  submitting ||
+                  !authService.isAuthenticated()
+                }
                 endIcon={submitting ? <CircularProgress size={20} /> : <Send />}
               >
                 Post Comment
@@ -254,7 +268,7 @@ const CommentSection = ({ mangaId }) => {
                     {(comment.user?.username || "U")[0]}
                   </Avatar>
                 }
-                title={comment.user?.username ? comment.user.username : "Anonymous"}
+                title={comment.username ? comment.username : "Anonymous"}
                 subheader={formatDate(comment.createdAt)}
                 action={
                   isCommentOwner(comment) && (
@@ -321,7 +335,10 @@ const CommentSection = ({ mangaId }) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)} disabled={submitting}>
+          <Button
+            onClick={() => setEditDialogOpen(false)}
+            disabled={submitting}
+          >
             Cancel
           </Button>
           <Button
@@ -346,7 +363,10 @@ const CommentSection = ({ mangaId }) => {
           <Typography>Are you sure you want to delete this comment?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} disabled={submitting}>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={submitting}
+          >
             Cancel
           </Button>
           <Button

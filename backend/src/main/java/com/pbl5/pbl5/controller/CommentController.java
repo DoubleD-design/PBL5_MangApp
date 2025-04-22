@@ -3,6 +3,7 @@ package com.pbl5.pbl5.controller;
 import com.pbl5.pbl5.modal.Comment;
 import com.pbl5.pbl5.modal.User;
 import com.pbl5.pbl5.repos.UserRepository;
+import com.pbl5.pbl5.request.CommentDTO;
 import com.pbl5.pbl5.request.CommentRequest;
 import com.pbl5.pbl5.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,14 @@ public class CommentController {
         return comment.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    
+
     @GetMapping("/manga/{mangaId}")
-    public ResponseEntity<List<Comment>> getCommentsByMangaId(@PathVariable Integer mangaId) {
+    public ResponseEntity<List<CommentDTO>> getCommentsByMangaId(@PathVariable Integer mangaId) {
         List<Comment> comments = commentService.getCommentsByMangaId(mangaId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+        List<CommentDTO> result = comments.stream()
+                .map(CommentDTO::new)
+                .toList();
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
     
     @GetMapping("/user/{userId}")
