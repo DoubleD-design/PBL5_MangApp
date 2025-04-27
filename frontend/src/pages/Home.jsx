@@ -27,7 +27,6 @@ import { Link } from "react-router-dom";
 import mangaService from "../services/mangaService";
 import categoryService from "../services/categoryService";
 
-
 const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -177,6 +176,15 @@ const Home = () => {
       >
         <Container maxWidth="xl">
           <Box
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim() !== "") {
+                window.location.href = `/search?q=${encodeURIComponent(
+                  searchQuery
+                )}`;
+              }
+            }}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -196,6 +204,8 @@ const Home = () => {
               <SearchIcon sx={{ color: "text.secondary", mr: 1 }} />
               <InputBase
                 placeholder="Search by title or author..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 sx={{
                   color: "text.primary",
                   width: "100%",
@@ -206,6 +216,7 @@ const Home = () => {
               />
             </Box>
             <Button
+              type="submit"
               variant="contained"
               color="primary"
               sx={{
@@ -281,9 +292,13 @@ const Home = () => {
                           {manga.title}
                         </Typography>
                         <Typography variant="caption" display="block">
-                          Chapter {manga.chapters && manga.chapters.length > 0
-                            ? Math.max(...manga.chapters.map(c => c.chapterNumber))
-                            : "N/A"} •{" "}
+                          Chapter{" "}
+                          {manga.chapters && manga.chapters.length > 0
+                            ? Math.max(
+                                ...manga.chapters.map((c) => c.chapterNumber)
+                              )
+                            : "N/A"}{" "}
+                          •{" "}
                           {manga.createdAt
                             ? new Date(manga.createdAt).toLocaleDateString()
                             : "Recent"}

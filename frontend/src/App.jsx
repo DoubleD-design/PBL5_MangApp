@@ -9,6 +9,7 @@ import Ranking from "./pages/Ranking";
 import AboutUs from "./pages/AboutUs";
 import Register from "./pages/Register";
 import LogIn from "./pages/LogIn";
+import SearchPage from "./pages/SearchPage";
 import CategoryPage from "./pages/CategoryPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import UpdatesPage from "./pages/UpdatesPage";
@@ -53,6 +54,7 @@ function App() {
                   <Route path="/ranking" element={<Ranking />} />
                   <Route path="/login" element={<LogIn />} />
                   <Route path="/about-us" element={<AboutUs />} />
+                  <Route path="/search" element={<SearchPage />} />
                   <Route path="/register" element={<Register />} />
                   <Route
                     path="/categories/:categorySlug"
@@ -60,9 +62,16 @@ function App() {
                   />
                   <Route path="/updates" element={<UpdatesPage />} />
                   <Route path="/account" element={<ManageAccount />} />
-                  <Route path="/account/profile/edit" element={<UserProfile />} />
-                  <Route path="/account/password/edit" element={<ChangePass />} />
-                  <Route path="/account/comments" element={<MyComment />} /> {/* New route for comments */}
+                  <Route
+                    path="/account/profile/edit"
+                    element={<UserProfile />}
+                  />
+                  <Route
+                    path="/account/password/edit"
+                    element={<ChangePass />}
+                  />
+                  <Route path="/account/comments" element={<MyComment />} />{" "}
+                  {/* New route for comments */}
                   {/* Protect FavoritesPage with PrivateRoute */}
                   <Route
                     path="/favorites"

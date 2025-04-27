@@ -11,7 +11,8 @@ import java.util.List;
 @Repository
 public interface MangaRepository extends JpaRepository<Manga, Integer> {
     List<Manga> findByStatus(Manga.MangaStatus status);
-    List<Manga> findByAuthorContainingIgnoreCase(String author);
+    @Query("SELECT m FROM Manga m WHERE LOWER(m.author) LIKE LOWER(CONCAT('%', :author, '%'))")
+    List<Manga> findByAuthorContainingIgnoreCase(@Param("author") String author);
     List<Manga> findByTitleContainingIgnoreCase(String title);
     // Get all Manga entities without loading chapters
     default List<Manga> getAllMangas() {
@@ -40,7 +41,8 @@ public interface MangaRepository extends JpaRepository<Manga, Integer> {
     }
     @Query("SELECT DISTINCT m FROM Manga m JOIN m.categories c WHERE c.id = :categoryId")
     List<Manga> findByCategoriesId(@Param("categoryId") Integer categoryId, Pageable pageable); // Method to fetch manga by category ID with pagination
-    List<Manga> searchByTitle(String keyword);
+    @Query("SELECT m FROM Manga m WHERE LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Manga> searchByTitle(@Param("keyword") String keyword);
 
 }
 

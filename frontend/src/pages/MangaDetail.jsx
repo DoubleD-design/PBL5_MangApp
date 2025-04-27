@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import mangaService from "../services/mangaService";
 import authService from "../services/authService";
+import readingHistoryService from "../services/readingHistoryService";
 import {
   Container,
   Grid,
@@ -24,6 +25,7 @@ import {
   CardHeader,
   IconButton,
   CircularProgress,
+  ListItemIcon,
 } from "@mui/material";
 import {
   Bookmark,
@@ -32,6 +34,8 @@ import {
   Send,
   ThumbUp,
   ThumbUpOutlined,
+  CheckCircle,
+  RadioButtonUnchecked,
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { useFavorites } from "../context/FavoritesContext";
@@ -96,6 +100,7 @@ const MangaDetail = () => {
   const [ratingError, setRatingError] = useState(null);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
+  const [readChapters, setReadChapters] = useState([]);
   // Use a ref instead of state to track if view has been counted
   // This will persist across re-renders and prevent double counting
   const viewCountedRef = useRef(false);
@@ -110,6 +115,11 @@ const MangaDetail = () => {
         console.log("Fetched manga:", data);
         setManga(data); // kiểm tra nếu cần set data.manga
         setError(null);
+
+        // Fetch reading history for this manga
+        const readChaptersData =
+          await readingHistoryService.getReadChaptersForManga(id);
+        setReadChapters(readChaptersData);
 
         // Fetch average rating and total ratings from API
         try {
@@ -476,23 +486,63 @@ const MangaDetail = () => {
         <div role="tabpanel" hidden={tabValue !== 0}>
           {tabValue === 0 && (
             <List>
-              {manga.chapters.map((chapter, index) => (
-                <div key={chapter.id}>
-                  <ListItem
-                    button
-                    component={Link}
-                    to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
-                  >
-                    <ListItemText
-                      primary={`${chapter.title}`}
-                      secondary={`Released: ${new Date(
-                        chapter.createdAt
-                      ).toLocaleDateString()}`}
-                    />
-                  </ListItem>
-                  {index < manga.chapters.length - 1 && <Divider />}
-                </div>
-              ))}
+              {manga.chapters.map((chapter, index) => {
+                // Check if this chapter has been read
+                const isRead = readChapters.some(
+                  (item) => item.chapterId === chapter.id
+                );
+
+                return (
+                  <div key={chapter.id}>
+                    <ListItem
+                      button
+                      component={Link}
+                      to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
+                      onClick={() => {
+                        // Add to reading history when clicked
+                        readingHistoryService.addToReadingHistory(
+                          manga.id,
+                          chapter.id,
+                          chapter.chapterNumber
+                        );
+                      }}
+                      sx={{
+                        backgroundColor: isRead
+                          ? "rgba(25, 118, 210, 0.08)"
+                          : "transparent",
+                        "&:hover": {
+                          backgroundColor: isRead
+                            ? "rgba(25, 118, 210, 0.12)"
+                            : "rgba(0, 0, 0, 0.04)",
+                        },
+                        borderLeft: isRead ? "4px solid #1976d2" : "none",
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        {isRead ? (
+                          <CheckCircle color="primary" fontSize="small" />
+                        ) : (
+                          <RadioButtonUnchecked
+                            color="action"
+                            fontSize="small"
+                          />
+                        )}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={`${chapter.title}`}
+                        secondary={`Released: ${new Date(
+                          chapter.createdAt
+                        ).toLocaleDateString()}`}
+                        primaryTypographyProps={{
+                          color: isRead ? "primary" : "inherit",
+                          fontWeight: isRead ? 500 : 400,
+                        }}
+                      />
+                    </ListItem>
+                    {index < manga.chapters.length - 1 && <Divider />}
+                  </div>
+                );
+              })}
             </List>
           )}
         </div>

@@ -48,6 +48,31 @@ public class MangaService {
         return mangaRepository.searchByTitle(keyword);
     }
     
+    public List<Manga> searchByAuthor(String keyword) {
+        return mangaRepository.findByAuthorContainingIgnoreCase(keyword);
+    }
+    
+    public List<Manga> searchByAll(String keyword) {
+        // Get results from title search
+        List<Manga> titleResults = mangaRepository.searchByTitle(keyword);
+        
+        // Get results from author search
+        List<Manga> authorResults = mangaRepository.findByAuthorContainingIgnoreCase(keyword);
+        
+        // Combine results (avoiding duplicates)
+        java.util.Set<Manga> combinedResults = new java.util.HashSet<>();
+        combinedResults.addAll(titleResults);
+        combinedResults.addAll(authorResults);
+        
+        // Add description search (still using stream since we don't have a repository method for this)
+        mangaRepository.findAll().stream()
+            .filter(manga -> manga.getDescription() != null && 
+                    manga.getDescription().toLowerCase().contains(keyword.toLowerCase()))
+            .forEach(combinedResults::add);
+            
+        return new java.util.ArrayList<>(combinedResults);
+    }
+    
     public List<Manga> getFeaturedMangas() {
         // For now, we'll consider mangas with high ratings as featured
         return mangaRepository.findAll().stream()

@@ -120,9 +120,20 @@ public class MangaController {
     public ResponseEntity<?> searchMangas(
         @RequestParam String query,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "title") String type) {
         try {
-            List<Manga> searchResults = mangaService.searchByTitle(query);
+            List<Manga> searchResults;
+            
+            // Perform search based on type
+            if ("author".equalsIgnoreCase(type)) {
+                searchResults = mangaService.searchByAuthor(query);
+            } else if ("all".equalsIgnoreCase(type)) {
+                searchResults = mangaService.searchByAll(query);
+            } else {
+                // Default to title search
+                searchResults = mangaService.searchByTitle(query);
+            }
             
             // Manual pagination
             int start = page * size;

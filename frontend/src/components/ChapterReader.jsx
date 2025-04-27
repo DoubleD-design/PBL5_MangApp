@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import readingHistoryService from "../services/readingHistoryService";
 import {
   Container,
   Box,
@@ -58,6 +59,21 @@ const ChapterReader = () => {
         console.log("Requesting chapter URL:", chapterUrl); // Log URL
         const chapterResponse = await api.get(chapterUrl);
         setChapter(chapterResponse.data);
+
+        // Add to reading history when chapter is loaded
+        if (chapterResponse.data && chapterResponse.data.id) {
+          // Track the current page as the last read page (default to 1 for new chapters)
+          const lastReadPage = 1;
+          await readingHistoryService.addToReadingHistory(
+            mangaId,
+            chapterResponse.data.id,
+            parseInt(chapterNumber),
+            lastReadPage
+          );
+
+          // We could also update the last read page when the user scrolls through pages
+          // This would require tracking the current visible page and updating the history
+        }
 
         // Fetch chapter pages
         const pagesUrl = `/chapters/manga/${mangaId}/chapter/${chapterNumber}/pages`;
