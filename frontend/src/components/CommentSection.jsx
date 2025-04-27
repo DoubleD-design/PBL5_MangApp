@@ -126,12 +126,26 @@ const CommentSection = ({ mangaId }) => {
 
     try {
       setSubmitting(true);
+
+      if (!user || typeof user.id !== "number") {
+        setError("User information is missing. Please log in again.");
+        setSubmitting(false);
+        return;
+      }
+
+      const commentData = {
+        commentId: currentComment.id,
+        content: editedContent,
+      };
+
+      // Đặt console.log ngay đây để xem dữ liệu trước khi gửi
+      console.log("Sending update:", JSON.stringify(commentData));
+
       const updatedComment = await commentService.updateComment(
         currentComment.id,
         { ...currentComment, content: editedContent }
       );
 
-      // Update the comments list with the edited comment
       setComments((prevComments) =>
         prevComments.map((comment) =>
           comment.id === updatedComment.id ? updatedComment : comment

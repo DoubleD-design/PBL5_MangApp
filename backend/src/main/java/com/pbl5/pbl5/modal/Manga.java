@@ -46,7 +46,7 @@ public class Manga {
     private List<Rating> ratings;
     
     @OneToMany(mappedBy = "manga")
-    @JsonManagedReference
+    @JsonManagedReference("comment-manga")
     private List<Comment> comments;
     
     @OneToMany(mappedBy = "manga")

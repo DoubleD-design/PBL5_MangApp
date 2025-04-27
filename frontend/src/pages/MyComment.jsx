@@ -25,9 +25,11 @@ import { useUser } from "../context/UserContext";
 import commentService from "../services/commentService";
 import { format } from "date-fns";
 import authService from "../services/authService";
+import mangaService from "../services/mangaService";
 
 const MyComment = () => {
   const [comments, setComments] = useState([]);
+  const [manga, setManga] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -44,6 +46,21 @@ const MyComment = () => {
         setLoading(true);
         const data = await commentService.getCommentsByUserId(user.id);
         setComments(data);
+        const uniqueMangaIds = [
+          ...new Set(data.map((item) => item.mangaId)),
+        ];
+        const mangasMap = {};
+
+        for (const mangaId of uniqueMangaIds) {
+          try {
+            const manga = await mangaService.getMangaById(mangaId);
+            mangasMap[mangaId] = manga;
+          } catch (err) {
+            console.error(`Error fetching manga ${mangaId}:`, err);
+          }
+        }
+
+        setManga(mangasMap);
         setError(null);
       } catch (err) {
         console.error("Error fetching comments:", err);
@@ -183,7 +200,7 @@ const MyComment = () => {
                     }}
                   >
                     <Typography variant="subtitle1" color="primary">
-                      {comment.manga?.title || "Unknown Manga"}
+                      {manga[comment.mangaId]?.title || "Unknown Manga"}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {formatDate(comment.createdAt)}

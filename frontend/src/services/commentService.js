@@ -39,7 +39,13 @@ const commentService = {
   updateComment: async (commentId, commentData) => {
     try {
       // Rely on default Axios instance headers for Content-Type
-      const response = await api.put(`/comments/${commentId}`, commentData);
+      const response = await api.put(`/comments/${commentId}`, commentData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error('Error updating comment:', error);

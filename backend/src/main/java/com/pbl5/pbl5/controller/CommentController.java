@@ -74,7 +74,19 @@ public class CommentController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Integer id, @RequestBody Comment comment) {
+    public ResponseEntity<Comment> updateComment(@PathVariable Integer id, @RequestBody CommentRequest commentRequest) {
+        // Lấy username từ token
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        // Tìm user trong DB
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Comment comment = new Comment();
+        comment.setUserId(user.getId());
+        comment.setMangaId(commentRequest.getMangaId());
+        comment.setContent(commentRequest.getContent());
+        comment.setCreatedAt(commentRequest.getCreatedAt());
         Comment updatedComment = commentService.updateComment(id, comment);
         if (updatedComment != null) {
             return new ResponseEntity<>(updatedComment, HttpStatus.OK);

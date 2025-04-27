@@ -37,8 +37,12 @@ public class Comment {
     
     @ManyToOne
     @JoinColumn(name = "manga_id", insertable = false, updatable = false)
-    @JsonBackReference
+    @JsonBackReference("comment-manga")
     private Manga manga;
+
+    public Comment() {
+    
+    }
     
     // Getters and Setters
     public Integer getId() {
