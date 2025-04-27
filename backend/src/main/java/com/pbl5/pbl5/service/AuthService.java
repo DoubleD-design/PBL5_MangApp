@@ -52,18 +52,19 @@ public class AuthService {
         user.setCreatedAt(LocalDateTime.now());
 
         // Save user to database
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         // Generate JWT token
-        Authentication authentication = createAuthentication(user);
+        Authentication authentication = createAuthentication(savedUser);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtTokenProvider.generateToken(authentication);
 
-        return new AuthResponse(jwt, "Register successful", true);
+        // Return jwt + user info
+        return new AuthResponse(jwt, "Register successful", true, savedUser);
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
-        // Find user by email
+        // Find user by username
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
 
         if (optionalUser.isEmpty()) {
@@ -82,7 +83,8 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtTokenProvider.generateToken(authentication);
 
-        return new AuthResponse(jwt, "Login successful", true);
+        // Return jwt + user info
+        return new AuthResponse(jwt, "Login successful", true, user);
     }
 
     private Authentication createAuthentication(User user) {

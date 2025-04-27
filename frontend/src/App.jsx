@@ -22,10 +22,23 @@ import ChangePass from "./pages/ChangePass";
 import ManageAccount from "./pages/ManageAccount";
 import MyComment from "./pages/MyComment"; // Import the MyComment component
 import { UserProvider } from "./context/UserContext";
+import AdminDashboard from "./pages/admin/AdminDashboard"; // Import AdminDashboard component
 
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/login" />;
+};
+
+// AdminRoute component - checks for both authentication and admin role
+const AdminRoute = ({ children }) => {
+  const user = authService.getCurrentUser();
+  const isAdmin = user && user.role === "ADMIN";
+
+  if (!authService.isAuthenticated()) {
+    return <Navigate to="/login" />;
+  }
+
+  return isAdmin ? children : <Navigate to="/" />;
 };
 
 function App() {
@@ -79,6 +92,15 @@ function App() {
                       <PrivateRoute>
                         <FavoritesPage />
                       </PrivateRoute>
+                    }
+                  />
+                  {/* Admin Dashboard Route */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
                     }
                   />
                 </Routes>

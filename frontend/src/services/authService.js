@@ -52,6 +52,15 @@ const authService = {
       return null;
     }
   },
+  getAllUsers: async () => {
+    try {
+      const response = await api.get("/users");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
+  },
 
   // Check if user is authenticated
   isAuthenticated: () => {

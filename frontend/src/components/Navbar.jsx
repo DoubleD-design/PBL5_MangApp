@@ -81,6 +81,8 @@ const Navbar = () => {
       navigate("/account");
     } else if (action === "vipRegistration") {
       navigate("/vip-registration");
+    } else if (action === "adminDashboard") {
+      navigate("/admin");
     }
     handleAccountClose();
   };
@@ -357,6 +359,19 @@ const Navbar = () => {
                   >
                     VIP Registration
                   </MenuItem>
+                  {authService.getCurrentUser()?.role === "ADMIN" && (
+                    <MenuItem
+                      onClick={() => handleAccountClick("adminDashboard")}
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 103, 64, 0.1)",
+                          color: "#ff6740",
+                        },
+                      }}
+                    >
+                      Admin Dashboard
+                    </MenuItem>
+                  )}
                   <MenuItem
                     onClick={() => handleAccountClick("logout")}
                     sx={{

@@ -24,9 +24,9 @@ import { Delete, Edit } from "@mui/icons-material";
 import { useUser } from "../context/UserContext";
 import commentService from "../services/commentService";
 import { format } from "date-fns";
+import authService from "../services/authService";
 
 const MyComment = () => {
-  const { user } = useUser();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,9 +39,10 @@ const MyComment = () => {
 
   useEffect(() => {
     const fetchComments = async () => {
+      const user = authService.getCurrentUser();
       try {
         setLoading(true);
-        const data = await commentService.getCurrentUserComments();
+        const data = await commentService.getCommentsByUserId(user.id);
         setComments(data);
         setError(null);
       } catch (err) {
@@ -270,7 +271,10 @@ const MyComment = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)} disabled={actionLoading}>
+          <Button
+            onClick={() => setEditDialogOpen(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button
@@ -295,7 +299,10 @@ const MyComment = () => {
           <Typography>Are you sure you want to delete this comment?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} disabled={actionLoading}>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            disabled={actionLoading}
+          >
             Cancel
           </Button>
           <Button

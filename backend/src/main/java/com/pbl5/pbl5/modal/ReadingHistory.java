@@ -3,6 +3,8 @@ package com.pbl5.pbl5.modal;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "reading_history")
 public class ReadingHistory {
@@ -28,14 +30,17 @@ public class ReadingHistory {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonBackReference("user-reading-history")
     private User user;
     
     @ManyToOne
     @JoinColumn(name = "manga_id", insertable = false, updatable = false)
+    @JsonBackReference("readinghistory-manga")
     private Manga manga;
     
     @ManyToOne
     @JoinColumn(name = "chapter_id", insertable = false, updatable = false)
+    @JsonBackReference("readinghistory-chapter")
     private Chapter chapter;
     
     // Getters and Setters

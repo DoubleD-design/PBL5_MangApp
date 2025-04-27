@@ -67,7 +67,17 @@ const commentService = {
       console.error('Error fetching current user comments:', error);
       throw error;
     }
-  }
+  },
+
+  getAllComments: async () => {
+    try {
+      const response = await api.get('/comments');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all comments:', error);
+      throw error;
+    }
+  },
 };
 
 export default commentService;

@@ -12,7 +12,7 @@ const readingHistoryService = {
         const user = authService.getCurrentUser();
         if (user && user.id) {
           const response = await api.get(
-            `/api/reading-history/user/${user.id}`
+            `/reading-history/user/${user.id}`
           );
           return response.data;
         } else {
@@ -61,7 +61,7 @@ const readingHistoryService = {
             chapterId: parseInt(chapterId),
             lastReadPage: lastReadPage,
           };
-          await api.post("/api/reading-history", apiPayload);
+          await api.post("/reading-history", apiPayload);
         } else {
           console.log("Using local storage only - user ID not available");
           // Continue with localStorage only, no error needed
@@ -129,7 +129,7 @@ const readingHistoryService = {
       if (authService.isAuthenticated()) {
         const user = authService.getCurrentUser();
         if (user && user.id) {
-          await api.delete(`/api/reading-history/user/${user.id}`);
+          await api.delete(`/reading-history/user/${user.id}`);
         } else {
           console.log("Using local storage only - user ID not available");
           // Continue with localStorage only

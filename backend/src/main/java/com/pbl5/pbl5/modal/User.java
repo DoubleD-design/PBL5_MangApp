@@ -67,6 +67,7 @@ public class User {
     private List<Favourite> favourites;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference("user-reading-history")
     private List<ReadingHistory> readingHistories;
 
     @OneToMany(mappedBy = "user")
