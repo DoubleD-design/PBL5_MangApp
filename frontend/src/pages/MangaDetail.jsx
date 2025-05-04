@@ -178,6 +178,22 @@ const MangaDetail = () => {
     setNewReview("");
   };
 
+  const handleLikeReview = (reviewId) => {
+    setReviews(
+      reviews.map((review) => {
+        if (review.id === reviewId) {
+          const newLikeStatus = !review.userLiked;
+          return {
+            ...review,
+            likes: newLikeStatus ? review.likes + 1 : review.likes - 1,
+            userLiked: newLikeStatus,
+          };
+        }
+        return review;
+      })
+    );
+  };
+
   // Show loading state or error message if applicable
   if (loadingManga) {
     return (
@@ -489,6 +505,16 @@ const MangaDetail = () => {
                   );
                 })}
             </List>
+          )}
+        </div>
+
+        {/* Comments Tab */}
+        <div role="tabpanel" hidden={tabValue !== 1}>
+          {tabValue === 1 && (
+            <Box sx={{ p: 3 }}>
+              {/* Import and use the CommentSection component */}
+              <CommentSection mangaId={id} />
+            </Box>
           )}
         </div>
 
