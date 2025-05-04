@@ -1,6 +1,17 @@
 import api from "./api";
 
 const mangaService = {
+  // Create a new manga
+  createManga: async (mangaData) => {
+    try {
+      const response = await api.post("/manga", mangaData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating manga:", error);
+      throw error;
+    }
+  },
+
   // Get all mangas with pagination
   getAllMangas: async (page = 0, size = 10) => {
     try {
@@ -157,14 +168,11 @@ const mangaService = {
   // Submit or update a user's rating for a manga
   rateManga: async (mangaId, rating) => {
     try {
-      const response = await api.post(
-        `/ratings/add`,
-        {
-          mangaId: Number(mangaId),
-          rating: Number(rating),
-          userId: Number(localStorage.getItem("userId") || 1),
-        }
-      );
+      const response = await api.post(`/ratings/add`, {
+        mangaId: Number(mangaId),
+        rating: Number(rating),
+        userId: Number(localStorage.getItem("userId") || 1),
+      });
       return response.data;
     } catch (error) {
       console.error("Error rating manga:", error);
@@ -204,6 +212,41 @@ const mangaService = {
       console.error("Error fetching average rating:", error);
       // Return 0 for any error, including authentication errors
       return 0;
+    }
+  },
+
+  // Update manga
+  updateManga: async (mangaId, mangaData) => {
+    try {
+      const response = await api.put(`/manga/${mangaId}`, mangaData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating manga:", error);
+      throw error;
+    }
+  },
+
+  // Delete manga
+  deleteManga: async (mangaId) => {
+    try {
+      const response = await api.delete(`/manga/${mangaId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting manga:", error);
+      throw error;
+    }
+  },
+
+  // Update manga visibility
+  updateMangaVisibility: async (mangaId, visible) => {
+    try {
+      const response = await api.put(`/manga/${mangaId}/visibility`, {
+        visible,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating manga visibility:", error);
+      throw error;
     }
   },
 };

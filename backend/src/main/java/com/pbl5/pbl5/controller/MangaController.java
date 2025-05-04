@@ -1,8 +1,12 @@
 package com.pbl5.pbl5.controller;
 
 import com.pbl5.pbl5.modal.*;
+import com.pbl5.pbl5.repos.CategoryRepository;
+import com.pbl5.pbl5.repos.UserRepository;
+import com.pbl5.pbl5.request.MangaRequestDTO;
 import com.pbl5.pbl5.service.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +25,10 @@ import org.springframework.web.bind.annotation.*;
 public class MangaController {
     @Autowired
     private MangaService mangaService;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
     
     @GetMapping("/featured")
     public ResponseEntity<?> getFeaturedMangas() {
@@ -102,7 +112,28 @@ public class MangaController {
     }
 
     @PostMapping
-    public Manga createManga(@RequestBody Manga manga) {
+    public Manga createManga(@RequestBody MangaRequestDTO dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName(); // Đây là username đã login
+        System.out.println(username);
+
+        // Tìm User tương ứng
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Manga manga = new Manga();
+        manga.setTitle(dto.getTitle());
+        manga.setDescription(dto.getDescription());
+        manga.setCoverImage(dto.getCoverImage());
+        manga.setAuthor(dto.getAuthor());
+        manga.setAdminId(user.getId());
+        manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
+        manga.setCreatedAt(LocalDateTime.now());
+        System.out.println("Category IDs: " + dto.getCategoryIds());
+
+        // Lấy danh sách category từ ID
+        List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+        manga.setCategories(categories);
+
         return mangaService.createManga(manga);
     }
 

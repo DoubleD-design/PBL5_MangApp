@@ -309,7 +309,12 @@ const Home = () => {
                 ))}
               </Grid>
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-                <Button size="small" endIcon={<TrendingUp />}>
+                <Button
+                  component={Link}
+                  to="/updates"
+                  size="small"
+                  endIcon={<TrendingUp />}
+                >
                   View All Updates
                 </Button>
               </Box>

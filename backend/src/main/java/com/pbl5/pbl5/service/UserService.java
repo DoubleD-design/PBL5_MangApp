@@ -49,4 +49,39 @@ public class UserService {
     public User saveUser(User user) {
         return userRepository.save(user);
     }
+    
+    public User lockUser(Integer id) {
+        return userRepository.findById(id).map(user -> {
+            user.setActive(false);
+            return userRepository.save(user);
+        }).orElse(null);
+    }
+    
+    public User unlockUser(Integer id) {
+        return userRepository.findById(id).map(user -> {
+            user.setActive(true);
+            return userRepository.save(user);
+        }).orElse(null);
+    }
+    
+    public User banUser(Integer id) {
+        return userRepository.findById(id).map(user -> {
+            user.setAbleToComment(false);
+            return userRepository.save(user);
+        }).orElse(null);
+    }
+    
+    public User unbanUser(Integer id) {
+        return userRepository.findById(id).map(user -> {
+            user.setAbleToComment(true);
+            return userRepository.save(user);
+        }).orElse(null);
+    }
+    
+    public User setVipStatus(Integer id, Boolean status) {
+        return userRepository.findById(id).map(user -> {
+            user.setVipStatus(status);
+            return userRepository.save(user);
+        }).orElse(null);
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,35 +95,35 @@ public class ChapterController {
         chapterService.deleteChapter(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    
+
     @GetMapping("/manga/{mangaId}/chapter/{chapterNumber}/next")
     public ResponseEntity<Chapter> getNextChapter(
             @PathVariable Integer mangaId,
-            @PathVariable Integer chapterNumber) {
-        
+            @PathVariable Float chapterNumber) {
+
         List<Chapter> chapters = chapterService.getChaptersByMangaId(mangaId);
-        
+
         // Find the next chapter number
         Optional<Chapter> nextChapter = chapters.stream()
                 .filter(c -> c.getChapterNumber() > chapterNumber)
-                .min((c1, c2) -> c1.getChapterNumber().compareTo(c2.getChapterNumber()));
-        
+                .min(Comparator.comparing(Chapter::getChapterNumber));
+
         return nextChapter.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    
+
     @GetMapping("/manga/{mangaId}/chapter/{chapterNumber}/previous")
     public ResponseEntity<Chapter> getPreviousChapter(
             @PathVariable Integer mangaId,
-            @PathVariable Integer chapterNumber) {
-        
+            @PathVariable Float chapterNumber) {
+
         List<Chapter> chapters = chapterService.getChaptersByMangaId(mangaId);
-        
+
         // Find the previous chapter number
         Optional<Chapter> previousChapter = chapters.stream()
                 .filter(c -> c.getChapterNumber() < chapterNumber)
-                .max((c1, c2) -> c1.getChapterNumber().compareTo(c2.getChapterNumber()));
-        
+                .max(Comparator.comparing(Chapter::getChapterNumber));
+
         return previousChapter.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

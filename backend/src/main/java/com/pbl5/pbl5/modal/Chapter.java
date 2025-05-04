@@ -21,7 +21,7 @@ public class Chapter {
     private String title;
     
     @Column(name = "chapter_number")
-    private Integer chapterNumber;
+    private float chapterNumber;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -61,11 +61,11 @@ public class Chapter {
         this.title = title;
     }
 
-    public Integer getChapterNumber() {
+    public float getChapterNumber() {
         return chapterNumber;
     }
 
-    public void setChapterNumber(Integer chapterNumber) {
+    public void setChapterNumber(float chapterNumber) {
         this.chapterNumber = chapterNumber;
     }
 

@@ -77,6 +77,11 @@ public class AuthService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
+        
+        // Check if user account is active
+        if (user.getActive() != null && !user.getActive()) {
+          throw new RuntimeException("Account is locked. Please contact administrator.");
+        }
 
         // Generate JWT token
         Authentication authentication = createAuthentication(user);

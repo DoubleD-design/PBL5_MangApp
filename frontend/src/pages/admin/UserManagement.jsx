@@ -98,39 +98,42 @@ const UserManagement = () => {
 
       switch (dialogType) {
         case "lock":
-          // Replace with actual API call to lock user
-          await authService.lockUser(selectedUser.id);
-          updatedUser.locked = true;
+          // Lock user account (set active to false)
+          const lockedUser = await authService.lockUser(selectedUser.id);
+          updatedUser = { ...updatedUser, ...lockedUser };
           message = `User ${selectedUser.username} has been locked`;
           break;
         case "unlock":
-          // Replace with actual API call to unlock user
-          await authService.unlockUser(selectedUser.id);
-          updatedUser.locked = false;
+          // Unlock user account (set active to true)
+          const unlockedUser = await authService.unlockUser(selectedUser.id);
+          updatedUser = { ...updatedUser, ...unlockedUser };
           message = `User ${selectedUser.username} has been unlocked`;
           break;
         case "ban":
-          // Replace with actual API call to ban user
-          await authService.banUser(selectedUser.id);
-          updatedUser.banned = true;
-          message = `User ${selectedUser.username} has been banned`;
+          // Ban user from commenting (set ableToComment to false)
+          const bannedUser = await authService.banUser(selectedUser.id);
+          updatedUser = { ...updatedUser, ...bannedUser };
+          message = `User ${selectedUser.username} has been banned from commenting`;
           break;
         case "unban":
-          // Replace with actual API call to unban user
-          await authService.unbanUser(selectedUser.id);
-          updatedUser.banned = false;
+          // Unban user (set ableToComment to true)
+          const unbannedUser = await authService.unbanUser(selectedUser.id);
+          updatedUser = { ...updatedUser, ...unbannedUser };
           message = `User ${selectedUser.username} has been unbanned`;
           break;
         case "vip":
-          // Replace with actual API call to set VIP status
-          await authService.setVipStatus(selectedUser.id, true);
-          updatedUser.vipStatus = true;
+          // Set user as VIP
+          const vipUser = await authService.setVipStatus(selectedUser.id, true);
+          updatedUser = { ...updatedUser, ...vipUser };
           message = `User ${selectedUser.username} has been set as VIP`;
           break;
         case "removeVip":
-          // Replace with actual API call to remove VIP status
-          await authService.setVipStatus(selectedUser.id, false);
-          updatedUser.vipStatus = false;
+          // Remove VIP status
+          const nonVipUser = await authService.setVipStatus(
+            selectedUser.id,
+            false
+          );
+          updatedUser = { ...updatedUser, ...nonVipUser };
           message = `VIP status removed from ${selectedUser.username}`;
           break;
         default:
@@ -221,10 +224,14 @@ const UserManagement = () => {
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>
-                  {user.banned ? (
-                    <Chip label="Banned" color="error" size="small" />
-                  ) : user.locked ? (
+                  {!user.active ? (
                     <Chip label="Locked" color="warning" size="small" />
+                  ) : !user.ableToComment ? (
+                    <Chip
+                      label="Banned from commenting"
+                      color="error"
+                      size="small"
+                    />
                   ) : (
                     <Chip label="Active" color="success" size="small" />
                   )}
@@ -248,8 +255,9 @@ const UserManagement = () => {
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: "flex" }}>
-                    {user.locked ? (
+                    {!user.active ? (
                       <IconButton
+                        size="small"
                         color="primary"
                         onClick={() => handleOpenDialog(user, "unlock")}
                         title="Unlock User"
@@ -258,6 +266,7 @@ const UserManagement = () => {
                       </IconButton>
                     ) : (
                       <IconButton
+                        size="small"
                         color="warning"
                         onClick={() => handleOpenDialog(user, "lock")}
                         title="Lock User"
@@ -266,9 +275,10 @@ const UserManagement = () => {
                       </IconButton>
                     )}
 
-                    {user.banned ? (
+                    {!user.ableToComment ? (
                       <IconButton
-                        color="success"
+                        size="small"
+                        color="primary"
                         onClick={() => handleOpenDialog(user, "unban")}
                         title="Unban User"
                       >
@@ -276,9 +286,10 @@ const UserManagement = () => {
                       </IconButton>
                     ) : (
                       <IconButton
+                        size="small"
                         color="error"
                         onClick={() => handleOpenDialog(user, "ban")}
-                        title="Ban User"
+                        title="Ban User from Commenting"
                       >
                         <Block fontSize="small" />
                       </IconButton>
@@ -286,6 +297,7 @@ const UserManagement = () => {
 
                     {user.vipStatus ? (
                       <IconButton
+                        size="small"
                         color="default"
                         onClick={() => handleOpenDialog(user, "removeVip")}
                         title="Remove VIP Status"
@@ -294,6 +306,7 @@ const UserManagement = () => {
                       </IconButton>
                     ) : (
                       <IconButton
+                        size="small"
                         color="primary"
                         onClick={() => handleOpenDialog(user, "vip")}
                         title="Set as VIP"
@@ -317,9 +330,9 @@ const UserManagement = () => {
             : dialogType === "unlock"
             ? "Unlock User Account"
             : dialogType === "ban"
-            ? "Ban User"
+            ? "Ban User from Commenting"
             : dialogType === "unban"
-            ? "Unban User"
+            ? "Unban User from Commenting"
             : dialogType === "vip"
             ? "Set User as VIP"
             : "Remove VIP Status"}
@@ -331,9 +344,9 @@ const UserManagement = () => {
               : dialogType === "unlock"
               ? `Are you sure you want to unlock ${selectedUser?.username}'s account?`
               : dialogType === "ban"
-              ? `Are you sure you want to ban ${selectedUser?.username}? This will prevent them from accessing the platform.`
+              ? `Are you sure you want to ban ${selectedUser?.username} from commenting? They will not be able to post comments.`
               : dialogType === "unban"
-              ? `Are you sure you want to unban ${selectedUser?.username}?`
+              ? `Are you sure you want to allow ${selectedUser?.username} to comment again?`
               : dialogType === "vip"
               ? `Are you sure you want to set ${selectedUser?.username} as a VIP user?`
               : `Are you sure you want to remove VIP status from ${selectedUser?.username}?`}

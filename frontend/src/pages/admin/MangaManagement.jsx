@@ -157,6 +157,8 @@ const MangaManagement = () => {
       switch (dialogType) {
         case "add":
           // Replace with actual API call to add manga
+          //log formData
+          console.log(formData);
           const newManga = await mangaService.createManga(formData);
           setMangas([...mangas, newManga]);
           message = `Manga "${formData.title}" has been added`;

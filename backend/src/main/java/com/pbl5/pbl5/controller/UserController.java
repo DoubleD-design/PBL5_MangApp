@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.pbl5.pbl5.request.UserProfileRequest;
 import com.pbl5.pbl5.request.ChangePasswordRequest;
+import java.util.Map;
 
 import java.util.List;
 
@@ -95,5 +96,51 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Integer id) {
         userService.deleteUser(id);
+    }
+
+    @PostMapping("/{id}/lock")
+    public ResponseEntity<User> lockUser(@PathVariable Integer id) {
+        User user = userService.lockUser(id);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/unlock")
+    public ResponseEntity<User> unlockUser(@PathVariable Integer id) {
+        User user = userService.unlockUser(id);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/ban")
+    public ResponseEntity<User> banUser(@PathVariable Integer id) {
+        User user = userService.banUser(id);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/unban")
+    public ResponseEntity<User> unbanUser(@PathVariable Integer id) {
+        User user = userService.unbanUser(id);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/vip")
+    public ResponseEntity<User> setVipStatus(@PathVariable Integer id, @RequestBody Map<String, Boolean> payload) {
+        Boolean status = payload.get("status");
+        User user = userService.setVipStatus(id, status);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

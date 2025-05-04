@@ -1,4 +1,5 @@
 package com.pbl5.pbl5.service;
+import com.pbl5.pbl5.modal.Category;
 import com.pbl5.pbl5.modal.Rating;
 import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Manga;
@@ -16,7 +17,7 @@ public class MangaService {
     @Autowired
     private MangaRepository mangaRepository;
     
-    @Autowired
+    //@Autowired
     //private ChapterService chapterService;
 
     public List<Manga> getAllMangas() {
@@ -28,6 +29,9 @@ public class MangaService {
     }
 
     public Manga createManga(Manga manga) {
+        for (Category c : manga.getCategories()) {
+            System.out.println("Category: id=" + c.getId() + ", name=" + c.getName());
+        }
         return mangaRepository.save(manga);
     }
 

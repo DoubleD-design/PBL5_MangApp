@@ -87,6 +87,15 @@ const CommentSection = ({ mangaId }) => {
         return;
       }
 
+      // Check if user is banned from commenting
+      if (user.ableToComment === false) {
+        setError(
+          "You are not allowed to comment. Please contact administrator."
+        );
+        setSubmitting(false);
+        return;
+      }
+
       const commentData = {
         userId: user.id, // Now we know user.id is a number
         mangaId: parseInt(mangaId),
@@ -103,7 +112,20 @@ const CommentSection = ({ mangaId }) => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error("Error posting comment:", err);
-      setError("Failed to post comment. Please try again.");
+
+      // Handle specific error from backend when user is banned
+      if (
+        err.response &&
+        err.response.data &&
+        err.response.data.includes("not allowed to comment")
+      ) {
+        setError(
+          "You are not allowed to comment. Please contact administrator."
+        );
+      } else {
+        setError("Failed to post comment. Please try again.");
+      }
+
       setTimeout(() => setError(null), 3000);
     } finally {
       setSubmitting(false);
@@ -206,37 +228,50 @@ const CommentSection = ({ mangaId }) => {
       {/* Comment Form */}
       <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3 }}>
         <CardContent>
-          <form onSubmit={handleCommentSubmit}>
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              placeholder={
-                authService.isAuthenticated()
-                  ? "Write a comment..."
-                  : "Please log in to comment"
-              }
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              disabled={!authService.isAuthenticated() || submitting}
-              sx={{ mb: 2 }}
-            />
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={
-                  !newComment.trim() ||
-                  submitting ||
-                  !authService.isAuthenticated()
+          {user && user.ableToComment === false ? (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              You are not allowed to comment. Please contact administrator.
+            </Alert>
+          ) : (
+            <form onSubmit={handleCommentSubmit}>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder={
+                  authService.isAuthenticated()
+                    ? "Write a comment..."
+                    : "Please log in to comment"
                 }
-                endIcon={submitting ? <CircularProgress size={20} /> : <Send />}
-              >
-                Post Comment
-              </Button>
-            </Box>
-          </form>
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                disabled={
+                  !authService.isAuthenticated() ||
+                  submitting ||
+                  (user && user.ableToComment === false)
+                }
+                sx={{ mb: 2 }}
+              />
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={
+                    !newComment.trim() ||
+                    submitting ||
+                    !authService.isAuthenticated() ||
+                    (user && user.ableToComment === false)
+                  }
+                  endIcon={
+                    submitting ? <CircularProgress size={20} /> : <Send />
+                  }
+                >
+                  Post Comment
+                </Button>
+              </Box>
+            </form>
+          )}
         </CardContent>
       </Card>
 

@@ -23,6 +23,8 @@ const authService = {
   register: async (userData) => {
     try {
       const response = await api.post("/auth/register", userData);
+      console.log("Registration successful, redirecting...");
+      window.location.href = "/login"; // Chuyển hướng về trang đăng nhập
       return response.data;
     } catch (error) {
       console.error(
@@ -58,6 +60,56 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error("Error fetching users:", error);
+      throw error;
+    }
+  },
+
+  lockUser: async (userId) => {
+    try {
+      const response = await api.post(`/users/${userId}/lock`);
+      return response.data;
+    } catch (error) {
+      console.error("Error locking user:", error);
+      throw error;
+    }
+  },
+
+  unlockUser: async (userId) => {
+    try {
+      const response = await api.post(`/users/${userId}/unlock`);
+      return response.data;
+    } catch (error) {
+      console.error("Error unlocking user:", error);
+      throw error;
+    }
+  },
+
+  banUser: async (userId) => {
+    try {
+      const response = await api.post(`/users/${userId}/ban`);
+      return response.data;
+    } catch (error) {
+      console.error("Error banning user:", error);
+      throw error;
+    }
+  },
+
+  unbanUser: async (userId) => {
+    try {
+      const response = await api.post(`/users/${userId}/unban`);
+      return response.data;
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      throw error;
+    }
+  },
+
+  setVipStatus: async (userId, status) => {
+    try {
+      const response = await api.post(`/users/${userId}/vip`, { status });
+      return response.data;
+    } catch (error) {
+      console.error("Error setting VIP status:", error);
       throw error;
     }
   },

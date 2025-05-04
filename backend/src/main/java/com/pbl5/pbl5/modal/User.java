@@ -34,6 +34,12 @@ public class User {
 
     @Column(name = "vip_end_date")
     private LocalDateTime vipEndDate;
+    
+    @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
+    private Boolean active = true;
+    
+    @Column(name = "able_to_comment", nullable = false, columnDefinition = "boolean default true")
+    private Boolean ableToComment = true;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -142,6 +148,22 @@ public class User {
 
     public void setVipEndDate(LocalDateTime vipEndDate) {
         this.vipEndDate = vipEndDate;
+    }
+    
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Boolean getAbleToComment() {
+        return ableToComment;
+    }
+
+    public void setAbleToComment(Boolean ableToComment) {
+        this.ableToComment = ableToComment;
     }
 
     public LocalDateTime getCreatedAt() {
