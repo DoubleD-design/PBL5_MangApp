@@ -42,46 +42,6 @@ import { useFavorites } from "../context/FavoritesContext";
 import categories from "../data/categories";
 import CommentSection from "../components/CommentSection";
 
-// Mock data for reviews
-const mockReviews = [
-  {
-    id: 1,
-    userId: 101,
-    username: "MangaLover42",
-    avatar: "https://mui.com/static/images/avatar/1.jpg",
-    rating: 5,
-    comment:
-      "One of the best manga ever created! The world-building is incredible and the character development over the years has been amazing to follow.",
-    date: "2023-04-15T10:30:00",
-    likes: 24,
-    userLiked: false,
-  },
-  {
-    id: 2,
-    userId: 102,
-    username: "PirateKing",
-    avatar: "https://mui.com/static/images/avatar/2.jpg",
-    rating: 4.5,
-    comment:
-      "I've been following this series for years. The story arcs keep getting better and better. Can't wait to see how it all ends!",
-    date: "2023-05-02T15:45:00",
-    likes: 18,
-    userLiked: true,
-  },
-  {
-    id: 3,
-    userId: 103,
-    username: "StrawHatFan",
-    avatar: "https://mui.com/static/images/avatar/3.jpg",
-    rating: 5,
-    comment:
-      "The character development in this manga is unmatched. Each arc introduces amazing new characters while developing the existing ones.",
-    date: "2023-05-10T09:20:00",
-    likes: 32,
-    userLiked: false,
-  },
-];
-
 const MangaDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -89,7 +49,6 @@ const MangaDetail = () => {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const [favoriteStatus, setFavoriteStatus] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [reviews, setReviews] = useState(mockReviews);
   const [manga, setManga] = useState(null);
   const [loadingManga, setLoadingManga] = useState(true);
   const [error, setError] = useState(null);
@@ -217,22 +176,6 @@ const MangaDetail = () => {
 
     setReviews([newReviewObj, ...reviews]);
     setNewReview("");
-  };
-
-  const handleLikeReview = (reviewId) => {
-    setReviews(
-      reviews.map((review) => {
-        if (review.id === reviewId) {
-          const newLikeStatus = !review.userLiked;
-          return {
-            ...review,
-            likes: newLikeStatus ? review.likes + 1 : review.likes - 1,
-            userLiked: newLikeStatus,
-          };
-        }
-        return review;
-      })
-    );
   };
 
   // Show loading state or error message if applicable
@@ -486,74 +429,66 @@ const MangaDetail = () => {
         <div role="tabpanel" hidden={tabValue !== 0}>
           {tabValue === 0 && (
             <List>
-              {manga.chapters.map((chapter, index) => {
-                // Check if this chapter has been read
-                const isRead = readChapters.some(
-                  (item) => item.chapterId === chapter.id
-                );
+              {[...manga.chapters]
+                .sort((a, b) => b.chapterNumber - a.chapterNumber) // Sort chapters in descending order
+                .map((chapter, index, sortedChapters) => {
+                  // Check if this chapter has been read
+                  const isRead = readChapters.some(
+                    (item) => item.chapterId === chapter.id
+                  );
 
-                return (
-                  <div key={chapter.id}>
-                    <ListItem
-                      button
-                      component={Link}
-                      to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
-                      onClick={() => {
-                        // Add to reading history when clicked
-                        readingHistoryService.addToReadingHistory(
-                          manga.id,
-                          chapter.id,
-                          chapter.chapterNumber
-                        );
-                      }}
-                      sx={{
-                        backgroundColor: isRead
-                          ? "rgba(25, 118, 210, 0.08)"
-                          : "transparent",
-                        "&:hover": {
-                          backgroundColor: isRead
-                            ? "rgba(25, 118, 210, 0.12)"
-                            : "rgba(0, 0, 0, 0.04)",
-                        },
-                        borderLeft: isRead ? "4px solid #1976d2" : "none",
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 36 }}>
-                        {isRead ? (
-                          <CheckCircle color="primary" fontSize="small" />
-                        ) : (
-                          <RadioButtonUnchecked
-                            color="action"
-                            fontSize="small"
-                          />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={`${chapter.title}`}
-                        secondary={`Released: ${new Date(
-                          chapter.createdAt
-                        ).toLocaleDateString()}`}
-                        primaryTypographyProps={{
-                          color: isRead ? "primary" : "inherit",
-                          fontWeight: isRead ? 500 : 400,
+                  return (
+                    <div key={chapter.id}>
+                      <ListItem
+                        button
+                        component={Link}
+                        to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
+                        onClick={() => {
+                          // Add to reading history when clicked
+                          readingHistoryService.addToReadingHistory(
+                            manga.id,
+                            chapter.id,
+                            chapter.chapterNumber
+                          );
                         }}
-                      />
-                    </ListItem>
-                    {index < manga.chapters.length - 1 && <Divider />}
-                  </div>
-                );
-              })}
+                        sx={{
+                          backgroundColor: isRead
+                            ? "rgba(25, 118, 210, 0.08)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: isRead
+                              ? "rgba(25, 118, 210, 0.12)"
+                              : "rgba(0, 0, 0, 0.04)",
+                          },
+                          borderLeft: isRead ? "4px solid #1976d2" : "none",
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 36 }}>
+                          {isRead ? (
+                            <CheckCircle color="primary" fontSize="small" />
+                          ) : (
+                            <RadioButtonUnchecked
+                              color="action"
+                              fontSize="small"
+                            />
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={`${chapter.title}`}
+                          secondary={`Released: ${new Date(
+                            chapter.createdAt
+                          ).toLocaleDateString()}`}
+                          primaryTypographyProps={{
+                            color: isRead ? "primary" : "inherit",
+                            fontWeight: isRead ? 500 : 400,
+                          }}
+                        />
+                      </ListItem>
+                      {index < sortedChapters.length - 1 && <Divider />}
+                    </div>
+                  );
+                })}
             </List>
-          )}
-        </div>
-
-        {/* Comments Tab */}
-        <div role="tabpanel" hidden={tabValue !== 1}>
-          {tabValue === 1 && (
-            <Box sx={{ p: 3 }}>
-              {/* Import and use the CommentSection component */}
-              <CommentSection mangaId={id} />
-            </Box>
           )}
         </div>
 
