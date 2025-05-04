@@ -28,6 +28,14 @@ const userService = {
       throw error;
     }
   },
+  getUserById: async (userId) => {
+    try {
+      const response = await api.get(`/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 
   // Get user reading history
   getReadingHistory: async () => {

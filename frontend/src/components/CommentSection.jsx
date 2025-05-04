@@ -312,9 +312,9 @@ const CommentSection = ({ mangaId }) => {
                 avatar={
                   <Avatar
                     src={comment.user?.avatar || ""}
-                    alt={comment.user?.username || "User"}
+                    alt={comment.username || "User"}
                   >
-                    {(comment.user?.username || "U")[0]}
+                    {(comment.username || "U")[0]}
                   </Avatar>
                 }
                 title={comment.username ? comment.username : "Anonymous"}

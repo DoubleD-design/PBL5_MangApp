@@ -32,6 +32,8 @@ import {
 } from "@mui/icons-material";
 import commentService from "../../services/commentService";
 import mangaService from "../../services/mangaService";
+import authService from "../../services/authService";
+import userService from "../../services/userService";
 import { format } from "date-fns";
 
 const CommentManagement = () => {
@@ -44,6 +46,7 @@ const CommentManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewCommentDialog, setViewCommentDialog] = useState(false);
   const [mangaTitles, setMangaTitles] = useState({});
+  const [userNames, setUserNames] = useState({});
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -64,6 +67,8 @@ const CommentManagement = () => {
       // Fetch manga titles for each comment
       const mangaIds = [...new Set(response.map((comment) => comment.mangaId))];
       const titles = {};
+      const userIds = [...new Set(response.map((comment) => comment.userId))];
+      const usernames = {};
 
       for (const mangaId of mangaIds) {
         try {
@@ -74,8 +79,20 @@ const CommentManagement = () => {
           titles[mangaId] = `Manga #${mangaId}`;
         }
       }
+      for (const userId of userIds) {
+        try {
+          const user = await userService.getUserById(userId);
+          usernames[userId] = user.username;
+        } catch (err) {
+          console.error(`Error fetching user name for ID ${userId}:`, err);
+          usernames[userId] = `User #${userId}`;
+        }
+      }
 
       setMangaTitles(titles);
+      console.log("Manga titles:", titles);
+      setUserNames(usernames);
+      console.log("User names:", usernames);
       setError(null);
     } catch (err) {
       console.error("Error fetching comments:", err);
@@ -251,7 +268,7 @@ const CommentManagement = () => {
               <TableRow key={comment.id}>
                 <TableCell>{comment.id}</TableCell>
                 <TableCell>
-                  {comment.username || `User #${comment.userId}`}
+                  {userNames[comment.userId] || `User #${comment.userId}`}
                 </TableCell>
                 <TableCell>
                   {mangaTitles[comment.mangaId] || `Manga #${comment.mangaId}`}
