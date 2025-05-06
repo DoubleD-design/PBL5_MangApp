@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class Ad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
     
     @Column(length = 255)

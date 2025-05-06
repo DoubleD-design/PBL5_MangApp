@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
     
     @Column(length = 255)

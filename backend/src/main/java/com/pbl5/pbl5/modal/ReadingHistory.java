@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class ReadingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
     
     @Column(name = "user_id")

@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Integer id;
     
     @Column(name = "chapter_id")
