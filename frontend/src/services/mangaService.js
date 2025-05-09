@@ -1,13 +1,80 @@
 import api from "./api";
 
 const mangaService = {
-  // Create a new manga
-  createManga: async (mangaData) => {
+  // Upload file ảnh lên Azure Blob qua backend, trả về URL
+  // uploadCoverImage: async (file) => {
+  //   const formData = new FormData();
+  //   formData.append("file", file);
+  //   const response = await fetch("/api/manga/upload", {
+  //     method: "POST",
+  //     body: formData,
+  //   });
+  //   if (!response.ok) throw new Error("Upload failed");
+  //   const data = await response.json();
+  //   return data.url;
+  // },
+
+  // Create a new manga (multipart/form-data)
+  createManga: async (formData) => {
     try {
-      const response = await api.post("/manga", mangaData);
-      return response.data;
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/manga/create", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!response.ok) throw new Error("Error creating manga");
+      return await response.json();
     } catch (error) {
       console.error("Error creating manga:", error);
+      throw error;
+    }
+  },
+
+    // Update manga (multipart/form-data or JSON)
+  updateManga: async (mangaId, data) => {
+  const token = localStorage.getItem("token");
+  const isFormData = data instanceof FormData;
+  const headers = isFormData
+    ? { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    : {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+
+  const response = await fetch(`/api/manga/update/${mangaId}`, {
+    method: "PUT",
+    body: isFormData ? data : JSON.stringify(data),
+    credentials: "include",
+    headers,
+  });
+  if (!response.ok) throw new Error("Error updating manga");
+    return await response.json();
+  },
+
+  // Delete manga
+  deleteManga: async (mangaId) => {
+    try {
+      const response = await api.delete(`/manga/delete/${mangaId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting manga:", error);
+      throw error;
+    }
+  },
+
+  // Update manga visibility
+  updateMangaVisibility: async (mangaId, visible) => {
+    try {
+      const response = await api.put(`/manga/${mangaId}/visibility`, {
+        visible,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating manga visibility:", error);
       throw error;
     }
   },
@@ -215,40 +282,6 @@ const mangaService = {
     }
   },
 
-  // Update manga
-  updateManga: async (mangaId, mangaData) => {
-    try {
-      const response = await api.put(`/manga/${mangaId}`, mangaData);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating manga:", error);
-      throw error;
-    }
-  },
-
-  // Delete manga
-  deleteManga: async (mangaId) => {
-    try {
-      const response = await api.delete(`/manga/${mangaId}`);
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting manga:", error);
-      throw error;
-    }
-  },
-
-  // Update manga visibility
-  updateMangaVisibility: async (mangaId, visible) => {
-    try {
-      const response = await api.put(`/manga/${mangaId}/visibility`, {
-        visible,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error updating manga visibility:", error);
-      throw error;
-    }
-  },
 };
 
 export default mangaService;

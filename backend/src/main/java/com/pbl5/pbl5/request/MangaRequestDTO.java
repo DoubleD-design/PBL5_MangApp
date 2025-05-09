@@ -4,9 +4,9 @@ import java.util.List;
 
 public class MangaRequestDTO {
     private String title;
+    private String author;
     private String description;
     private String coverImage;
-    private String author;
     private String status;
     private List<Integer> categoryIds; // danh sách ID của category
 
@@ -27,11 +27,11 @@ public class MangaRequestDTO {
     }
 
     public String getCoverImage() {
-        return coverImage;
+       return coverImage;
     }
 
     public void setCoverImage(String coverImage) {
-        this.coverImage = coverImage;
+       this.coverImage = coverImage;
     }
 
     public String getAuthor() {

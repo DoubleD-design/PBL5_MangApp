@@ -4,9 +4,11 @@ import com.pbl5.pbl5.modal.Rating;
 import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.repos.MangaRepository;
+import com.pbl5.pbl5.request.MangaRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,8 +19,10 @@ public class MangaService {
     @Autowired
     private MangaRepository mangaRepository;
     
-    //@Autowired
-    //private ChapterService chapterService;
+    @Autowired
+    private AzureBlobService azureBlobService;
+    @Autowired
+    private com.pbl5.pbl5.repos.CategoryRepository categoryRepository;
 
     public List<Manga> getAllMangas() {
         return mangaRepository.findAll();
@@ -26,13 +30,6 @@ public class MangaService {
 
     public Optional<Manga> getMangaById(Integer id) {
         return mangaRepository.findById(id);
-    }
-
-    public Manga createManga(Manga manga) {
-        for (Category c : manga.getCategories()) {
-            System.out.println("Category: id=" + c.getId() + ", name=" + c.getName());
-        }
-        return mangaRepository.save(manga);
     }
 
     public Manga updateManga(Integer id, Manga mangaDetails) {
@@ -131,6 +128,30 @@ public class MangaService {
             throw new IllegalArgumentException("Category ID cannot be null");
         }
         return mangaRepository.findByCategoriesId(categoryId, pageable);
+    }
+
+    public Manga uploadAndSave(MangaRequestDTO dto, MultipartFile image, Integer adminId, boolean isUpdate, Integer mangaId) {
+        String imageUrl = dto.getCoverImage();
+        if (image != null && !image.isEmpty()) {
+            imageUrl = azureBlobService.uploadImage(image);
+        }
+        Manga manga;
+        if (isUpdate && mangaId != null) {
+            manga = mangaRepository.findById(mangaId).orElseThrow(() -> new RuntimeException("Manga not found"));
+        } else {
+            manga = new Manga();
+            manga.setCreatedAt(java.time.LocalDateTime.now());
+        }
+        manga.setTitle(dto.getTitle());
+        manga.setDescription(dto.getDescription());
+        manga.setCoverImage(imageUrl);
+        manga.setAuthor(dto.getAuthor());
+        manga.setAdminId(adminId);
+        manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
+        // Set categories
+        List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+        manga.setCategories(categories);
+        return mangaRepository.save(manga);
     }
 
 }

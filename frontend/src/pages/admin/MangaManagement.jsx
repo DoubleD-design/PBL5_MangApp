@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -61,6 +61,9 @@ const MangaManagement = () => {
     message: "",
     severity: "success",
   });
+  const [coverFile, setCoverFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchMangas();
@@ -103,6 +106,7 @@ const MangaManagement = () => {
         status: "ONGOING",
         categoryIds: [],
       });
+      setCoverFile(null);
     } else if (type === "edit" && manga) {
       setSelectedManga(manga);
       setFormData({
@@ -113,8 +117,10 @@ const MangaManagement = () => {
         status: manga.status,
         categoryIds: manga.categories?.map((cat) => cat.id) || [],
       });
+      setCoverFile(null);
     } else {
       setSelectedManga(manga);
+      setCoverFile(null);
     }
 
     setOpenDialog(true);
@@ -143,6 +149,18 @@ const MangaManagement = () => {
     });
   };
 
+  const handleCoverFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverFile(file);
+      // Hiển thị preview tạm thời
+      setFormData((prev) => ({
+        ...prev,
+        coverImage: URL.createObjectURL(file),
+      }));
+    }
+  };
+
   const filteredMangas = mangas.filter(
     (manga) =>
       manga.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -151,25 +169,42 @@ const MangaManagement = () => {
 
   const handleAction = async () => {
     try {
+      setUploading(true);
       let message = "";
       let updatedManga = null;
 
       switch (dialogType) {
-        case "add":
-          // Replace with actual API call to add manga
-          //log formData
-          console.log(formData);
-          const newManga = await mangaService.createManga(formData);
-          setMangas([...mangas, newManga]);
-          message = `Manga "${formData.title}" has been added`;
-          break;
-
-        case "edit":
-          // Replace with actual API call to update manga
-          updatedManga = await mangaService.updateManga(
-            selectedManga.id,
-            formData
+        case "add": {
+          // Use multipart/form-data for create
+          const form = new FormData();
+          form.append(
+            "dataForm",
+            new Blob([JSON.stringify(formData)], { type: "application/json" })
           );
+          if (coverFile) {
+            form.append("image", coverFile);
+          }
+          // Call the correct endpoint for multipart
+          const newManga = await mangaService.createManga(form);
+          setMangas([...mangas, newManga]);
+          message = `Manga "${newManga.title}" has been added`;
+          break;
+        }
+        case "edit": {
+          let updatedManga;
+          if (coverFile) {
+            // If a new image is selected, use multipart/form-data
+            const form = new FormData();
+            form.append(
+              "dataForm",
+              new Blob([JSON.stringify(formData)], { type: "application/json" })
+            );
+            form.append("image", coverFile);
+            updatedManga = await mangaService.updateManga(selectedManga.id, form);
+          } else {
+            // No new image, just update with JSON
+            updatedManga = await mangaService.updateManga(selectedManga.id, formData);
+          }
           setMangas(
             mangas.map((manga) =>
               manga.id === updatedManga.id ? updatedManga : manga
@@ -177,16 +212,13 @@ const MangaManagement = () => {
           );
           message = `Manga "${updatedManga.title}" has been updated`;
           break;
-
+        }
         case "delete":
-          // Replace with actual API call to delete manga
           await mangaService.deleteManga(selectedManga.id);
           setMangas(mangas.filter((manga) => manga.id !== selectedManga.id));
           message = `Manga "${selectedManga.title}" has been deleted`;
           break;
-
         case "toggleVisibility":
-          // Replace with actual API call to toggle visibility
           const newVisibility = !selectedManga.visible;
           updatedManga = await mangaService.updateMangaVisibility(
             selectedManga.id,
@@ -201,7 +233,6 @@ const MangaManagement = () => {
             newVisibility ? "visible" : "hidden"
           }`;
           break;
-
         default:
           break;
       }
@@ -219,6 +250,7 @@ const MangaManagement = () => {
         severity: "error",
       });
     } finally {
+      setUploading(false);
       handleCloseDialog();
     }
   };
@@ -404,14 +436,39 @@ const MangaManagement = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Cover Image URL"
-                name="coverImage"
-                value={formData.coverImage}
-                onChange={handleInputChange}
-                required
-              />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    "Choose Cover Image"
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleCoverFileChange}
+                  />
+                </Button>
+                {formData.coverImage && (
+                  <img
+                    src={formData.coverImage}
+                    alt="cover"
+                    style={{
+                      width: 60,
+                      height: 80,
+                      objectFit: "cover",
+                      borderRadius: 4,
+                      border: "1px solid #eee",
+                    }}
+                  />
+                )}
+              </Box>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
@@ -465,10 +522,15 @@ const MangaManagement = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
+          <Button onClick={handleCloseDialog} color="primary" disabled={uploading}>
             Cancel
           </Button>
-          <Button onClick={handleAction} color="primary" variant="contained">
+          <Button
+            onClick={handleAction}
+            color="primary"
+            variant="contained"
+            disabled={uploading}
+          >
             {dialogType === "add" ? "Add" : "Save"}
           </Button>
         </DialogActions>

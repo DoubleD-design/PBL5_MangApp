@@ -129,6 +129,11 @@
             <artifactId>spring-cloud-azure-starter-storage-blob</artifactId>
             <version>4.6.0</version> <!-- Hoặc bản mới nhất -->
         </dependency>
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
