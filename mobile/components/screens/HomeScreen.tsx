@@ -10,20 +10,12 @@ import {
   Dimensions,
   StyleSheet
 } from 'react-native';
-import Carousel from 'react-native-reanimated-carousel';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GRADIENTS } from '../../utils/const';
-import { BlurView } from 'expo-blur';
+import FeaturedCarousel from '../FeaturedCarousel'; // Adjust the path to your FeaturedCarousel file
 
 const { width } = Dimensions.get('window');
-
-const bannerData = [
-  { id: '1', title: 'Attack on Titan', author: 'Hajime Isayama', image: require('../../assets/manga/aot.jpg') },
-  { id: '2', title: 'Oyasumi, Punpun', author: 'Asano Inio', image: require('../../assets/manga/punpun.jpg') },
-  { id: '3', title: 'Shounen no Abyss', author: 'Minenami Ryo', image: require('../../assets/manga/sna.jpg') },
-  { id: '4', title: 'Made in Abyss', author: 'Akihito Tsukushi', image: require('../../assets/manga/mia.jpg') },
-];
 
 const mangaData = [
   { id: '1', title: 'Attack on Titan', chapter: 'Chap 139', image: require('../../assets/manga/aot.jpg') },
@@ -40,29 +32,20 @@ const HomeScreen = () => {
   const updatedData = [...popularData];
   const allData = [...popularData];
 
-  const renderCarouselItem = ({ item }: any) => (
-    <Image
-      source={item.image}
-      style={{
-        width: width - 40,
-        height: 200,
-        borderRadius: 10,
-      }}
-      resizeMode="cover"
-    />
-  );
-
-  const renderItem = ({ item }: any) => (
-    <View style={{ marginRight: 12, width: 100 }}>
-      <Image
-        source={item.image}
-        style={{ width: 100, height: 140, borderRadius: 10 }}
-        resizeMode="cover"
-      />
-      <Text style={{ color: '#fff', fontWeight: 'bold', marginTop: 5 }}>{item.title}</Text>
-      <Text style={{ color: '#aaa', fontSize: 12 }}>{item.chapter}</Text>
-    </View>
-  );
+  const renderItem = ({ item }: any) => {
+    if (!item.image) return null; // Kiểm tra xem item có thuộc tính image không
+    return (
+      <View style={{ marginRight: 12, width: 100 }}>
+        <Image
+          source={item.image}
+          style={{ width: 100, height: 140, borderRadius: 10 }}
+          resizeMode="cover"
+        />
+        <Text style={{ color: '#fff', fontWeight: 'bold', marginTop: 5 }}>{item.title}</Text>
+        <Text style={{ color: '#aaa', fontSize: 12 }}>{item.chapter}</Text>
+      </View>
+    );
+  };
 
   const Section = ({
     title,
@@ -71,7 +54,7 @@ const HomeScreen = () => {
     title: string;
     data: any[];
   }) => (
-    <View style = {{marginTop: 5}}>
+    <View style={{ marginTop: 5 }}>
       <View
         style={{
           flexDirection: 'row',
@@ -90,7 +73,7 @@ const HomeScreen = () => {
               navigation.navigate('MostViewsList', { title, data });
             } else if (title === 'Most favourites') {
               navigation.navigate('MostFavouritesList', { title, data });
-            } 
+            }
           }}
         >
           <Text style={{ color: '#bbb' }}>See more {'>>'} </Text>
@@ -129,60 +112,8 @@ const HomeScreen = () => {
           />
         </View>
 
-        {bannerData.length > 0 && (
-          <View style={{ marginTop: 10, marginBottom: 20 }}>
-            <Carousel
-              width={width}
-              height={250}
-              data={bannerData}
-              renderItem={({ item }) => (
-                <View>
-                  <Image
-                    source={item.image}
-                    style={{ width: width, height: 250, borderRadius: 10 }}
-                    resizeMode="cover"
-                  />
-                  <LinearGradient
-                    colors={['transparent', 'rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.6)']}
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: 100,
-                      borderBottomLeftRadius: 10,
-                      borderBottomRightRadius: 10,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <BlurView
-                      intensity={20} // độ mờ từ 0 -> 100
-                      tint="light" // hoặc 'dark', 'default'
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: 10,
-                        borderBottomLeftRadius: 10,
-                        borderBottomRightRadius: 10,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 23 }}>
-                        {item.title}
-                      </Text><Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>
-                        {item.author}
-                      </Text>
-                    </BlurView>
-                  </LinearGradient>
-                </View>
-              )}
-              autoPlay
-              loop
-            />
-          </View>
-        )}
+        <FeaturedCarousel /> {/* Here is the new FeaturedCarousel */}
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <Section title="Most views" data={popularData} />
           <Section title="Most favourites" data={favoriteData} />

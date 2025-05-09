@@ -51,7 +51,7 @@ export default function BottomTabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Translators" component={TeamsScreen} />
+      {/* <Tab.Screen name="Translators" component={TeamsScreen} /> */}
       <Tab.Screen name="Favourites" component={FavouritesScreen} />
       <Tab.Screen name="History" component={HistoryScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
