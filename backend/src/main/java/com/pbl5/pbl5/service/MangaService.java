@@ -2,7 +2,9 @@ package com.pbl5.pbl5.service;
 import com.pbl5.pbl5.modal.Category;
 import com.pbl5.pbl5.modal.Rating;
 import com.pbl5.pbl5.modal.Chapter;
+import com.pbl5.pbl5.modal.Favourite;
 import com.pbl5.pbl5.modal.Manga;
+import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.MangaRepository;
 import com.pbl5.pbl5.request.MangaRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,8 @@ import java.util.Optional;
 public class MangaService {
     @Autowired
     private MangaRepository mangaRepository;
-    
+    @Autowired
+    private FavouriteRepository favouriteRepository;
     @Autowired
     private AzureBlobService azureBlobService;
     @Autowired
@@ -42,6 +45,7 @@ public class MangaService {
     }
 
     public void deleteManga(Integer id) {
+        favouriteRepository.deleteByMangaId(id);
         mangaRepository.deleteById(id);
     }
 

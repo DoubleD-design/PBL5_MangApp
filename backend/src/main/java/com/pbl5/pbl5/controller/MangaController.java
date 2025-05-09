@@ -1,17 +1,14 @@
 package com.pbl5.pbl5.controller;
 
 import com.pbl5.pbl5.modal.*;
-import com.pbl5.pbl5.repos.CategoryRepository;
 import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.MangaRequestDTO;
 import com.pbl5.pbl5.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +25,7 @@ public class MangaController {
     @Autowired
     private MangaService mangaService;
     @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private AzureBlobService azureBlobService;
     
     @GetMapping("/featured")
     public ResponseEntity<?> getFeaturedMangas() {

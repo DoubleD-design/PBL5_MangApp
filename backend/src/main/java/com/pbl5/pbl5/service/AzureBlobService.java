@@ -12,8 +12,7 @@ import java.util.UUID;
 public class AzureBlobService {
 
     private final String connectionString = System.getProperty("CONNECTION_STRING");
-    @Value("${spring.cloud.azure.storage.blob.container-name}")
-    private String containerName;
+    private final String containerName = "manga";
 
     @Value("${spring.cloud.azure.storage.blob.endpoint}")
     private String blobEndpoint;
@@ -26,8 +25,8 @@ public class AzureBlobService {
                     .buildClient();
             BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
 
-            // Đặt tên file duy nhất
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // Đặt tên file duy nhất trong thư mục con "coverimage"
+            String fileName = "coverimage/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
             // Upload file
             BlobClient blobClient = containerClient.getBlobClient(fileName);
