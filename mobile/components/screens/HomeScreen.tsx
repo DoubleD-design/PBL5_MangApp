@@ -112,9 +112,10 @@ const HomeScreen = () => {
           />
         </View>
 
-        <FeaturedCarousel /> {/* Here is the new FeaturedCarousel */}
+        
 
         <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{ marginTop: 10}}><FeaturedCarousel /> </View>
           <Section title="Most views" data={popularData} />
           <Section title="Most favourites" data={favoriteData} />
           <Section title="Latest update" data={updatedData} />
