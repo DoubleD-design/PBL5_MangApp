@@ -2,7 +2,6 @@ package com.pbl5.pbl5.service;
 import com.pbl5.pbl5.modal.Category;
 import com.pbl5.pbl5.modal.Rating;
 import com.pbl5.pbl5.modal.Chapter;
-import com.pbl5.pbl5.modal.Favourite;
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.MangaRepository;
@@ -137,7 +136,7 @@ public class MangaService {
     public Manga uploadAndSave(MangaRequestDTO dto, MultipartFile image, Integer adminId, boolean isUpdate, Integer mangaId) {
         String imageUrl = dto.getCoverImage();
         if (image != null && !image.isEmpty()) {
-            imageUrl = azureBlobService.uploadImage(image);
+            imageUrl = azureBlobService.uploadCoverImage(image);
         }
         Manga manga;
         if (isUpdate && mangaId != null) {

@@ -23,6 +23,7 @@ import ManageAccount from "./pages/ManageAccount";
 import MyComment from "./pages/MyComment"; // Import the MyComment component
 import { UserProvider } from "./context/UserContext";
 import AdminDashboard from "./pages/admin/AdminDashboard"; // Import AdminDashboard component
+import ChapterManagement from "./pages/admin/ChapterManagement"; // Import ChapterManagement component
 
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
@@ -100,6 +101,15 @@ function App() {
                     element={
                       <AdminRoute>
                         <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
+                  {/* Route for chapter management per manga */}
+                  <Route
+                    path="/admin/manga/:mangaId/chapters"
+                    element={
+                      <AdminRoute>
+                        <ChapterManagement />
                       </AdminRoute>
                     }
                   />

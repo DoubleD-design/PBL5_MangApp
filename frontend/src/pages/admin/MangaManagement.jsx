@@ -36,6 +36,7 @@ import {
   Search,
   Refresh,
 } from "@mui/icons-material";
+import { Link as RouterLink } from "react-router-dom";
 import mangaService from "../../services/mangaService";
 import categoryService from "../../services/categoryService";
 
@@ -326,7 +327,16 @@ const MangaManagement = () => {
             {filteredMangas.map((manga) => (
               <TableRow key={manga.id}>
                 <TableCell>{manga.id}</TableCell>
-                <TableCell>{manga.title}</TableCell>
+                <TableCell>
+                  <Button
+                    component={RouterLink}
+                    to={`/admin/manga/${manga.id}/chapters`}
+                    color="primary"
+                    sx={{ textTransform: "none", fontWeight: 600, p: 0 }}
+                  >
+                    {manga.title}
+                  </Button>
+                </TableCell>
                 <TableCell>{manga.author}</TableCell>
                 <TableCell>
                   <Chip
