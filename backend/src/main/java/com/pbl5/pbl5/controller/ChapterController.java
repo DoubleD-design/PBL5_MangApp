@@ -116,13 +116,26 @@ public class ChapterController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Chapter> updateChapter(@PathVariable Integer id, @RequestBody Chapter chapter) {
-        Chapter updatedChapter = chapterService.updateChapter(id, chapter);
-        if (updatedChapter != null) {
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateChapterWithImages(
+            @PathVariable Integer id,
+            @RequestPart("dataForm") String dataForm,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        try {
+            // Parse dữ liệu JSON thành DTO
+            ObjectMapper mapper = new ObjectMapper();
+            ChapterRequestDTO dto = mapper.readValue(dataForm, ChapterRequestDTO.class);
+
+            // Upload new chapter pages to Azure Blob if files are provided
+            List<String> pageUrls = files != null ? azureBlobService.uploadChapterPages(dto.getManga_id(), String.valueOf(id), files) : List.of();
+
+            // Update chapter details
+            Chapter updatedChapter = chapterService.updateChapterWithPages(id, dto, pageUrls);
+
             return new ResponseEntity<>(updatedChapter, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating chapter: " + e.getMessage());
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")

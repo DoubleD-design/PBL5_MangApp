@@ -10,4 +10,6 @@ public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, 
     List<ReadingHistory> findByUserId(Integer userId);
     List<ReadingHistory> findByMangaId(Integer mangaId);
     List<ReadingHistory> findByUserIdAndMangaId(Integer userId, Integer mangaId);
+    void deleteByMangaId(Integer id);
+    void deleteByChapterId(Integer id);
 }

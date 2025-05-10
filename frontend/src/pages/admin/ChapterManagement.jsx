@@ -5,7 +5,7 @@ import {
   Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Snackbar, IconButton, CircularProgress, Typography, Box, Tooltip, Chip, Stack
 } from "@mui/material";
-import { Add, Edit, Delete, ArrowBack, Image as ImageIcon } from "@mui/icons-material";
+import { Add, Edit, Delete, ArrowBack, Image as ImageIcon, AddCircle, Delete as DeleteIcon } from "@mui/icons-material";
 import chapterService from "../../services/chapterService";
 
 const ChapterManagement = () => {
@@ -24,6 +24,7 @@ const ChapterManagement = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, chapter: null });
+  const [viewDialog, setViewDialog] = useState({ open: false, pages: [] });
 
   // Fetch manga info and chapters
   useEffect(() => {
@@ -82,20 +83,21 @@ const ChapterManagement = () => {
 
   const handleSubmit = async () => {
     try {
+      const formDataToSend = {
+        manga_id: mangaId,
+        chapter_number: formData.chapterNumber,
+        title: formData.title,
+      };
+
       if (dialogType === "add") {
-        await chapterService.createChapter(
-          {
-            manga_id: mangaId,
-            chapter_number: formData.chapterNumber,
-            title: formData.title,
-          },
-          imageFiles
-        );
+        await chapterService.createChapter(formDataToSend, imageFiles);
       } else if (dialogType === "edit" && selectedChapter) {
-        await chapterService.updateChapter(mangaId, selectedChapter.id, formData, imageFiles);
+        await chapterService.updateChapter(selectedChapter.id, formDataToSend, imageFiles);
       }
+
       setSnackbar({ open: true, message: "Lưu chương thành công!", severity: "success" });
       handleCloseDialog();
+
       // Reload chapters
       const chaptersData = await chapterService.getChaptersByManga(mangaId);
       setChapters(chaptersData);
@@ -106,14 +108,75 @@ const ChapterManagement = () => {
 
   const handleDelete = async () => {
     try {
-      await chapterService.deleteChapter(mangaId, deleteDialog.chapter.id);
+      // Call the API to delete the chapter
+      await chapterService.deleteChapter(deleteDialog.chapter.id);
+
+      // Show success notification
       setSnackbar({ open: true, message: "Xóa chương thành công!", severity: "success" });
+
+      // Remove the deleted chapter from the UI
+      setChapters((prevChapters) =>
+        prevChapters.filter((chapter) => chapter.id !== deleteDialog.chapter.id)
+      );
+
+      // Close the delete dialog
       setDeleteDialog({ open: false, chapter: null });
-      // Reload chapters
-      const chaptersData = await chapterService.getChaptersByManga(mangaId);
-      setChapters(chaptersData);
     } catch (err) {
-      setSnackbar({ open: true, message: err.message, severity: "error" });
+      // Show error notification
+      setSnackbar({ open: true, message: "Lỗi xóa chương!", severity: "error" });
+    }
+  };
+
+  const handleViewChapter = async (chapterId) => {
+    try {
+      const pages = await chapterService.getPagesByChapterId(chapterId);
+      setViewDialog({ open: true, pages });
+    } catch (err) {
+      setSnackbar({ open: true, message: "Lỗi tải ảnh chương!", severity: "error" });
+    }
+  };
+
+  const handleCloseViewDialog = () => {
+    setViewDialog({ open: false, pages: [] });
+  };
+
+  const handleAddPage = async (chapterId) => {
+    try {
+      // Logic to add a new page (e.g., open a file picker and upload the image)
+      setSnackbar({ open: true, message: "Chức năng thêm trang chưa được triển khai!", severity: "info" });
+
+      // Example: After adding a page, update the chapter's page count
+      const updatedPages = await chapterService.getPagesByChapterId(chapterId);
+      setViewDialog({ ...viewDialog, pages: updatedPages });
+
+      // Update the chapter's page count in the main list
+      setChapters((prevChapters) =>
+        prevChapters.map((chapter) =>
+          chapter.id === chapterId ? { ...chapter, pages: updatedPages } : chapter
+        )
+      );
+    } catch (err) {
+      setSnackbar({ open: true, message: "Lỗi thêm trang!", severity: "error" });
+    }
+  };
+
+  const handleDeletePage = async (pageId) => {
+    try {
+      await chapterService.deletePage(pageId);
+      setSnackbar({ open: true, message: "Xóa trang thành công!", severity: "success" });
+
+      // Reload pages for the current chapter
+      const updatedPages = await chapterService.getPagesByChapterId(viewDialog.pages[0]?.chapterId);
+      setViewDialog({ ...viewDialog, pages: updatedPages });
+
+      // Update the chapter's page count in the main list
+      setChapters((prevChapters) =>
+        prevChapters.map((chapter) =>
+          chapter.id === viewDialog.pages[0]?.chapterId ? { ...chapter, pages: updatedPages } : chapter
+        )
+      );
+    } catch (err) {
+      setSnackbar({ open: true, message: "Lỗi xóa trang!", severity: "error" });
     }
   };
 
@@ -186,10 +249,12 @@ const ChapterManagement = () => {
               <TableRow
                 key={chapter.id}
                 hover
+                onClick={() => handleViewChapter(chapter.id)}
                 sx={{
                   backgroundColor: idx % 2 === 0 ? "background.default" : "background.paper",
                   "&:hover": {
                     backgroundColor: "#2c2320",
+                    cursor: "pointer",
                   },
                 }}
               >
@@ -214,12 +279,12 @@ const ChapterManagement = () => {
                 </TableCell>
                 <TableCell align="center">
                   <Tooltip title="Sửa chương">
-                    <IconButton color="primary" onClick={() => handleOpenDialog("edit", chapter)}>
+                    <IconButton color="primary" onClick={(e) => { e.stopPropagation(); handleOpenDialog("edit", chapter); }}>
                       <Edit />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Xóa chương">
-                    <IconButton color="error" onClick={() => setDeleteDialog({ open: true, chapter })}>
+                    <IconButton color="error" onClick={(e) => { e.stopPropagation(); setDeleteDialog({ open: true, chapter }); }}>
                       <Delete />
                     </IconButton>
                   </Tooltip>
@@ -309,13 +374,73 @@ const ChapterManagement = () => {
         </DialogActions>
       </Dialog>
 
+      {/* View Dialog */}
+      <Dialog open={viewDialog.open} onClose={handleCloseViewDialog} maxWidth="md" fullWidth>
+        <DialogTitle
+          sx={{
+            color: "#ff6740",
+            fontWeight: 700,
+            letterSpacing: 1,
+          }}
+        >
+          Xem ảnh chương
+        </DialogTitle>
+        <DialogContent>
+          <Stack direction="row" spacing={2} flexWrap="wrap" alignItems="center">
+            {viewDialog.pages.map((page, idx) => (
+              <React.Fragment key={idx}>
+                <Box sx={{ width: 120, textAlign: "center" }}>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: 160,
+                      border: "1px solid #eee",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={page.imageUrl}
+                      alt={`Page ${page.pageNumber}`}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </Box>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    sx={{ mt: 1 }}
+                    onClick={() => handleDeletePage(page.id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+                {idx < viewDialog.pages.length - 1 && (
+                  <IconButton
+                    size="large"
+                    color="primary"
+                    onClick={() => handleAddPage(viewDialog.pages[0]?.chapterId)}
+                  >
+                    <AddCircle />
+                  </IconButton>
+                )}
+              </React.Fragment>
+            ))}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseViewDialog}>Đóng</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         message={snackbar.message}
-      />
+      >
+      </Snackbar>
     </Box>
   );
 };
