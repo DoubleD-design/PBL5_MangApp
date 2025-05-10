@@ -2,21 +2,14 @@ package com.pbl5.pbl5.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pbl5.pbl5.modal.Chapter;
-import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.modal.Page;
-import com.pbl5.pbl5.modal.User;
-import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.ChapterRequestDTO;
-import com.pbl5.pbl5.request.MangaRequestDTO;
 import com.pbl5.pbl5.service.AzureBlobService;
 import com.pbl5.pbl5.service.ChapterService;
-import com.pbl5.pbl5.service.MangaService;
 import com.pbl5.pbl5.service.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,10 +25,6 @@ public class ChapterController {
     
     @Autowired
     private PageService pageService;
-    @Autowired
-    private MangaService mangaService;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private AzureBlobService azureBlobService;
     @GetMapping

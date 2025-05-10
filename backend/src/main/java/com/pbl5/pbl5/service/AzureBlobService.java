@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +66,27 @@ public class AzureBlobService {
         }
     }
 
-    private String getFileExtension(String fileName) {
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    public String uploadAvatarImage(String userId, MultipartFile file) {
+        try {
+            // Create a BlobServiceClient
+            BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+                    .connectionString(connectionString)
+                    .buildClient();
+            BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerNameUser);
+
+            // Set the file name as {user_id}.jpg
+            String fileName = String.format("%s.jpg", userId);
+
+            // Upload the file
+            BlobClient blobClient = containerClient.getBlobClient(fileName);
+            try (InputStream inputStream = file.getInputStream()) {
+                blobClient.upload(inputStream, file.getSize(), true);
+            }
+
+            // Return the URL of the uploaded avatar
+            return blobEndpoint + "/" + containerNameUser + "/" + fileName;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload avatar image to Azure Blob Storage: " + e.getMessage(), e);
+        }
     }
 }

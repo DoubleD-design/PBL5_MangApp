@@ -164,4 +164,26 @@ public class MangaService {
         return mangaRepository.save(manga);
     }
 
+    public Manga updateManga(Integer id, MangaRequestDTO dto, MultipartFile image) {
+        return mangaRepository.findById(id).map(manga -> {
+            // Update manga details
+            manga.setTitle(dto.getTitle());
+            manga.setDescription(dto.getDescription());
+            manga.setAuthor(dto.getAuthor());
+            manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
+
+            // Upload new cover image if provided
+            if (image != null && !image.isEmpty()) {
+                String coverImageUrl = azureBlobService.uploadCoverImage(String.valueOf(id), image);
+                manga.setCoverImage(coverImageUrl);
+            }
+
+            // Update categories
+            List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+            manga.setCategories(categories);
+
+            return mangaRepository.save(manga);
+        }).orElseThrow(() -> new RuntimeException("Manga not found with id: " + id));
+    }
+
 }

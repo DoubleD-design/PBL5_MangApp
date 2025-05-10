@@ -227,23 +227,35 @@ const MangaManagement = () => {
   const handleEditUpdate = async () => {
     try {
       setUploading(true);
-      let updatedManga;
-      if (coverFile) {
-        const form = new FormData();
-        form.append(
-          "dataForm",
-          new Blob([JSON.stringify(formData)], { type: "application/json" })
-        );
-        form.append("image", coverFile);
-        updatedManga = await mangaService.updateManga(selectedManga.id, form);
-      } else {
-        updatedManga = await mangaService.updateManga(selectedManga.id, formData);
-      }
-      setMangas(
-        mangas.map((manga) =>
-          manga.id === updatedManga.id ? updatedManga : manga
+
+      // Gọi API cập nhật manga
+      const updatedManga = await mangaService.updateManga(
+        selectedManga.id,
+        formData,
+        coverFile // Chỉ gửi file nếu có
+      );
+
+      // Thêm chuỗi truy vấn ngẫu nhiên để tránh cache
+      const updatedCoverImage = `${updatedManga.coverImage}?t=${new Date().getTime()}`;
+
+      // Cập nhật danh sách manga trong state
+      setMangas((prevMangas) =>
+        prevMangas.map((manga) =>
+          manga.id === updatedManga.id
+            ? { ...updatedManga, coverImage: updatedCoverImage }
+            : manga
         )
       );
+
+      // Cập nhật manga đã chọn trong form
+      setSelectedManga({ ...updatedManga, coverImage: updatedCoverImage });
+
+      // Cập nhật formData với URL ảnh mới
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        coverImage: updatedCoverImage,
+      }));
+
       setSnackbar({
         open: true,
         message: `Manga "${updatedManga.title}" has been updated`,

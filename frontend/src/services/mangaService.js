@@ -34,25 +34,20 @@ const mangaService = {
     }
   },
 
-    // Update manga (multipart/form-data or JSON)
-  updateManga: async (mangaId, data) => {
-  const token = localStorage.getItem("token");
-  const isFormData = data instanceof FormData;
-  const headers = isFormData
-    ? { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-    : {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      };
+  // Update manga (multipart/form-data or JSON)
+  updateManga: async (mangaId, formData, file) => {
+    const form = new FormData();
+    form.append("dataForm", JSON.stringify(formData));
 
-  const response = await fetch(`/api/manga/update/${mangaId}`, {
-    method: "PUT",
-    body: isFormData ? data : JSON.stringify(data),
-    credentials: "include",
-    headers,
-  });
-  if (!response.ok) throw new Error("Error updating manga");
-    return await response.json();
+    // Append the file only if it exists
+    if (file) {
+      form.append("image", file);
+    }
+
+    const res = await api.put(`/manga/update/${mangaId}`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
   },
 
   // Delete manga
