@@ -298,20 +298,20 @@ const UserManagement = () => {
                     {user.vipStatus ? (
                       <IconButton
                         size="small"
-                        color="default"
+                        color="primary"
                         onClick={() => handleOpenDialog(user, "removeVip")}
                         title="Remove VIP Status"
                       >
-                        <StarBorder fontSize="small" />
+                        <Star fontSize="small" />
                       </IconButton>
                     ) : (
                       <IconButton
                         size="small"
-                        color="primary"
+                        color="default"
                         onClick={() => handleOpenDialog(user, "vip")}
                         title="Set as VIP"
                       >
-                        <Star fontSize="small" />
+                        <StarBorder fontSize="small" />
                       </IconButton>
                     )}
                   </Box>

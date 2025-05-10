@@ -31,8 +31,6 @@ import {
   Add,
   Edit,
   Delete,
-  Visibility,
-  VisibilityOff,
   Search,
   Refresh,
 } from "@mui/icons-material";
@@ -65,6 +63,7 @@ const MangaManagement = () => {
   const [coverFile, setCoverFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const [pendingEdit, setPendingEdit] = useState(false);
 
   useEffect(() => {
     fetchMangas();
@@ -192,53 +191,22 @@ const MangaManagement = () => {
           break;
         }
         case "edit": {
-          let updatedManga;
-          if (coverFile) {
-            // If a new image is selected, use multipart/form-data
-            const form = new FormData();
-            form.append(
-              "dataForm",
-              new Blob([JSON.stringify(formData)], { type: "application/json" })
-            );
-            form.append("image", coverFile);
-            updatedManga = await mangaService.updateManga(selectedManga.id, form);
-          } else {
-            // No new image, just update with JSON
-            updatedManga = await mangaService.updateManga(selectedManga.id, formData);
-          }
-          setMangas(
-            mangas.map((manga) =>
-              manga.id === updatedManga.id ? updatedManga : manga
-            )
-          );
-          message = `Manga "${updatedManga.title}" has been updated`;
-          break;
+          // Không thực hiện update trực tiếp, chỉ mở dialog xác nhận
+          setPendingEdit(true);
+          setOpenDialog(false);
+          setUploading(false);
+          return;
         }
         case "delete":
           await mangaService.deleteManga(selectedManga.id);
           setMangas(mangas.filter((manga) => manga.id !== selectedManga.id));
           message = `Manga "${selectedManga.title}" has been deleted`;
           break;
-        case "toggleVisibility":
-          const newVisibility = !selectedManga.visible;
-          updatedManga = await mangaService.updateMangaVisibility(
-            selectedManga.id,
-            newVisibility
-          );
-          setMangas(
-            mangas.map((manga) =>
-              manga.id === updatedManga.id ? updatedManga : manga
-            )
-          );
-          message = `Manga "${updatedManga.title}" is now ${
-            newVisibility ? "visible" : "hidden"
-          }`;
-          break;
         default:
           break;
       }
 
-      setSnackbar({
+      setSnackbar({ 
         open: true,
         message,
         severity: "success",
@@ -254,6 +222,49 @@ const MangaManagement = () => {
       setUploading(false);
       handleCloseDialog();
     }
+  };
+
+  const handleEditUpdate = async () => {
+    try {
+      setUploading(true);
+      let updatedManga;
+      if (coverFile) {
+        const form = new FormData();
+        form.append(
+          "dataForm",
+          new Blob([JSON.stringify(formData)], { type: "application/json" })
+        );
+        form.append("image", coverFile);
+        updatedManga = await mangaService.updateManga(selectedManga.id, form);
+      } else {
+        updatedManga = await mangaService.updateManga(selectedManga.id, formData);
+      }
+      setMangas(
+        mangas.map((manga) =>
+          manga.id === updatedManga.id ? updatedManga : manga
+        )
+      );
+      setSnackbar({
+        open: true,
+        message: `Manga "${updatedManga.title}" has been updated`,
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: `Error: ${err.message || "Failed to update manga"}`,
+        severity: "error",
+      });
+    } finally {
+      setUploading(false);
+      setPendingEdit(false);
+      setOpenDialog(false);
+    }
+  };
+
+  const handleEditConfirm = () => {
+    setPendingEdit(true);
+    setOpenDialog(false);
   };
 
   const handleCloseSnackbar = () => {
@@ -319,7 +330,6 @@ const MangaManagement = () => {
               <TableCell>Author</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Categories</TableCell>
-              <TableCell>Visibility</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -358,13 +368,6 @@ const MangaManagement = () => {
                   </Box>
                 </TableCell>
                 <TableCell>
-                  {manga.visible ? (
-                    <Chip label="Visible" color="success" size="small" />
-                  ) : (
-                    <Chip label="Hidden" color="default" size="small" />
-                  )}
-                </TableCell>
-                <TableCell>
                   <Box sx={{ display: "flex" }}>
                     <IconButton
                       color="primary"
@@ -379,19 +382,6 @@ const MangaManagement = () => {
                       title="Delete Manga"
                     >
                       <Delete fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      color={manga.visible ? "default" : "primary"}
-                      onClick={() =>
-                        handleOpenDialog(manga, "toggleVisibility")
-                      }
-                      title={manga.visible ? "Hide Manga" : "Show Manga"}
-                    >
-                      {manga.visible ? (
-                        <VisibilityOff fontSize="small" />
-                      ) : (
-                        <Visibility fontSize="small" />
-                      )}
                     </IconButton>
                   </Box>
                 </TableCell>
@@ -536,7 +526,11 @@ const MangaManagement = () => {
             Cancel
           </Button>
           <Button
-            onClick={handleAction}
+            onClick={
+              dialogType === "add"
+                ? handleAction
+                : handleEditConfirm
+            }
             color="primary"
             variant="contained"
             disabled={uploading}
@@ -546,28 +540,20 @@ const MangaManagement = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog for Delete */}
       <Dialog
         open={
           openDialog &&
-          (dialogType === "delete" || dialogType === "toggleVisibility")
+          dialogType === "delete"
         }
         onClose={handleCloseDialog}
       >
         <DialogTitle>
-          {dialogType === "delete"
-            ? "Delete Manga"
-            : selectedManga?.visible
-            ? "Hide Manga"
-            : "Show Manga"}
+          Delete Manga
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {dialogType === "delete"
-              ? `Are you sure you want to delete "${selectedManga?.title}"? This action cannot be undone.`
-              : selectedManga?.visible
-              ? `Are you sure you want to hide "${selectedManga?.title}"? It will no longer be visible to users.`
-              : `Are you sure you want to make "${selectedManga?.title}" visible to users?`}
+            {`Are you sure you want to delete "${selectedManga?.title}"? This action cannot be undone.`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -576,8 +562,36 @@ const MangaManagement = () => {
           </Button>
           <Button
             onClick={handleAction}
-            color={dialogType === "delete" ? "error" : "primary"}
+            color="error"
             variant="contained"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog for Update */}
+      <Dialog
+        open={pendingEdit}
+        onClose={() => setPendingEdit(false)}
+      >
+        <DialogTitle>
+          Update Manga
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {`Are you sure you want to update "${selectedManga?.title}"? This action cannot be undone.`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingEdit(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEditUpdate}
+            color="primary"
+            variant="contained"
+            disabled={uploading}
           >
             Confirm
           </Button>

@@ -67,17 +67,17 @@ const mangaService = {
   },
 
   // Update manga visibility
-  updateMangaVisibility: async (mangaId, visible) => {
-    try {
-      const response = await api.put(`/manga/${mangaId}/visibility`, {
-        visible,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error updating manga visibility:", error);
-      throw error;
-    }
-  },
+  // updateMangaVisibility: async (mangaId, visible) => {
+  //   try {
+  //     const response = await api.put(`/manga/${mangaId}/visibility`, {
+  //       visible,
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error updating manga visibility:", error);
+  //     throw error;
+  //   }
+  // },
 
   // Get all mangas with pagination
   getAllMangas: async (page = 0, size = 10) => {
