@@ -50,11 +50,16 @@ const ChapterManagement = () => {
     if (type === "edit" && chapter) {
       setFormData({
         title: chapter.title,
+        chapterNumber: chapter.chapterNumber,
         images: [],
       });
       setImageFiles([]);
     } else {
-      setFormData({ title: "", images: [] });
+      // Calculate the next chapter number
+      const nextChapterNumber = chapters.length > 0 
+        ? Math.max(...chapters.map((c) => c.chapterNumber)) + 1 
+        : 1;
+      setFormData({ title: "", chapterNumber: nextChapterNumber, images: [] });
       setImageFiles([]);
     }
     setDialogOpen(true);
@@ -78,7 +83,14 @@ const ChapterManagement = () => {
   const handleSubmit = async () => {
     try {
       if (dialogType === "add") {
-        await chapterService.createChapter(mangaId, formData, imageFiles);
+        await chapterService.createChapter(
+          {
+            manga_id: mangaId,
+            chapter_number: formData.chapterNumber,
+            title: formData.title,
+          },
+          imageFiles
+        );
       } else if (dialogType === "edit" && selectedChapter) {
         await chapterService.updateChapter(mangaId, selectedChapter.id, formData, imageFiles);
       }
@@ -181,7 +193,9 @@ const ChapterManagement = () => {
                   },
                 }}
               >
-                <TableCell align="center" sx={{ color: "#fff" }}>{idx}</TableCell>
+                <TableCell align="center" sx={{ color: "#fff" }}>
+                  {chapter.chapterNumber}
+                </TableCell>
                 <TableCell>
                   <Typography fontWeight={600} sx={{ color: "#fff" }}>{chapter.title}</Typography>
                 </TableCell>

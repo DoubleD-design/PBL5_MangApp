@@ -13,12 +13,14 @@ const getChaptersByManga = async (mangaId) => {
 };
 
 // Tạo chương mới (multipart/form-data)
-const createChapter = async (mangaId, formData, imageFiles) => {
+const createChapter = async (formData, files) => {
   const form = new FormData();
-  form.append("title", formData.title);
-  imageFiles.forEach((file) => form.append("images", file));
-  // Gửi lên endpoint backend nhận multipart/form-data cho chương mới
-  const res = await api.post(`/chapters?mangaId=${mangaId}`, form);
+  form.append("dataForm", JSON.stringify(formData));
+  files.forEach((file) => form.append("files", file));
+
+  const res = await api.post(`/chapters/create`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return res.data;
 };
 

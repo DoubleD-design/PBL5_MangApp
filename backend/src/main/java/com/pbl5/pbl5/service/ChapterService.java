@@ -1,6 +1,7 @@
 package com.pbl5.pbl5.service;
 
 import com.pbl5.pbl5.modal.Chapter;
+import com.pbl5.pbl5.modal.Page;
 import com.pbl5.pbl5.repos.ChapterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ public class ChapterService {
     @Autowired
     private ChapterRepository chapterRepository;
 
+    @Autowired
+    private PageService pageService;
+
     public List<Chapter> getAllChapters() {
         return chapterRepository.findAll();
     }
@@ -26,9 +30,21 @@ public class ChapterService {
         return chapterRepository.findByMangaIdOrderByChapterNumberAsc(mangaId);
     }
 
-    public Chapter createChapter(Chapter chapter) {
+        public Chapter createChapter(Chapter chapter, List<String> pageUrls) {
         chapter.setCreatedAt(LocalDateTime.now());
-        return chapterRepository.save(chapter);
+        Chapter savedChapter = chapterRepository.save(chapter);
+
+        // Create pages for the chapter
+        int pageNumber = 1;
+        for (String pageUrl : pageUrls) {
+            Page page = new Page();
+            page.setChapterId(savedChapter.getId());
+            page.setPageNumber(pageNumber++);
+            page.setImageUrl(pageUrl);
+            pageService.createPage(page);
+        }
+
+        return savedChapter;
     }
     
     public Chapter updateChapter(Integer id, Chapter chapterDetails) {
