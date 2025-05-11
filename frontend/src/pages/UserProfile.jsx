@@ -17,6 +17,7 @@ const UserProfile = () => {
   const { user, loading, error, updateUser } = useUser();
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
+    avatarUrl: user?.avatar || "",
     username: user?.username || "",
     email: user?.email || "",
     vipStatus: user?.vipStatus || false,
@@ -24,10 +25,31 @@ const UserProfile = () => {
     birthday: user?.birthday || "",
     gender: user?.gender || "",
   });
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditAvatar = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setAvatarFile(file);
+    setUploadingAvatar(true);
+
+    try {
+      const avatarUrl = await userService.updateAvatar(file);
+      const updatedUser = { ...user, avatarUrl }; // Ensure avatarUrl is updated correctly
+      updateUser(updatedUser); // Ensure the updated user object is saved in context
+      setAvatarFile(null);
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -44,11 +66,6 @@ const UserProfile = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
     }
-  };
-
-  const handleEditAvatar = () => {
-    // Add logic to edit avatar (e.g., file upload)
-    console.log("Edit Avatar clicked");
   };
 
   if (loading) {
@@ -77,11 +94,25 @@ const UserProfile = () => {
         <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
           <Avatar
             sx={{ width: 120, height: 120, mx: "auto", mb: 2 }}
-            src="https://via.placeholder.com/120"
+            src={user?.avatarUrl ?? "https://via.placeholder.com/120"}
             alt="User Avatar"
           />
-          <Button variant="outlined" onClick={handleEditAvatar}>
-            Edit Avatar
+          <Button
+            variant="outlined"
+            component="label"
+            disabled={uploadingAvatar}
+          >
+            {uploadingAvatar ? (
+              <CircularProgress size={20} />
+            ) : (
+              "Edit Avatar"
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleEditAvatar}
+            />
           </Button>
         </Grid>
 

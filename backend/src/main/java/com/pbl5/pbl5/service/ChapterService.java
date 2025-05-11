@@ -3,7 +3,6 @@ package com.pbl5.pbl5.service;
 import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Page;
 import com.pbl5.pbl5.repos.ChapterRepository;
-import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.PageRepository;
 import com.pbl5.pbl5.repos.ReadingHistoryRepository;
 import com.pbl5.pbl5.request.ChapterRequestDTO;
@@ -23,8 +22,6 @@ public class ChapterService {
     private ChapterRepository chapterRepository;
     @Autowired
     private PageRepository pageRepository;
-    @Autowired
-    private FavouriteRepository favouriteRepository;
     @Autowired
     private ReadingHistoryRepository readingHistoryRepository;
     @Autowired

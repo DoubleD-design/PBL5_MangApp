@@ -12,7 +12,8 @@ export const UserProvider = ({ children }) => {
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/users/details");
+        const response = await api.get("/users/details"); 
+        console.log("API Response:", response.data); // Kiểm tra dữ liệu trả về từ API  
         setUser(response.data);
         setError(null);
       } catch (err) {
@@ -45,11 +46,18 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   const updateUser = (updatedUser) => {
-    setUser(updatedUser);
+    console.log("Previous User:", user); // Kiểm tra dữ liệu trước khi cập nhật
+    console.log("Updated User Data:", updatedUser); // Kiểm tra dữ liệu mới
+    setUser((prevUser) => {
+      const newUser = { ...prevUser, ...updatedUser }; // Merge dữ liệu
+      console.log("New User State:", newUser); // Kiểm tra dữ liệu sau khi cập nhật
+      return { ...newUser }; // Ensure a new object reference is returned
+    });
   };
 
   return (
     <UserContext.Provider value={{ user, loading, error, updateUser }}>
+      {console.log("Current User State in Context:", user)} {/* Kiểm tra giá trị */}
       {children}
     </UserContext.Provider>
   );

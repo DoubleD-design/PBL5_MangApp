@@ -5,6 +5,7 @@ import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.MangaRepository;
+import com.pbl5.pbl5.repos.ReadingHistoryRepository;
 import com.pbl5.pbl5.request.MangaRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,6 +33,8 @@ public class MangaService {
     private AzureBlobService azureBlobService;
     @Autowired
     private com.pbl5.pbl5.repos.CategoryRepository categoryRepository;
+    @Autowired
+    private ReadingHistoryRepository readingHistoryRepository;
 
     @Cacheable("mangas")
     public List<Manga> getAllMangas() {
@@ -82,6 +85,7 @@ public class MangaService {
     @CacheEvict(value = {"mangas", "mangaById", "mangaWithCategories", "mangaWithChapters"}, key = "#id")
     public void deleteManga(Integer id) {
         favouriteRepository.deleteByMangaId(id);
+        readingHistoryRepository.deleteByMangaId(id);
         mangaRepository.deleteById(id);
     }
 
