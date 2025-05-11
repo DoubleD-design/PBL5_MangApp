@@ -3,9 +3,7 @@ import com.pbl5.pbl5.modal.Category;
 import com.pbl5.pbl5.modal.Rating;
 import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Manga;
-import com.pbl5.pbl5.repos.FavouriteRepository;
-import com.pbl5.pbl5.repos.MangaRepository;
-import com.pbl5.pbl5.repos.ReadingHistoryRepository;
+import com.pbl5.pbl5.repos.*;
 import com.pbl5.pbl5.request.MangaRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,6 +23,8 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 public class MangaService {
+
+    private final PageRepository pageRepository;
     @Autowired
     private MangaRepository mangaRepository;
     @Autowired
@@ -35,7 +35,11 @@ public class MangaService {
     private com.pbl5.pbl5.repos.CategoryRepository categoryRepository;
     @Autowired
     private ReadingHistoryRepository readingHistoryRepository;
-
+    @Autowired
+    private ChapterRepository chapterRepository;
+    MangaService(PageRepository pageRepository) {
+        this.pageRepository = pageRepository;
+    }
     @Cacheable("mangas")
     public List<Manga> getAllMangas() {
         // Use findAllWithChapters to eagerly fetch chapters and avoid LazyInitializationException
@@ -86,6 +90,11 @@ public class MangaService {
     public void deleteManga(Integer id) {
         favouriteRepository.deleteByMangaId(id);
         readingHistoryRepository.deleteByMangaId(id);
+        List<Chapter> chapters  = chapterRepository.findByMangaId(id);
+        for (Chapter chapter : chapters) {
+            pageRepository.deleteByChapterId(chapter.getId());
+        }
+        chapterRepository.deleteByMangaId(id);
         mangaRepository.deleteById(id);
     }
 

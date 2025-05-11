@@ -18,4 +18,5 @@ public interface ChapterRepository extends JpaRepository<Chapter, Integer> {
     
     @Query("SELECT DISTINCT c FROM Chapter c LEFT JOIN FETCH c.pages WHERE c.id = :id")
     Optional<Chapter> findByIdWithPages(@Param("id") Integer id);
+    void deleteByMangaId(Integer id);
 }
