@@ -35,7 +35,16 @@ const ChapterManagement = () => {
         setManga(mangaData);
 
         const chaptersData = await chapterService.getChaptersByManga(mangaId);
-        setChapters(chaptersData);
+
+        // Fetch pages for each chapter and include them in the chapters data
+        const chaptersWithPages = await Promise.all(
+          chaptersData.map(async (chapter) => {
+            const pages = await chapterService.getPagesByChapterId(chapter.id);
+            return { ...chapter, pages };
+          })
+        );
+
+        setChapters(chaptersWithPages);
       } catch (err) {
         setSnackbar({ open: true, message: "Lỗi tải dữ liệu!", severity: "error" });
       }

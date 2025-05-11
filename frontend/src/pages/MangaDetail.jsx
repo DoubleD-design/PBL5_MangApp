@@ -445,65 +445,71 @@ const MangaDetail = () => {
         <div role="tabpanel" hidden={tabValue !== 0}>
           {tabValue === 0 && (
             <List>
-              {[...manga.chapters]
-                .sort((a, b) => b.chapterNumber - a.chapterNumber) // Sort chapters in descending order
-                .map((chapter, index, sortedChapters) => {
-                  // Check if this chapter has been read
-                  const isRead = readChapters.some(
-                    (item) => item.chapterId === chapter.id
-                  );
+              {Array.isArray(manga.chapters) && manga.chapters.length > 0 ? (
+                [...manga.chapters]
+                  .sort((a, b) => b.chapterNumber - a.chapterNumber) // Sort chapters in descending order
+                  .map((chapter, index, sortedChapters) => {
+                    // Check if this chapter has been read
+                    const isRead = readChapters.some(
+                      (item) => item.chapterId === chapter.id
+                    );
 
-                  return (
-                    <div key={chapter.id}>
-                      <ListItem
-                        button
-                        component={Link}
-                        to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
-                        onClick={() => {
-                          // Add to reading history when clicked
-                          readingHistoryService.addToReadingHistory(
-                            manga.id,
-                            chapter.id,
-                            chapter.chapterNumber
-                          );
-                        }}
-                        sx={{
-                          backgroundColor: isRead
-                            ? "rgba(25, 118, 210, 0.08)"
-                            : "transparent",
-                          "&:hover": {
-                            backgroundColor: isRead
-                              ? "rgba(25, 118, 210, 0.12)"
-                              : "rgba(0, 0, 0, 0.04)",
-                          },
-                          borderLeft: isRead ? "4px solid #1976d2" : "none",
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          {isRead ? (
-                            <CheckCircle color="primary" fontSize="small" />
-                          ) : (
-                            <RadioButtonUnchecked
-                              color="action"
-                              fontSize="small"
-                            />
-                          )}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={`${chapter.title}`}
-                          secondary={`Released: ${new Date(
-                            chapter.createdAt
-                          ).toLocaleDateString()}`}
-                          primaryTypographyProps={{
-                            color: isRead ? "primary" : "inherit",
-                            fontWeight: isRead ? 500 : 400,
+                    return (
+                      <div key={chapter.id}>
+                        <ListItem
+                          button
+                          component={Link}
+                          to={`/manga/${manga.id}/chapter/${chapter.chapterNumber}`}
+                          onClick={() => {
+                            // Add to reading history when clicked
+                            readingHistoryService.addToReadingHistory(
+                              manga.id,
+                              chapter.id,
+                              chapter.chapterNumber
+                            );
                           }}
-                        />
-                      </ListItem>
-                      {index < sortedChapters.length - 1 && <Divider />}
-                    </div>
-                  );
-                })}
+                          sx={{
+                            backgroundColor: isRead
+                              ? "rgba(25, 118, 210, 0.08)"
+                              : "transparent",
+                            "&:hover": {
+                              backgroundColor: isRead
+                                ? "rgba(25, 118, 210, 0.12)"
+                                : "rgba(0, 0, 0, 0.04)",
+                            },
+                            borderLeft: isRead ? "4px solid #1976d2" : "none",
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            {isRead ? (
+                              <CheckCircle color="primary" fontSize="small" />
+                            ) : (
+                              <RadioButtonUnchecked
+                                color="action"
+                                fontSize="small"
+                              />
+                            )}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={`${chapter.title}`}
+                            secondary={`Released: ${new Date(
+                              chapter.createdAt
+                            ).toLocaleDateString()}`}
+                            primaryTypographyProps={{
+                              color: isRead ? "primary" : "inherit",
+                              fontWeight: isRead ? 500 : 400,
+                            }}
+                          />
+                        </ListItem>
+                        {index < sortedChapters.length - 1 && <Divider />}
+                      </div>
+                    );
+                  })
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  No chapters available for this manga.
+                </Typography>
+              )}
             </List>
           )}
         </div>
