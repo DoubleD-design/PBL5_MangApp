@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.pbl5.pbl5.request.UserProfileRequest;
 import com.pbl5.pbl5.request.ChangePasswordRequest;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 import java.util.List;
@@ -22,6 +23,9 @@ public class UserController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private AzureBlobService azureBlobService;
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -42,7 +46,9 @@ public class UserController {
         String email = auth.getName();
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return new ResponseEntity<>(user, HttpStatus.OK);
+
+        // Ensure the avatarUrl field is included in the response
+        return ResponseEntity.ok(user); 
     }
 
     @PostMapping
@@ -91,6 +97,28 @@ public class UserController {
         userService.saveUser(user);
 
         return ResponseEntity.ok("Password changed successfully");
+    }
+
+    @PutMapping("/avatar")
+    public ResponseEntity<String> updateAvatar(@RequestPart("file") MultipartFile file) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            // Upload avatar to Azure Blob Storage
+            String avatarUrl = azureBlobService.uploadAvatarImage(user.getId().toString(), file);
+
+            // Update user's avatar URL
+            user.setAvatarUrl(avatarUrl);
+            userService.saveUser(user);
+
+            return ResponseEntity.ok(avatarUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update avatar: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
