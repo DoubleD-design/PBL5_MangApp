@@ -132,6 +132,7 @@ public class MangaController {
             @RequestPart("dataForm") String dataForm,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
+            // Parse JSON data
             ObjectMapper mapper = new ObjectMapper();
             MangaRequestDTO dto = mapper.readValue(dataForm, MangaRequestDTO.class);
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();

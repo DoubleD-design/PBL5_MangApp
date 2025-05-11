@@ -13,27 +13,45 @@ const getChaptersByManga = async (mangaId) => {
 };
 
 // Tạo chương mới (multipart/form-data)
-const createChapter = async (mangaId, formData, imageFiles) => {
+const createChapter = async (formData, files) => {
   const form = new FormData();
-  form.append("title", formData.title);
-  imageFiles.forEach((file) => form.append("images", file));
-  // Gửi lên endpoint backend nhận multipart/form-data cho chương mới
-  const res = await api.post(`/chapters?mangaId=${mangaId}`, form);
+  form.append("dataForm", JSON.stringify(formData));
+  files.forEach((file) => form.append("files", file));
+
+  const res = await api.post(`/chapters/create`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return res.data;
 };
 
 // Cập nhật chương (multipart/form-data)
-const updateChapter = async (mangaId, chapterId, formData, imageFiles) => {
+const updateChapter = async (chapterId, formData, files) => {
   const form = new FormData();
-  form.append("title", formData.title);
-  imageFiles.forEach((file) => form.append("images", file));
-  const res = await api.put(`/chapters/${chapterId}?mangaId=${mangaId}`, form);
+  form.append("dataForm", JSON.stringify(formData));
+  files.forEach((file) => form.append("files", file));
+
+  const res = await api.put(`/chapters/${chapterId}`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return res.data;
 };
 
 // Xóa chương
-const deleteChapter = async (mangaId, chapterId) => {
-  const res = await api.delete(`/manga/${mangaId}/chapters/${chapterId}`);
+const deleteChapter = async (chapterId) => {
+  // Ensure the API call is made to the correct endpoint
+  const res = await api.delete(`/chapters/${chapterId}`);
+  return res.data;
+};
+
+// Lấy danh sách trang của chương
+const getPagesByChapterId = async (chapterId) => {
+  const res = await api.get(`/pages/chapter/${chapterId}`);
+  return res.data;
+};
+
+// Xóa trang
+const deletePage = async (pageId) => {
+  const res = await api.delete(`/pages/${pageId}`);
   return res.data;
 };
 
@@ -43,6 +61,8 @@ const chapterService = {
   createChapter,
   updateChapter,
   deleteChapter,
+  getPagesByChapterId,
+  deletePage,
 };
 
 export default chapterService;

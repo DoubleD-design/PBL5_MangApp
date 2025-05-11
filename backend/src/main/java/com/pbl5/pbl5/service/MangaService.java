@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class MangaService {
@@ -135,26 +136,54 @@ public class MangaService {
 
     public Manga uploadAndSave(MangaRequestDTO dto, MultipartFile image, Integer adminId, boolean isUpdate, Integer mangaId) {
         String imageUrl = dto.getCoverImage();
-        if (image != null && !image.isEmpty()) {
-            imageUrl = azureBlobService.uploadCoverImage(image);
-        }
         Manga manga;
+
         if (isUpdate && mangaId != null) {
             manga = mangaRepository.findById(mangaId).orElseThrow(() -> new RuntimeException("Manga not found"));
         } else {
             manga = new Manga();
             manga.setCreatedAt(java.time.LocalDateTime.now());
         }
+
+        // Upload cover image if provided
+        if (image != null && !image.isEmpty()) {
+            imageUrl = azureBlobService.uploadCoverImage(manga.getId() != null ? manga.getId().toString() : UUID.randomUUID().toString(), image);
+        }
+
         manga.setTitle(dto.getTitle());
         manga.setDescription(dto.getDescription());
         manga.setCoverImage(imageUrl);
         manga.setAuthor(dto.getAuthor());
         manga.setAdminId(adminId);
         manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
+
         // Set categories
         List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
         manga.setCategories(categories);
+
         return mangaRepository.save(manga);
+    }
+
+    public Manga updateManga(Integer id, MangaRequestDTO dto, MultipartFile image) {
+        return mangaRepository.findById(id).map(manga -> {
+            // Update manga details
+            manga.setTitle(dto.getTitle());
+            manga.setDescription(dto.getDescription());
+            manga.setAuthor(dto.getAuthor());
+            manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
+
+            // Upload new cover image if provided
+            if (image != null && !image.isEmpty()) {
+                String coverImageUrl = azureBlobService.uploadCoverImage(String.valueOf(id), image);
+                manga.setCoverImage(coverImageUrl);
+            }
+
+            // Update categories
+            List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+            manga.setCategories(categories);
+
+            return mangaRepository.save(manga);
+        }).orElseThrow(() -> new RuntimeException("Manga not found with id: " + id));
     }
 
 }
