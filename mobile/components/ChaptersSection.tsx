@@ -1,22 +1,28 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import { Manga, Chapter, Page } from '../types/Manga';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import axios from 'axios';
+import { RootStackParamList } from '../types/RootStackParamList';
+import { Chapter } from '../types/Manga';
+import api from '../services/api';
 
-interface ChaptersSectionProps {
-  mangaId: number; // Đảm bảo mangaId là number
-}
+type ChaptersSectionProps = {
+  mangaId: number;
+};
+
+type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const ChaptersSection: React.FC<ChaptersSectionProps> = ({ mangaId }) => {
+  const navigation = useNavigation<RootStackNavigationProp>();
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Giả sử API trả về danh sách các chapter theo mangaId
     const fetchChapters = async () => {
       try {
-        const response = await fetch(`https://api.example.com/manga/${mangaId}/chapters`);
-        const data = await response.json();
-        setChapters(data); // Giả sử API trả về array của các chapter
+        const response = await api.get(`/chapters/manga/${mangaId}`);
+        setChapters(response.data);
       } catch (error) {
         console.error('Error fetching chapters:', error);
       } finally {
@@ -27,68 +33,64 @@ const ChaptersSection: React.FC<ChaptersSectionProps> = ({ mangaId }) => {
     fetchChapters();
   }, [mangaId]);
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Loading Chapters...</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chapters</Text>
+    <View style={styles.chapterListContainer}>
+      <Text style={styles.chapterListTitle}>Chapters</Text>
       <View style={styles.chapterBox}>
-        <ScrollView nestedScrollEnabled={true}>
-          {chapters.map((chapter, index) => (
-            <TouchableOpacity key={index} style={styles.chapterRow}>
-              <Text style={styles.chapterTitle}>{chapter.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {loading ? (
+          <Text style={{ color: '#ccc', paddingVertical: 10 }}>Loading...</Text>
+        ) : (
+          <ScrollView nestedScrollEnabled={true}>
+            {chapters.length > 0 ? (
+              chapters.slice().reverse().map((chapter, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.chapterRow}
+                  onPress={() => navigation.navigate('Reading', { chapter, chapters })}
+                >
+                  <Text style={styles.chapterTitle}>{chapter.title}</Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={{ color: '#ccc', paddingVertical: 10 }}>No chapters available.</Text>
+            )}
+          </ScrollView>
+        )}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-  },
-  title: {
-    fontSize: 18,
-    color: 'white',
-    marginBottom: 10,
+  chapterListContainer: {
     marginHorizontal: 10,
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    marginBottom: 30,
+  },
+  chapterListTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#b5e745',
+    marginBottom: 10,
+    marginLeft: 10,
   },
   chapterBox: {
     backgroundColor: 'rgba(59, 42, 26, 0.7)',
-    borderColor: '#b5e745',
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
-    borderRadius: 15,
-    padding: 5,
-    maxHeight: 400,
+    borderColor: '#b5e745',
+    maxHeight: 250,
   },
   chapterRow: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderBottomColor: 'rgba(181, 231, 69, 0.3)',
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'center', // căn giữa nội dung theo chiều ngang
-    alignItems: 'center',    
+    borderBottomColor: '#444',
   },
   chapterTitle: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 16,
+    textAlign: 'center',
   },
-  chapterDate: {
-    color: 'white',
-    fontSize: 14,
-  },
-})
+});
 
 export default ChaptersSection;

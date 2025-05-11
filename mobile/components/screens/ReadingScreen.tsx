@@ -3,10 +3,13 @@ import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../types/RootStackParamList';
 import {
   View, Text, ScrollView, Image, StyleSheet, TouchableOpacity,
-  Dimensions, Modal, FlatList
+  Dimensions, Modal, FlatList, ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { Page } from '../../types/Manga';
+import axios from 'axios';
+import api from '../../services/api';
 
 type ReadingRouteProp = RouteProp<RootStackParamList, 'Reading'>;
 
@@ -17,6 +20,8 @@ const ReadingScreen = () => {
   const { chapter, chapters } = route.params;
   const { width } = Dimensions.get('window');
 
+  const [pages, setPages] = useState<Page[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showChapterList, setShowChapterList] = useState(false);
   const [imageHeights, setImageHeights] = useState<{ [key: string]: number }>({});
 
@@ -32,7 +37,23 @@ const ReadingScreen = () => {
   };
 
   useEffect(() => {
-    chapter.pages.forEach((page) => {
+  setLoading(true);
+  setPages([]);
+  setImageHeights({});
+  api.get(`/chapters/${chapter.id}/pages`).then((response) => {
+      setPages(
+        response.data.sort((a: Page, b: Page) => a.pageNumber - b.pageNumber)
+      );
+      setLoading(false);
+    })
+    .catch((error) => {
+      console.error('Lỗi khi fetch pages:', error);
+      setLoading(false);
+    });
+}, [chapter]);
+
+  useEffect(() => {
+    pages.forEach((page) => {
       if (!imageHeights[page.id]) {
         Image.getSize(
           page.imageUrl,
@@ -46,7 +67,7 @@ const ReadingScreen = () => {
         );
       }
     });
-  }, [chapter, width]);
+  }, [pages, width]);
 
   return (
     <View style={styles.container}>
@@ -57,6 +78,30 @@ const ReadingScreen = () => {
       <Text style={styles.chapterTitle} numberOfLines={1} ellipsizeMode="tail">
         {chapter.title.length > 25 ? chapter.title.slice(0, 25) + '...' : chapter.title}
       </Text>
+
+      
+
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#b5e745" />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.imageList}>
+          {pages.map((page) => (
+            <Image
+              key={page.id}
+              source={{ uri: page.imageUrl }}
+              style={{
+                width: width,
+                height: imageHeights[page.id] || width * 1.4,
+                marginBottom: 10,
+                alignSelf: 'center',
+              }}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+      )}
 
       <View style={styles.navButtons}>
         <TouchableOpacity
@@ -71,11 +116,10 @@ const ReadingScreen = () => {
           style={styles.navButtonModal}
           onPress={() => setShowChapterList(true)}
         >
-          <Text style={styles.navButtonText}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          >{chapter.title}</Text>
-          <Ionicons name="chevron-down" size={18} color="#b5e745" />
+          <Text style={styles.navButtonText} numberOfLines={1} ellipsizeMode="tail">
+            {chapter.title}
+          </Text>
+          <Ionicons name="chevron-up" size={18} color="#b5e745" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -87,29 +131,10 @@ const ReadingScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.imageList}>
-        {chapter.pages
-          .sort((a, b) => a.pageNumber - b.pageNumber)
-          .map((page) => (
-            <Image
-              key={page.id}
-              source={{ uri: page.imageUrl }}
-              style={[
-                styles.pageImage,
-                {
-                  width: width,
-                  height: imageHeights[page.id] || width * 1.4,
-                },
-              ]}
-              resizeMode="cover"
-            />
-          ))}
-      </ScrollView>
-
       <Modal visible={showChapterList} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Danh sách chương</Text>
+            <Text style={styles.modalTitle}>Chapters List</Text>
             <FlatList
               data={chapters.slice().reverse()}
               keyExtractor={(item) => item.id.toString()}
@@ -126,7 +151,7 @@ const ReadingScreen = () => {
               )}
             />
             <TouchableOpacity onPress={() => setShowChapterList(false)} style={styles.closeButton}>
-              <Text style={styles.navButtonText}>Đóng</Text>
+              <Text style={styles.navButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -136,14 +161,15 @@ const ReadingScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1a1a1a' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#1a1a1a' },
   backButton: { position: 'absolute', top: 70, left: 20, zIndex: 10 },
   chapterTitle: {
     fontSize: 18, fontWeight: 'bold', color: '#b5e745', textAlign: 'center',
     marginTop: 70, marginBottom: 10,
   },
   imageList: { paddingBottom: 20 },
-  pageImage: { marginBottom: 10, alignSelf: 'center' },
   navButtons: {
     flexDirection: 'row', justifyContent: 'center',
     marginVertical: 10, paddingHorizontal: 10,
@@ -159,11 +185,11 @@ const styles = StyleSheet.create({
   },
   navButtonModal: {
     backgroundColor: '#3a3a3a',
-    width: 200,  // Để chiều rộng tự động điều chỉnh theo nội dung
+    width: 200,
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'space-between',
-    flexDirection: 'row',  // Sử dụng 'row' để mũi tên và tiêu đề nằm cạnh nhau
+    flexDirection: 'row',
     paddingHorizontal: 30,
   },
   navButtonText: {
