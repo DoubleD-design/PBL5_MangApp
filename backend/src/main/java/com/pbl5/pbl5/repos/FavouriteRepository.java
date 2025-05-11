@@ -19,4 +19,8 @@ public interface FavouriteRepository extends JpaRepository<Favourite, Integer> {
     void deleteByUserIdAndMangaId(Integer userId, Integer mangaId);
     List<Favourite> findByReaderId(Integer readerId);
     void deleteByReaderIdAndMangaId(Integer readerId, Integer mangaId);
+
+    @Modifying
+    @Transactional
+    void deleteByMangaId(Integer mangaId);
 }

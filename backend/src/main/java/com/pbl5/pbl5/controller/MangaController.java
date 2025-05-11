@@ -1,16 +1,14 @@
 package com.pbl5.pbl5.controller;
 
 import com.pbl5.pbl5.modal.*;
-import com.pbl5.pbl5.repos.CategoryRepository;
 import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.MangaRequestDTO;
 import com.pbl5.pbl5.service.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,14 +17,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/manga")
 public class MangaController {
     @Autowired
     private MangaService mangaService;
-    @Autowired
-    private CategoryRepository categoryRepository;
     @Autowired
     private UserRepository userRepository;
     
@@ -111,38 +108,45 @@ public class MangaController {
         return ResponseEntity.of(mangaService.getMangaById(id));
     }
 
-    @PostMapping
-    public Manga createManga(@RequestBody MangaRequestDTO dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName(); // Đây là username đã login
-        System.out.println(username);
-
-        // Tìm User tương ứng
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Manga manga = new Manga();
-        manga.setTitle(dto.getTitle());
-        manga.setDescription(dto.getDescription());
-        manga.setCoverImage(dto.getCoverImage());
-        manga.setAuthor(dto.getAuthor());
-        manga.setAdminId(user.getId());
-        manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
-        manga.setCreatedAt(LocalDateTime.now());
-        System.out.println("Category IDs: " + dto.getCategoryIds());
-
-        // Lấy danh sách category từ ID
-        List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
-        manga.setCategories(categories);
-
-        return mangaService.createManga(manga);
+    @PostMapping(value = "/create", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createMangaWithForm(
+            @RequestPart("dataForm") String dataForm,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            MangaRequestDTO dto = mapper.readValue(dataForm, MangaRequestDTO.class);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            Manga manga = mangaService.uploadAndSave(dto, image, user.getId(), false, null);
+            return ResponseEntity.ok(manga);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error creating manga: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Manga> updateManga(@PathVariable Integer id, @RequestBody Manga manga) {
-        return ResponseEntity.of(Optional.ofNullable(mangaService.updateManga(id, manga)));
+    @PutMapping(value = "/update/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateMangaWithForm(
+            @PathVariable Integer id,
+            @RequestPart("dataForm") String dataForm,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        try {
+            // Parse JSON data
+            ObjectMapper mapper = new ObjectMapper();
+            MangaRequestDTO dto = mapper.readValue(dataForm, MangaRequestDTO.class);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            Manga manga = mangaService.uploadAndSave(dto, image, user.getId(), true, id);
+            return ResponseEntity.ok(manga);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating manga: " + e.getMessage());
+        }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public void deleteManga(@PathVariable Integer id) {
         mangaService.deleteManga(id);
     }

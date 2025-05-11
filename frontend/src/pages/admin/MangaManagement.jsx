@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -31,11 +31,10 @@ import {
   Add,
   Edit,
   Delete,
-  Visibility,
-  VisibilityOff,
   Search,
   Refresh,
 } from "@mui/icons-material";
+import { Link as RouterLink } from "react-router-dom";
 import mangaService from "../../services/mangaService";
 import categoryService from "../../services/categoryService";
 
@@ -61,6 +60,10 @@ const MangaManagement = () => {
     message: "",
     severity: "success",
   });
+  const [coverFile, setCoverFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [pendingEdit, setPendingEdit] = useState(false);
 
   useEffect(() => {
     fetchMangas();
@@ -103,6 +106,7 @@ const MangaManagement = () => {
         status: "ONGOING",
         categoryIds: [],
       });
+      setCoverFile(null);
     } else if (type === "edit" && manga) {
       setSelectedManga(manga);
       setFormData({
@@ -113,8 +117,10 @@ const MangaManagement = () => {
         status: manga.status,
         categoryIds: manga.categories?.map((cat) => cat.id) || [],
       });
+      setCoverFile(null);
     } else {
       setSelectedManga(manga);
+      setCoverFile(null);
     }
 
     setOpenDialog(true);
@@ -143,6 +149,18 @@ const MangaManagement = () => {
     });
   };
 
+  const handleCoverFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverFile(file);
+      // Hiển thị preview tạm thời
+      setFormData((prev) => ({
+        ...prev,
+        coverImage: URL.createObjectURL(file),
+      }));
+    }
+  };
+
   const filteredMangas = mangas.filter(
     (manga) =>
       manga.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -151,62 +169,44 @@ const MangaManagement = () => {
 
   const handleAction = async () => {
     try {
+      setUploading(true);
       let message = "";
       let updatedManga = null;
 
       switch (dialogType) {
-        case "add":
-          // Replace with actual API call to add manga
-          //log formData
-          console.log(formData);
-          const newManga = await mangaService.createManga(formData);
+        case "add": {
+          // Use multipart/form-data for create
+          const form = new FormData();
+          form.append(
+            "dataForm",
+            new Blob([JSON.stringify(formData)], { type: "application/json" })
+          );
+          if (coverFile) {
+            form.append("image", coverFile);
+          }
+          // Call the correct endpoint for multipart
+          const newManga = await mangaService.createManga(form);
           setMangas([...mangas, newManga]);
-          message = `Manga "${formData.title}" has been added`;
+          message = `Manga "${newManga.title}" has been added`;
           break;
-
-        case "edit":
-          // Replace with actual API call to update manga
-          updatedManga = await mangaService.updateManga(
-            selectedManga.id,
-            formData
-          );
-          setMangas(
-            mangas.map((manga) =>
-              manga.id === updatedManga.id ? updatedManga : manga
-            )
-          );
-          message = `Manga "${updatedManga.title}" has been updated`;
-          break;
-
+        }
+        case "edit": {
+          // Không thực hiện update trực tiếp, chỉ mở dialog xác nhận
+          setPendingEdit(true);
+          setOpenDialog(false);
+          setUploading(false);
+          return;
+        }
         case "delete":
-          // Replace with actual API call to delete manga
           await mangaService.deleteManga(selectedManga.id);
           setMangas(mangas.filter((manga) => manga.id !== selectedManga.id));
           message = `Manga "${selectedManga.title}" has been deleted`;
           break;
-
-        case "toggleVisibility":
-          // Replace with actual API call to toggle visibility
-          const newVisibility = !selectedManga.visible;
-          updatedManga = await mangaService.updateMangaVisibility(
-            selectedManga.id,
-            newVisibility
-          );
-          setMangas(
-            mangas.map((manga) =>
-              manga.id === updatedManga.id ? updatedManga : manga
-            )
-          );
-          message = `Manga "${updatedManga.title}" is now ${
-            newVisibility ? "visible" : "hidden"
-          }`;
-          break;
-
         default:
           break;
       }
 
-      setSnackbar({
+      setSnackbar({ 
         open: true,
         message,
         severity: "success",
@@ -219,8 +219,64 @@ const MangaManagement = () => {
         severity: "error",
       });
     } finally {
+      setUploading(false);
       handleCloseDialog();
     }
+  };
+
+  const handleEditUpdate = async () => {
+    try {
+      setUploading(true);
+
+      // Gọi API cập nhật manga
+      const updatedManga = await mangaService.updateManga(
+        selectedManga.id,
+        formData,
+        coverFile // Chỉ gửi file nếu có
+      );
+
+      // Thêm chuỗi truy vấn ngẫu nhiên để tránh cache
+      const updatedCoverImage = `${updatedManga.coverImage}?t=${new Date().getTime()}`;
+
+      // Cập nhật danh sách manga trong state
+      setMangas((prevMangas) =>
+        prevMangas.map((manga) =>
+          manga.id === updatedManga.id
+            ? { ...updatedManga, coverImage: updatedCoverImage }
+            : manga
+        )
+      );
+
+      // Cập nhật manga đã chọn trong form
+      setSelectedManga({ ...updatedManga, coverImage: updatedCoverImage });
+
+      // Cập nhật formData với URL ảnh mới
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        coverImage: updatedCoverImage,
+      }));
+
+      setSnackbar({
+        open: true,
+        message: `Manga "${updatedManga.title}" has been updated`,
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: `Error: ${err.message || "Failed to update manga"}`,
+        severity: "error",
+      });
+    } finally {
+      setUploading(false);
+      setPendingEdit(false);
+      setOpenDialog(false);
+    }
+  };
+
+  const handleEditConfirm = () => {
+    setPendingEdit(true);
+    setOpenDialog(false);
   };
 
   const handleCloseSnackbar = () => {
@@ -286,7 +342,6 @@ const MangaManagement = () => {
               <TableCell>Author</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Categories</TableCell>
-              <TableCell>Visibility</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -294,7 +349,16 @@ const MangaManagement = () => {
             {filteredMangas.map((manga) => (
               <TableRow key={manga.id}>
                 <TableCell>{manga.id}</TableCell>
-                <TableCell>{manga.title}</TableCell>
+                <TableCell>
+                  <Button
+                    component={RouterLink}
+                    to={`/admin/manga/${manga.id}/chapters`}
+                    color="primary"
+                    sx={{ textTransform: "none", fontWeight: 600, p: 0 }}
+                  >
+                    {manga.title}
+                  </Button>
+                </TableCell>
                 <TableCell>{manga.author}</TableCell>
                 <TableCell>
                   <Chip
@@ -316,13 +380,6 @@ const MangaManagement = () => {
                   </Box>
                 </TableCell>
                 <TableCell>
-                  {manga.visible ? (
-                    <Chip label="Visible" color="success" size="small" />
-                  ) : (
-                    <Chip label="Hidden" color="default" size="small" />
-                  )}
-                </TableCell>
-                <TableCell>
                   <Box sx={{ display: "flex" }}>
                     <IconButton
                       color="primary"
@@ -337,19 +394,6 @@ const MangaManagement = () => {
                       title="Delete Manga"
                     >
                       <Delete fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      color={manga.visible ? "default" : "primary"}
-                      onClick={() =>
-                        handleOpenDialog(manga, "toggleVisibility")
-                      }
-                      title={manga.visible ? "Hide Manga" : "Show Manga"}
-                    >
-                      {manga.visible ? (
-                        <VisibilityOff fontSize="small" />
-                      ) : (
-                        <Visibility fontSize="small" />
-                      )}
                     </IconButton>
                   </Box>
                 </TableCell>
@@ -404,14 +448,39 @@ const MangaManagement = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Cover Image URL"
-                name="coverImage"
-                value={formData.coverImage}
-                onChange={handleInputChange}
-                required
-              />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    "Choose Cover Image"
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleCoverFileChange}
+                  />
+                </Button>
+                {formData.coverImage && (
+                  <img
+                    src={formData.coverImage}
+                    alt="cover"
+                    style={{
+                      width: 60,
+                      height: 80,
+                      objectFit: "cover",
+                      borderRadius: 4,
+                      border: "1px solid #eee",
+                    }}
+                  />
+                )}
+              </Box>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
@@ -465,37 +534,38 @@ const MangaManagement = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
+          <Button onClick={handleCloseDialog} color="primary" disabled={uploading}>
             Cancel
           </Button>
-          <Button onClick={handleAction} color="primary" variant="contained">
+          <Button
+            onClick={
+              dialogType === "add"
+                ? handleAction
+                : handleEditConfirm
+            }
+            color="primary"
+            variant="contained"
+            disabled={uploading}
+          >
             {dialogType === "add" ? "Add" : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog for Delete */}
       <Dialog
         open={
           openDialog &&
-          (dialogType === "delete" || dialogType === "toggleVisibility")
+          dialogType === "delete"
         }
         onClose={handleCloseDialog}
       >
         <DialogTitle>
-          {dialogType === "delete"
-            ? "Delete Manga"
-            : selectedManga?.visible
-            ? "Hide Manga"
-            : "Show Manga"}
+          Delete Manga
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {dialogType === "delete"
-              ? `Are you sure you want to delete "${selectedManga?.title}"? This action cannot be undone.`
-              : selectedManga?.visible
-              ? `Are you sure you want to hide "${selectedManga?.title}"? It will no longer be visible to users.`
-              : `Are you sure you want to make "${selectedManga?.title}" visible to users?`}
+            {`Are you sure you want to delete "${selectedManga?.title}"? This action cannot be undone.`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -504,8 +574,36 @@ const MangaManagement = () => {
           </Button>
           <Button
             onClick={handleAction}
-            color={dialogType === "delete" ? "error" : "primary"}
+            color="error"
             variant="contained"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog for Update */}
+      <Dialog
+        open={pendingEdit}
+        onClose={() => setPendingEdit(false)}
+      >
+        <DialogTitle>
+          Update Manga
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {`Are you sure you want to update "${selectedManga?.title}"? This action cannot be undone.`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingEdit(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEditUpdate}
+            color="primary"
+            variant="contained"
+            disabled={uploading}
           >
             Confirm
           </Button>

@@ -1,13 +1,19 @@
 package com.pbl5.pbl5.modal;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "mangas")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Manga {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,31 +45,37 @@ public class Manga {
     @Column(name = "views")
     private Integer views = 0;
     // Relationships
-    @OneToMany(mappedBy = "manga")
+    @OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Chapter> chapters;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Set<Chapter> chapters = new HashSet<>();
     
-    @OneToMany(mappedBy = "manga")
-    private List<Rating> ratings;
+    @OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Set<Rating> ratings = new HashSet<>();
     
-    @OneToMany(mappedBy = "manga")
+    @OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
     @JsonManagedReference("comment-manga")
-    private List<Comment> comments;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Set<Comment> comments = new HashSet<>();
     
-    @OneToMany(mappedBy = "manga")
+    @OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Favourite> favourites;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Set<Favourite> favourites = new HashSet<>();
     
-    @OneToMany(mappedBy = "manga")
-    private List<ReadingHistory> readingHistories;
+    @OneToMany(mappedBy = "manga", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Set<ReadingHistory> readingHistories = new HashSet<>();
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "manga_categories",
         joinColumns = @JoinColumn(name = "manga_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private List<Category> categories;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Set<Category> categories = new HashSet<>();
     
     // Enum for manga status
     public enum MangaStatus {
@@ -137,52 +149,62 @@ public class Manga {
         this.adminId = adminId;
     }
 
-    public List<Chapter> getChapters() {
+    public Set<Chapter> getChapters() {
         return chapters;
     }
 
-    public void setChapters(List<Chapter> chapters) {
+    public void setChapters(Set<Chapter> chapters) {
         this.chapters = chapters;
     }
 
-    public List<Rating> getRatings() {
+    public Set<Rating> getRatings() {
         return ratings;
     }
 
-    public void setRatings(List<Rating> ratings) {
+    public void setRatings(Set<Rating> ratings) {
         this.ratings = ratings;
     }
 
-    public List<Comment> getComments() {
+    public Set<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
+    public void setComments(Set<Comment> comments) {
         this.comments = comments;
     }
 
-    public List<Favourite> getFavourites() {
+    public Set<Favourite> getFavourites() {
         return favourites;
     }
 
-    public void setFavourites(List<Favourite> favourites) {
+    public void setFavourites(Set<Favourite> favourites) {
         this.favourites = favourites;
     }
 
-    public List<ReadingHistory> getReadingHistories() {
+    public Set<ReadingHistory> getReadingHistories() {
         return readingHistories;
     }
 
-    public void setReadingHistories(List<ReadingHistory> readingHistories) {
+    public void setReadingHistories(Set<ReadingHistory> readingHistories) {
         this.readingHistories = readingHistories;
     }
 
-    public List<Category> getCategories() {
+    public Set<Category> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<Category> categories) {
+    public void setCategories(Set<Category> categories) {
         this.categories = categories;
+    }
+    
+    // Utility method to add a category
+    public void addCategory(Category category) {
+        this.categories.add(category);
+    }
+    
+    // Utility method to add a chapter
+    public void addChapter(Chapter chapter) {
+        this.chapters.add(chapter);
     }
     
     public Integer getViews() {

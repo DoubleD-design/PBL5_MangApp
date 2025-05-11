@@ -1,13 +1,17 @@
 package com.pbl5.pbl5.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pbl5.pbl5.modal.Chapter;
 import com.pbl5.pbl5.modal.Page;
+import com.pbl5.pbl5.request.ChapterRequestDTO;
+import com.pbl5.pbl5.service.AzureBlobService;
 import com.pbl5.pbl5.service.ChapterService;
 import com.pbl5.pbl5.service.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +25,8 @@ public class ChapterController {
     
     @Autowired
     private PageService pageService;
-
+    @Autowired
+    private AzureBlobService azureBlobService;
     @GetMapping
     public ResponseEntity<List<Chapter>> getAllChapters() {
         List<Chapter> chapters = chapterService.getAllChapters();
@@ -75,19 +80,51 @@ public class ChapterController {
         return new ResponseEntity<>(chapters, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<Chapter> createChapter(@RequestBody Chapter chapter) {
-        Chapter newChapter = chapterService.createChapter(chapter);
-        return new ResponseEntity<>(newChapter, HttpStatus.CREATED);
+    @PostMapping(value = "/create", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createChapterWithImages(
+            @RequestPart("dataForm") String dataForm,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        try {
+            // Parse dữ liệu JSON thành DTO
+            ObjectMapper mapper = new ObjectMapper();
+            ChapterRequestDTO dto = mapper.readValue(dataForm, ChapterRequestDTO.class);
+            
+            // Upload chapter pages to Azure Blob
+            List<String> pageUrls = azureBlobService.uploadChapterPages(dto.getManga_id(), dto.getChapter_number(), files);
+
+            // Create chapter and pages
+            Chapter chapter = new Chapter();
+            chapter.setMangaId(Integer.parseInt(dto.getManga_id()));
+            chapter.setChapterNumber(Float.parseFloat(dto.getChapter_number()));
+            chapter.setTitle(dto.getTitle());
+            Chapter newChapter = chapterService.createChapter(chapter, pageUrls);
+
+            return new ResponseEntity<>(newChapter, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error creating chapter: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Chapter> updateChapter(@PathVariable Integer id, @RequestBody Chapter chapter) {
-        Chapter updatedChapter = chapterService.updateChapter(id, chapter);
-        if (updatedChapter != null) {
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateChapterWithImages(
+            @PathVariable Integer id,
+            @RequestPart("dataForm") String dataForm,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        try {
+            // Parse dữ liệu JSON thành DTO
+            ObjectMapper mapper = new ObjectMapper();
+            ChapterRequestDTO dto = mapper.readValue(dataForm, ChapterRequestDTO.class);
+
+            // Upload new chapter pages to Azure Blob if files are provided
+            List<String> pageUrls = files != null ? azureBlobService.uploadChapterPages(dto.getManga_id(), String.valueOf(id), files) : List.of();
+
+            // Update chapter details
+            Chapter updatedChapter = chapterService.updateChapterWithPages(id, dto, pageUrls);
+
             return new ResponseEntity<>(updatedChapter, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating chapter: " + e.getMessage());
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
