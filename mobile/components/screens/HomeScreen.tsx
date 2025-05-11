@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GRADIENTS } from '../../utils/const';
 import FeaturedCarousel from '../FeaturedCarousel'; // Adjust the path to your FeaturedCarousel file
 import MangaSection from '../MangaSection';
+import SearchBar from '../SearchBar';
 
 const { width } = Dimensions.get('window');
 
@@ -39,32 +40,13 @@ const HomeScreen = () => {
   return (
     <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
       <View style={{ flex: 1, backgroundColor: '#2c1a0e' }}>
-        <View
-          style={{
-            marginTop: 50,
-            marginHorizontal: 20,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: '#333',
-            borderRadius: 10,
-            paddingHorizontal: 10,
-            height: 40,
-          }}
-        >
-          <TextInput
-            placeholder="Searching..."
-            placeholderTextColor="#aaa"
-            style={{ flex: 1, color: '#fff' }}
-          />
-        </View>
-
-        
+        <SearchBar />
 
         <ScrollView showsVerticalScrollIndicator={false} style = { {marginTop: 10} }>
           <View><FeaturedCarousel /> </View>
-          <MangaSection title="Most views" />
-          <MangaSection title="Latest update" />
-          <MangaSection title="All mangas" />
+          <MangaSection title="Most Views" />
+          <MangaSection title="Latest Update" />
+          <MangaSection title="All Mangas" />
           <View style={{ height: 40 }} />
         </ScrollView>
       </View>

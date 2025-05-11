@@ -31,7 +31,7 @@ const mangaService = {
     return response.data;
   },
 
-  getMostViewedMangas: async (limit = 7): Promise<Manga[]> => {
+  getMostViewedMangas: async (limit = 20): Promise<Manga[]> => {
     const response = await api.get<Manga[]>(`/manga/most-viewed?limit=${limit}`);
     return response.data;
   },

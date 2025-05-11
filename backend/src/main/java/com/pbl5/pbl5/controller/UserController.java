@@ -98,6 +98,30 @@ public class UserController {
 
         return ResponseEntity.ok("Password changed successfully");
     }
+    
+    // Check if user has VIP status
+    @GetMapping("/vip-status")
+    public ResponseEntity<Map<String, Object>> checkVipStatus() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        
+        // If user is not authenticated, they are not VIP
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            Map<String, Object> response = Map.of("isVIP", false);
+            return ResponseEntity.ok(response);
+        }
+        
+        String email = auth.getName();
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Check if user has VIP status
+        // In a real implementation, this would check a subscription field or membership level
+        // For now, we'll assume no users are VIP so ads will show to everyone
+        boolean isVIP = Boolean.TRUE.equals(user.getVipStatus());; // This should be replaced with actual logic in production
+        
+        Map<String, Object> response = Map.of("isVIP", isVIP);
+        return ResponseEntity.ok(response);
+    }
 
     @PutMapping("/avatar")
     public ResponseEntity<String> updateAvatar(@RequestPart("file") MultipartFile file) {
@@ -107,10 +131,16 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
-            // Upload avatar to Azure Blob Storage
+            // 1. Xoá avatar cũ nếu tồn tại
+            if (user.getAvatarUrl() != null) {
+                String oldBlobName = azureBlobService.extractBlobNameFromUrl(user.getAvatarUrl());
+                azureBlobService.deleteBlob("user", oldBlobName);
+            }
+
+            // 2. Upload avatar mới
             String avatarUrl = azureBlobService.uploadAvatarImage(user.getId().toString(), file);
 
-            // Update user's avatar URL
+            // 3. Cập nhật URL
             user.setAvatarUrl(avatarUrl);
             userService.saveUser(user);
 

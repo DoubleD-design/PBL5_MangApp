@@ -9,12 +9,14 @@ public class CommentDTO {
     private Integer userId;
     private String username;
     private String content;
+    private String avatarUrl;
     private LocalDateTime createdAt;
 
     public CommentDTO(Comment comment) {
         this.id = comment.getId();
         this.userId = comment.getUserId();
         this.username = comment.getUser() != null ? comment.getUser().getUsername() : "Anonymous";
+        this.avatarUrl = comment.getUser() != null ? comment.getUser().getAvatarUrl() : "Anonymous";
         this.content = comment.getContent();
         this.createdAt = comment.getCreatedAt();
     }
@@ -59,5 +61,13 @@ public class CommentDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

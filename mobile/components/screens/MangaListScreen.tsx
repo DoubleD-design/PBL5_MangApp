@@ -1,94 +1,167 @@
-import React from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, Dimensions } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import axios from 'axios';
+import MangaCard from './../MangaCard';
+import { Manga } from '../../types/Manga';
+import api from '../../services/api';
+import SearchBar from '../SearchBar';
 
-const { width } = Dimensions.get('window');
+const screenWidth = Dimensions.get('window').width;
+const ITEM_WIDTH = screenWidth / 3 - 2;
 
-const mangaData = [
+type MangaListRouteProp = RouteProp<
   {
-    id: '1',
-    title: 'Attack on Titan',
-    chapter: 'Chap 139',
-    image: require('../../assets/manga/aot.jpg'),
+    params: {
+      title: string;
+    };
   },
-  {
-    id: '2',
-    title: 'Oyasumi, Punpun',
-    chapter: 'Chap 147',
-    image: require('../../assets/manga/punpun.jpg'),
-  },
-  {
-    id: '3',
-    title: 'Shounen no Abyss',
-    chapter: 'Chap 173',
-    image: require('../../assets/manga/sna.jpg'),
-  },
-  {
-    id: '4',
-    title: 'Kimi no koto nado',
-    chapter: 'Chap 40',
-    image: require('../../assets/manga/aot.jpg'),
-  },
-  {
-    id: '5',
-    title: 'Kimetsu no Yaiba',
-    chapter: 'Chap 189',
-    image: require('../../assets/manga/kny.jpg'),
-  },
-  {
-    id: '6',
-    title: 'Takopi no genzai',
-    chapter: 'Chap 16',
-    image: require('../../assets/manga/takopi.jpg'),
-  },
-];
+  'params'
+>;
 
-const ITEM_WIDTH = width / 3 - 16;
+const MangaListScreen: React.FC = () => {
+  const route = useRoute<MangaListRouteProp>();
+  const { title } = route.params;
 
-const MangaListScreen = () => {
-  const navigation = useNavigation();
+  const [data, setData] = useState<Manga[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 21;
 
-  const renderItem = ({ item }: any) => (
-    <View style={{ width: ITEM_WIDTH, margin: 8 }}>
-      <Image
-        source={item.image}
-        style={{ width: '100%', height: 150, borderRadius: 12 }}
-        resizeMode="cover"
-      />
-      <Text style={{ color: 'white', marginTop: 6, fontWeight: 'bold' }} numberOfLines={1}>
-        {item.title}
-      </Text>
-      <Text style={{ color: 'white', fontSize: 12 }}>{item.chapter}</Text>
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let url = '';
+
+        switch (title) {
+          case 'All Mangas':
+            url = '/manga?size=10000';
+            break;
+          case 'Latest Update':
+            url = '/manga/latest?size=10000';
+            break;
+          case 'Most Views':
+            url = '/manga/most-viewed?limit=10000';
+            break;
+          default:
+            return;
+        }
+
+        const response = await api.get(url);
+        const content = response.data?.content || response.data || [];
+        setData(content);
+      } catch (error) {
+        console.error('Error fetching manga list:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [title]);
+
+  const paginatedData = data.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const renderItem = ({ item }: { item: Manga }) => (
+    <View style={{ width: ITEM_WIDTH, marginBottom: 7 }}>
+      <MangaCard manga={item} />
     </View>
   );
 
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#2c1a0e' }}>
-      {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={{ position: 'absolute', top: 50, left: 20, zIndex: 10 }}
-      >
-        <Ionicons name="arrow-back" size={28} color="white" />
-      </TouchableOpacity>
+    <View style={styles.container }>
+      <SearchBar />
+      <Text style={styles.title}>{title}</Text>
 
-      {/* Title */}
-      <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginTop: 50, marginBottom: 10, alignSelf: 'center' }}>
-        Manga List
-      </Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#ff6740" style={{ marginTop: 20 }} />
+      ) : (
+        <>
+          <FlatList
+            data={paginatedData}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={3}
+            contentContainerStyle={styles.list}
+          />
 
-      {/* Manga Grid */}
-      <FlatList
-        data={mangaData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        contentContainerStyle={{ paddingBottom: 16 }}
-        showsVerticalScrollIndicator={false}
-      />
+          {/* Pagination */}
+          <View style={styles.pagination}>
+            <TouchableOpacity
+              onPress={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <Text style={[styles.pageButton, currentPage === 1 && styles.disabled]}>
+                {'< Prev'}
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.pageNumber}>Page {currentPage} / {totalPages}</Text>
+
+            <TouchableOpacity
+              onPress={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <Text
+                style={[styles.pageButton, currentPage === totalPages && styles.disabled]}
+              >
+                {'Next >'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#2c1a0e',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 15,
+    marginTop: 15,
+  },
+  list: {
+    paddingBottom: 10,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  pageButton: {
+    fontSize: 16,
+    color: '#ff6740',
+    paddingHorizontal: 10,
+  },
+  disabled: {
+    color: '#555',
+  },
+  pageNumber: {
+    fontSize: 16,
+    color: '#fff',
+  },
+});
 
 export default MangaListScreen;

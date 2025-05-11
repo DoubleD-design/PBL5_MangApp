@@ -2,11 +2,21 @@ package com.pbl5.pbl5.request;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 // CommentRequest.java
 public class CommentRequest {
     private Integer mangaId;
     private String content;
     private LocalDateTime createdAt;
+    private Integer userId;
+    public Integer getUserId() {
+        return userId;
+    }
+    public void setUserId(Integer userId) {
+        
+    }
 
     public Integer getMangaId() {
         return mangaId;

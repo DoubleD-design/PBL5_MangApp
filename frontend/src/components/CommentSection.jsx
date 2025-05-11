@@ -107,7 +107,7 @@ const CommentSection = ({ mangaId }) => {
       const commentWithUser = {
         ...createdComment,
         username: user.username,
-        user: { avatar: user.avatar },
+        avatarUrl: user.avatarUrl,
       };
       // Add the new comment to the list
       setComments([commentWithUser, ...comments]);
@@ -160,6 +160,8 @@ const CommentSection = ({ mangaId }) => {
       }
 
       const commentData = {
+        userId: user.id, // Now we know user.id is a number
+        mangaId: parseInt(mangaId),
         commentId: currentComment.id,
         content: editedContent,
       };
@@ -171,10 +173,15 @@ const CommentSection = ({ mangaId }) => {
         currentComment.id,
         { ...currentComment, content: editedContent }
       );
+      const updatedCommentWithUser = {
+       ...updatedComment,
+        username: user.username,
+        avatarUrl: user.avatarUrl,
+      };
 
       setComments((prevComments) =>
         prevComments.map((comment) =>
-          comment.id === updatedComment.id ? updatedComment : comment
+          comment.id === updatedCommentWithUser.id ? updatedCommentWithUser : comment
         )
       );
 
@@ -315,7 +322,7 @@ const CommentSection = ({ mangaId }) => {
               <CardHeader
                 avatar={
                   <Avatar
-                    src={comment.user?.avatar || ""}
+                    src={comment.avatarUrl || ""}
                     alt={comment.username || "User"}
                   >
                     {(comment.username || "U")[0]}

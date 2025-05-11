@@ -26,6 +26,9 @@ import {
   Home,
 } from "@mui/icons-material";
 import api from "../services/api";
+import AdPopup from "./AdPopup";
+import { useUser } from "../context/UserContext";
+import adService from "../services/adService";
 
 const ChapterReader = () => {
   const { mangaId, chapterNumber } = useParams();
@@ -39,6 +42,8 @@ const ChapterReader = () => {
   const [allChapters, setAllChapters] = useState([]);
   const [nextChapter, setNextChapter] = useState(null);
   const [prevChapter, setPrevChapter] = useState(null);
+  const [showAd, setShowAd] = useState(false);
+  const { user } = useUser();
 
   const handleZoomChange = (event, newValue) => {
     setZoom(newValue);
@@ -113,18 +118,46 @@ const ChapterReader = () => {
     fetchChapterData();
   }, [mangaId, chapterNumber]);
 
+  // Check if user is VIP to determine whether to show ads
+  useEffect(() => {
+    const checkAdEligibility = async () => {
+      // Show ad when component mounts (chapter view)
+      const isVIP = await adService.isUserVIP();
+      if (!isVIP) {
+        setShowAd(true);
+      }
+    };
+
+    checkAdEligibility();
+  }, []);
+
   // Navigate to next chapter
-  const goToNextChapter = () => {
+  const goToNextChapter = async () => {
     if (nextChapter) {
+      // Check if user is VIP before showing ad on chapter navigation
+      const isVIP = await adService.isUserVIP();
+      if (!isVIP) {
+        setShowAd(true);
+      }
       navigate(`/manga/${mangaId}/chapter/${nextChapter.chapterNumber}`);
     }
   };
 
   // Navigate to previous chapter
-  const goToPrevChapter = () => {
+  const goToPrevChapter = async () => {
     if (prevChapter) {
+      // Check if user is VIP before showing ad on chapter navigation
+      const isVIP = await adService.isUserVIP();
+      if (!isVIP) {
+        setShowAd(true);
+      }
       navigate(`/manga/${mangaId}/chapter/${prevChapter.chapterNumber}`);
     }
+  };
+
+  // Close ad popup
+  const handleCloseAd = () => {
+    setShowAd(false);
   };
 
   return (
@@ -136,6 +169,8 @@ const ChapterReader = () => {
         bgcolor: "background.default",
       }}
     >
+      {/* Ad Popup */}
+      {showAd && <AdPopup onClose={handleCloseAd} triggerType="chapter_view" />}
       {/* Top Bar */}
       <Paper elevation={2} sx={{ py: 1, px: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>

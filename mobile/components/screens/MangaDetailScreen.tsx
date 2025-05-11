@@ -3,12 +3,12 @@ import { RootStackParamList } from '../../types/RootStackParamList';
 import { View, Text, TouchableOpacity, ScrollView, ImageBackground, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GRADIENTS } from '../../utils/const';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import ChaptersSection from '../ChaptersSection'
+import { Chapter } from '../../types/Manga';
 import { StackNavigationProp } from '@react-navigation/stack';
+import api from '../../services/api';
 
 type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -20,22 +20,38 @@ const MangaDetailScreen = () => {
   const route = useRoute<MangaDetailRouteProp>();
   const { manga } = route.params;
   const navigation = useNavigation<RootStackNavigationProp>();
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        const response = await api.get(`/chapters/manga/${manga.id}`);
+        setChapters(response.data);
+      } catch (error) {
+        console.error('Error fetching chapters:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChapters();
+  }, [manga.id]);
 
   return (
     <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
       <ImageBackground
         source={{ uri: manga.coverImage }}
-        style={[StyleSheet.absoluteFillObject, {backgroundColor: '#2c1a0e'}, {marginTop: 50}]}
+        style={[StyleSheet.absoluteFillObject, { backgroundColor: '#2c1a0e' }, { marginTop: 50 }]}
         imageStyle={{ resizeMode: 'cover', opacity: 0.2 }}
       />
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
         <Ionicons name="arrow-back" size={28} color="white" />
       </TouchableOpacity>
       <ScrollView style={styles.container}>
-        <View><Text style={styles.mangaTitle}>{manga.title}</Text></View>
+        <View>
+          <Text style={styles.mangaTitle}>{manga.title}</Text>
+        </View>
         <View style={{ position: 'relative', marginTop: 20 }}>
           <ImageBackground
             source={{ uri: manga.coverImage }}
@@ -47,8 +63,8 @@ const MangaDetailScreen = () => {
           <TouchableOpacity
             style={styles.startButton}
             onPress={() => {
-              if (Array.isArray(manga.chapters) && manga.chapters.length > 0) {
-                navigation.navigate('Reading', { chapter: manga.chapters[0], chapters: manga.chapters });
+              if (chapters.length > 0) {
+                navigation.navigate('Reading', { chapter: chapters[0], chapters: chapters });
               } else {
                 alert('No chapters available.');
               }
@@ -64,9 +80,9 @@ const MangaDetailScreen = () => {
             <Ionicons name="heart" size={24} color="white" />
           </TouchableOpacity>
         </View>
-        <View style={{marginTop: 5}}>
+        <View style={{ marginTop: 5 }}>
           <View style={styles.infoTable}>
-            <View >
+            <View>
               <Text style={styles.infoValue}>{manga.description}</Text>
             </View>
             <View style={{ height: 1, backgroundColor: '#b5e745', marginVertical: 20, opacity: 0.3 }} />
@@ -94,27 +110,29 @@ const MangaDetailScreen = () => {
           </View>
         </View>
 
-
         <View style={styles.chapterListContainer}>
-            <Text style={styles.chapterListTitle}>Chapters</Text>
-            <View style={styles.chapterBox}>
-                <ScrollView nestedScrollEnabled={true}>
-                    {Array.isArray(manga.chapters) ? (
-                    manga.chapters.slice().reverse().map((chapter, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          style={styles.chapterRow}
-                          onPress={() => navigation.navigate('Reading', { chapter, chapters: manga.chapters })}
-                        >
-                          <Text style={styles.chapterTitle}>{chapter.title}</Text>
-                        </TouchableOpacity>
-
-                    ))
-                    ) : (
-                    <Text style={{ color: '#ccc', paddingVertical: 10 }}>No chapters available.</Text>
-                    )}
-                </ScrollView>
-            </View>
+          <Text style={styles.chapterListTitle}>Chapters</Text>
+          <View style={styles.chapterBox}>
+            {loading ? (
+              <Text style={{ color: '#ccc', paddingVertical: 10 }}>Loading...</Text>
+            ) : (
+              <ScrollView nestedScrollEnabled={true}>
+                {chapters.length > 0 ? (
+                  chapters.slice().reverse().map((chapter, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.chapterRow}
+                      onPress={() => navigation.navigate('Reading', { chapter, chapters })}
+                    >
+                      <Text style={styles.chapterTitle}>{chapter.title}</Text>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <Text style={{ color: '#ccc', paddingVertical: 10 }}>No chapters available.</Text>
+                )}
+              </ScrollView>
+            )}
+          </View>
         </View>
       </ScrollView>
     </LinearGradient>
@@ -125,7 +143,8 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     position: 'relative',
-    flex: 1, marginTop: 50
+    flex: 1,
+    marginTop: 50,
   },
   backButton: {
     position: 'absolute',
@@ -146,7 +165,7 @@ const styles = StyleSheet.create({
     color: '#b5e745',
     textAlign: 'center',
     marginHorizontal: 10,
-    top: 55
+    top: 55,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -157,7 +176,7 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     alignSelf: 'center',
-    backgroundColor: 'rgba(39, 148, 70, 0.9)', 
+    backgroundColor: 'rgba(39, 148, 70, 0.9)',
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
@@ -185,7 +204,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#b5e745',
     marginHorizontal: 10,
-    marginBottom: 20
+    marginBottom: 20,
   },
   infoRow: {
     flexDirection: 'row',
@@ -205,44 +224,39 @@ const styles = StyleSheet.create({
     textAlign: 'justify',
   },
   gradient: {
-        flex: 1, // Chiếm toàn bộ màn hình
-        justifyContent: 'center', // Canh giữa theo chiều dọc
-        alignItems: 'center', // Canh giữa theo chiều ngang
-    },
-    chapterListContainer: {
-  marginHorizontal: 10,
-  marginBottom: 30,
-},
-
-chapterListTitle: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  color: '#b5e745',
-  marginBottom: 10,
-  marginLeft: 10,
-},
-
-chapterBox: {
-  backgroundColor: 'rgba(59, 42, 26, 0.7)',
-  borderRadius: 10,
-  padding: 10,
-  borderWidth: 1,
-  borderColor: '#b5e745',
-  maxHeight: 250,
-},
-
-chapterRow: {
-  paddingVertical: 10,
-  borderBottomWidth: 1,
-  borderBottomColor: '#444',
-},
-
-chapterTitle: {
-  color: '#fff',
-  fontSize: 16,
-  textAlign: 'center'
-}
-
+    flex: 1, // Chiếm toàn bộ màn hình
+    justifyContent: 'center', // Canh giữa theo chiều dọc
+    alignItems: 'center', // Canh giữa theo chiều ngang
+  },
+  chapterListContainer: {
+    marginHorizontal: 10,
+    marginBottom: 30,
+  },
+  chapterListTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#b5e745',
+    marginBottom: 10,
+    marginLeft: 10,
+  },
+  chapterBox: {
+    backgroundColor: 'rgba(59, 42, 26, 0.7)',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#b5e745',
+    maxHeight: 250,
+  },
+  chapterRow: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
+  },
+  chapterTitle: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
 });
 
 export default MangaDetailScreen;
