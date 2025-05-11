@@ -3,17 +3,7 @@ import { View, Text, TouchableOpacity, ImageBackground, FlatList, ActivityIndica
 import { ChevronLeft, ChevronRight } from 'react-native-feather';
 import { useNavigation } from '@react-navigation/native';
 import mangaService from '../services/mangaService';
-
-// Define the Manga type
-interface Manga {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  views: number;
-  coverImage: string;
-}
+import { Manga } from '../types/Manga';
 
 const FeaturedCarousel: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -28,11 +18,14 @@ const FeaturedCarousel: React.FC = () => {
         const formattedData = data.map((manga: any) => ({
           id: manga.id,
           title: manga.title,
+          author: manga.author,
           subtitle: `${manga.views.toLocaleString()} views`,
           description: manga.description || `By ${manga.author}`,
           image: manga.coverImage,
           views: manga.views,
           coverImage: manga.coverImage,
+          createAt: manga.createAt,
+          status: manga.status,
         }));
         setFeaturedMangas(formattedData);
       } catch (error) {
@@ -71,20 +64,28 @@ const FeaturedCarousel: React.FC = () => {
         >
           <View style={styles.overlay}>
             <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">{featuredMangas[currentSlide].title}</Text>
-            <Text style={styles.subtitle}>{featuredMangas[currentSlide].subtitle}</Text>
+            <View style={styles.subtitle}>
+              <Text style={styles.author}>
+                {featuredMangas[currentSlide].author.length > 30 
+                  ? featuredMangas[currentSlide].author.slice(0, 30) + "..." 
+                  : featuredMangas[currentSlide].author}
+              </Text>
+              <Text style={styles.view}>{featuredMangas[currentSlide].subtitle}</Text>
+            </View>
+            
+            
             {/* <Text style={styles.description}>{featuredMangas[currentSlide].description}</Text> */}
           </View>
         </ImageBackground>
       )}
 
       <TouchableOpacity onPress={prevSlide} style={styles.navButtonLeft}>
-        <ChevronLeft width={30} height={30} stroke="#fff" />
+        <ChevronLeft width={20} height={20} stroke="#fff" />
       </TouchableOpacity>
 
       <TouchableOpacity onPress={nextSlide} style={styles.navButtonRight}>
-        <ChevronRight width={30} height={30} stroke="#fff" />
+        <ChevronRight width={20} height={20} stroke="#fff" />
       </TouchableOpacity>
-
       <View style={styles.indicatorContainer}>
         {featuredMangas.map((_, index) => (
           <TouchableOpacity
@@ -131,15 +132,28 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    fontWeight: 'bold'
+  },
+  author: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  view: {
+    fontSize: 15,
+    fontWeight: 'bold',
     color: '#ff6740',
   },
   description: {
     fontSize: 16,
     color: '#fff',
+    fontWeight: 'bold'
   },
   navButtonLeft: {
     position: 'absolute',
-    left: 20,
+    left: 5,
     top: '50%',
     transform: [{ translateY: -15 }],
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -148,7 +162,7 @@ const styles = StyleSheet.create({
   },
   navButtonRight: {
     position: 'absolute',
-    right: 20,
+    right: 5,
     top: '50%',
     transform: [{ translateY: -15 }],
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -157,7 +171,7 @@ const styles = StyleSheet.create({
   },
   indicatorContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 10,
     left: '50%',
     transform: [{ translateX: -50 }],
     flexDirection: 'row',
