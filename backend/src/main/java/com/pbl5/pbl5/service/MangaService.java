@@ -7,16 +7,22 @@ import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.MangaRepository;
 import com.pbl5.pbl5.request.MangaRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class MangaService {
     @Autowired
     private MangaRepository mangaRepository;
@@ -27,14 +33,42 @@ public class MangaService {
     @Autowired
     private com.pbl5.pbl5.repos.CategoryRepository categoryRepository;
 
+    @Cacheable("mangas")
     public List<Manga> getAllMangas() {
-        return mangaRepository.findAll();
+        // Use findAllWithChapters to eagerly fetch chapters and avoid LazyInitializationException
+        return mangaRepository.findAllWithChapters();
     }
 
+    @Cacheable(value = "mangaById", key = "#id")
     public Optional<Manga> getMangaById(Integer id) {
-        return mangaRepository.findById(id);
+        // Get the basic manga entity first
+        Optional<Manga> mangaOpt = mangaRepository.findByIdWithAllRelations(id);
+        
+        if (mangaOpt.isPresent()) {
+            // Load each collection separately to avoid MultipleBagFetchException
+            mangaRepository.findByIdWithCategories(id);
+            mangaRepository.findByIdWithChapters(id);
+            mangaRepository.findByIdWithRatings(id);
+            mangaRepository.findByIdWithComments(id);
+            mangaRepository.findByIdWithFavourites(id);
+            mangaRepository.findByIdWithReadingHistories(id);
+        }
+        
+        return mangaOpt;
+    }
+    
+    @Cacheable(value = "mangaWithCategories", key = "#id")
+    public Optional<Manga> getMangaWithCategories(Integer id) {
+        return mangaRepository.findByIdWithCategories(id);
+    }
+    
+    @Cacheable(value = "mangaWithChapters", key = "#id")
+    public Optional<Manga> getMangaWithChapters(Integer id) {
+        return mangaRepository.findByIdWithChapters(id);
     }
 
+    @Transactional
+    @CacheEvict(value = {"mangas", "mangaById", "mangaWithCategories", "mangaWithChapters"}, key = "#id")
     public Manga updateManga(Integer id, Manga mangaDetails) {
         return mangaRepository.findById(id).map(manga -> {
             manga.setTitle(mangaDetails.getTitle());
@@ -44,6 +78,8 @@ public class MangaService {
         }).orElse(null);
     }
 
+    @Transactional
+    @CacheEvict(value = {"mangas", "mangaById", "mangaWithCategories", "mangaWithChapters"}, key = "#id")
     public void deleteManga(Integer id) {
         favouriteRepository.deleteByMangaId(id);
         mangaRepository.deleteById(id);
@@ -79,9 +115,12 @@ public class MangaService {
     }
     
     public List<Manga> getFeaturedMangas() {
-        // For now, we'll consider mangas with high ratings as featured
-        return mangaRepository.findAll().stream()
-            .filter(manga -> !manga.getRatings().isEmpty())
+        // Fetch all mangas with their ratings eagerly loaded
+        List<Manga> allMangas = mangaRepository.findAllWithRatings();
+        
+        // Process mangas with ratings already initialized
+        return allMangas.stream()
+            .filter(manga -> manga.getRatings() != null && !manga.getRatings().isEmpty())
             .sorted((m1, m2) -> {
                 double avg1 = m1.getRatings().stream().mapToDouble(Rating::getRating).average().orElse(0.0);
                 double avg2 = m2.getRatings().stream().mapToDouble(Rating::getRating).average().orElse(0.0);
@@ -92,8 +131,12 @@ public class MangaService {
     }
     
     public List<Manga> getLatestUpdates() {
-        return mangaRepository.findAll().stream()
-            .filter(manga -> !manga.getChapters().isEmpty())
+        // Fetch all mangas with their chapters eagerly loaded
+        List<Manga> allMangas = mangaRepository.findAllWithChapters();
+        
+        // Process mangas with chapters already initialized
+        return allMangas.stream()
+            .filter(manga -> manga.getChapters() != null && !manga.getChapters().isEmpty())
             .sorted((m1, m2) -> {
                 LocalDateTime latest1 = m1.getChapters().stream()
                     .map(Chapter::getCreatedAt)
@@ -158,7 +201,7 @@ public class MangaService {
         manga.setStatus(Manga.MangaStatus.valueOf(dto.getStatus()));
 
         // Set categories
-        List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
+        Set<Category> categories = new HashSet<>(categoryRepository.findAllById(dto.getCategoryIds()));
         manga.setCategories(categories);
 
         return mangaRepository.save(manga);
@@ -180,7 +223,7 @@ public class MangaService {
 
             // Update categories
             List<Category> categories = categoryRepository.findAllById(dto.getCategoryIds());
-            manga.setCategories(categories);
+            manga.setCategories((Set<Category>) categories);
 
             return mangaRepository.save(manga);
         }).orElseThrow(() -> new RuntimeException("Manga not found with id: " + id));

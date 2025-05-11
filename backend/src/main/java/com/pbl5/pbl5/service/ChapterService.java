@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class ChapterService {
     @Autowired
     private ChapterRepository chapterRepository;
@@ -34,14 +35,16 @@ public class ChapterService {
     }
 
     public Optional<Chapter> getChapterById(Integer id) {
-        return chapterRepository.findById(id);
+        // Use a query that eagerly fetches pages to avoid LazyInitializationException
+        return chapterRepository.findByIdWithPages(id);
     }
     
     public List<Chapter> getChaptersByMangaId(Integer mangaId) {
         return chapterRepository.findByMangaIdOrderByChapterNumberAsc(mangaId);
     }
 
-        public Chapter createChapter(Chapter chapter, List<String> pageUrls) {
+    @Transactional
+    public Chapter createChapter(Chapter chapter, List<String> pageUrls) {
         chapter.setCreatedAt(LocalDateTime.now());
         Chapter savedChapter = chapterRepository.save(chapter);
 
@@ -58,6 +61,7 @@ public class ChapterService {
         return savedChapter;
     }
     
+    @Transactional
     public Chapter updateChapter(Integer id, Chapter chapterDetails) {
         return chapterRepository.findById(id).map(chapter -> {
             chapter.setTitle(chapterDetails.getTitle());

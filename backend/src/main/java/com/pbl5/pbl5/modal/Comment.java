@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 //import com.fasterxml.jackson.annotation.JsonIdentityReference;
 //import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

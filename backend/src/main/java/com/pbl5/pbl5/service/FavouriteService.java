@@ -6,13 +6,17 @@ import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.MangaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class FavouriteService {
     @Autowired
     private FavouriteRepository favouriteRepository;
@@ -35,15 +39,18 @@ public class FavouriteService {
         return favouriteRepository.findByMangaId(mangaId);
     }
 
+    @Transactional
     public Favourite createFavourite(Favourite favourite) {
         favourite.setCreatedAt(LocalDateTime.now());
         return favouriteRepository.save(favourite);
     }
 
+    @Transactional
     public void deleteFavourite(Integer id) {
         favouriteRepository.deleteById(id);
     }
     
+    @Transactional
     public void deleteFavouriteByUserIdAndMangaId(Integer userId, Integer mangaId) {
         favouriteRepository.deleteByUserIdAndMangaId(userId, mangaId);
     }
@@ -56,6 +63,14 @@ public class FavouriteService {
         List<Integer> mangaIds = favourites.stream()
                 .map(Favourite::getMangaId)
                 .collect(Collectors.toList());
-        return mangaRepository.findAllById(mangaIds);
+        
+        // Use a separate query to fetch mangas by IDs without eager loading collections
+        // This avoids the MultipleBagFetchException by not fetching multiple collections at once
+        List<Manga> mangas = new ArrayList<>(mangaRepository.findAllById(mangaIds));
+        
+        // Sort mangas to maintain consistent order
+        mangas.sort(Comparator.comparing(Manga::getId));
+        
+        return mangas;
     }
 }
