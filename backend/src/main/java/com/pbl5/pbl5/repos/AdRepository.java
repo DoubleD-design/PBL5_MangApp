@@ -8,6 +8,10 @@ import java.util.List;
 
 @Repository
 public interface AdRepository extends JpaRepository<Ad, Integer> {
-    // Lấy danh sách quảng cáo mới nhất (sắp xếp theo thời gian giảm dần)
+    // Get the latest ads (ordered by creation time descending)
     List<Ad> findAllByOrderByCreatedAtDesc();
+    
+    // Get only active ads
+    
+    List<Ad> findByIsActiveTrue();
 }

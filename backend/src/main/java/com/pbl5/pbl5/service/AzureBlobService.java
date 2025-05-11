@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +88,22 @@ public class AzureBlobService {
             return blobEndpoint + "/" + containerNameUser + "/" + fileName;
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload avatar image to Azure Blob Storage: " + e.getMessage(), e);
+        }
+    }
+    public String extractBlobNameFromUrl(String url) {
+        // Giả sử URL như: https://yourstorage.blob.core.windows.net/container/avatars/123/abc.jpg
+        URI uri = URI.create(url);
+        String path = uri.getPath(); // /container/avatars/123/abc.jpg
+        return path.startsWith("/") ? path.substring(1) : path;
+    }
+    public void deleteBlob(String containerName, String blobName) {
+        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+                .connectionString(connectionString)
+                .buildClient();
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+        BlobClient blobClient = containerClient.getBlobClient(blobName);
+        if (blobClient.exists()) {
+            blobClient.delete();
         }
     }
 }

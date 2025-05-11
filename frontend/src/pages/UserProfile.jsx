@@ -42,7 +42,11 @@ const UserProfile = () => {
 
     try {
       const avatarUrl = await userService.updateAvatar(file);
-      const updatedUser = { ...user, avatarUrl }; // Ensure avatarUrl is updated correctly
+      // Thêm timestamp để tạo URL duy nhất, tránh cache
+      const updatedUser = {
+        ...user,
+        avatarUrl: `${avatarUrl}?t=${Date.now()}`,
+      };
       updateUser(updatedUser); // Ensure the updated user object is saved in context
       setAvatarFile(null);
     } catch (error) {
@@ -102,11 +106,7 @@ const UserProfile = () => {
             component="label"
             disabled={uploadingAvatar}
           >
-            {uploadingAvatar ? (
-              <CircularProgress size={20} />
-            ) : (
-              "Edit Avatar"
-            )}
+            {uploadingAvatar ? <CircularProgress size={20} /> : "Edit Avatar"}
             <input
               type="file"
               accept="image/*"
