@@ -104,9 +104,13 @@ const CommentSection = ({ mangaId }) => {
       };
 
       const createdComment = await commentService.createComment(commentData);
-
+      const commentWithUser = {
+        ...createdComment,
+        username: user.username,
+        user: { avatar: user.avatar },
+      };
       // Add the new comment to the list
-      setComments([createdComment, ...comments]);
+      setComments([commentWithUser, ...comments]);
       setNewComment("");
       setSuccess("Comment posted successfully!");
       setTimeout(() => setSuccess(null), 3000);
