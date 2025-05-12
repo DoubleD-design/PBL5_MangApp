@@ -2,7 +2,7 @@ import api from "./api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Credentials {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -15,7 +15,7 @@ interface User {
 }
 
 interface RegisterData {
-  name: string;
+  username: string;
   email: string;
   password: string;
   // Thêm các trường khác nếu có
@@ -29,9 +29,9 @@ const authService = {
       const user: User = response.data.user;
       await AsyncStorage.setItem("token", response.data.jwt);  // Dùng await cho setItem
       await AsyncStorage.setItem("user", JSON.stringify(user));  // Dùng await cho setItem
-      window.dispatchEvent(new Event("user-logged-in"));
+      
       console.log("Login successful, redirecting...");
-      window.location.href = "/"; // Cần thay đổi sang cách xử lý redirect phù hợp trong React Native
+      
       return user;
     } catch (error: any) {
       console.error("Login failed:", error.response?.data || error.message);
@@ -43,7 +43,7 @@ const authService = {
     try {
       const response = await api.post("/auth/register", userData);
       console.log("Registration successful, redirecting...");
-      window.location.href = "/login"; // Cần thay đổi sang cách xử lý redirect phù hợp trong React Native
+      // Cần thay đổi sang cách xử lý redirect phù hợp trong React Native
       return response.data;
     } catch (error: any) {
       console.error("Registration failed:", error.response?.data || error.message);
