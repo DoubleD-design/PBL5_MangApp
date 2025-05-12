@@ -8,6 +8,7 @@ import HistoryScreen from './history/HistoryScreen';
 import FavouritesScreen from './favourites/FavouritesScreen';
 import HomeStack from './HomeStack';
 import SearchResultsScreen from './screens/SearchResultsScreen';
+import LoginScreen from './screens/LoginScreen';
 
 const Tab = createBottomTabNavigator();
 

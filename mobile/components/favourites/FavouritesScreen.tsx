@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity, Dimensions, ActivityIndicator, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -48,6 +49,27 @@ const ITEM_WIDTH = width / 3 - 16;
 
 const FavouritesScreen = () => {
   const navigation = useNavigation();
+  const [isCheckingLogin, setIsCheckingLogin] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        navigation.navigate('Login');
+        return;
+      }
+
+      setIsCheckingLogin(false);
+    })();
+  }, []);
+
+  if (isCheckingLogin) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#f97316" />
+        </View>
+      );
+    }
 
   const renderItem = ({ item }: any) => (
     <View style={{ width: ITEM_WIDTH, margin: 8 }}>
@@ -90,5 +112,14 @@ const FavouritesScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#171717',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+})
 
 export default FavouritesScreen;
