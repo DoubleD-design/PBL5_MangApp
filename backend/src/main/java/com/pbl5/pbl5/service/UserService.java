@@ -84,4 +84,40 @@ public class UserService {
             return userRepository.save(user);
         }).orElse(null);
     }
+    
+    /**
+     * Updates user's VIP status with start and end dates
+     * @param id User ID
+     * @param status VIP status
+     * @param startDate VIP subscription start date
+     * @param endDate VIP subscription end date
+     * @return Updated user
+     */
+    public User updateVipSubscription(Integer id, Boolean status, 
+                                     java.time.LocalDateTime startDate, 
+                                     java.time.LocalDateTime endDate) {
+        return userRepository.findById(id).map(user -> {
+            user.setVipStatus(status);
+            user.setVipStartDate(startDate);
+            user.setVipEndDate(endDate);
+            return userRepository.save(user);
+        }).orElse(null);
+    }
+    
+    /**
+     * Gets all users with active VIP status
+     * @return List of VIP users
+     */
+    public List<User> getAllVipUsers() {
+        return userRepository.findByVipStatusTrue();
+    }
+    
+    /**
+     * Updates a user entity
+     * @param user User entity to update
+     * @return Updated user
+     */
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
 }

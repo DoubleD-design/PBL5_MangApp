@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByEmail(@NonNull String email);
     boolean existsByUsername(@NonNull String username);
     List<User> findByVipStatusTrue();
+    
+    // Find users with active VIP status but expired end date
+    List<User> findByVipStatusTrueAndVipEndDateBefore(LocalDateTime currentDateTime);
 
     // Cập nhật VIP status cho người dùng
     @Modifying

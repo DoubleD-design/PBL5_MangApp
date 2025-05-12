@@ -459,19 +459,19 @@ const Home = () => {
                   {[
                     {
                       id: 1,
-                      title: "Manga Plus Subscription",
+                      title: "Monthly VIP Subscription",
                       description:
-                        "Get unlimited access to all manga for just $4.99/month",
-                      // image:
-                      //   "https://cdn.pixabay.com/photo/2016/12/28/08/15/hatsune-miku-1935674_1280.png",
+                        "Get unlimited access to all manga for just $1.25/month",
+                      image:
+                        "http://localhost:8080/vip/monthly_vip.jpeg",
                     },
                     {
                       id: 2,
-                      title: "New Releases",
+                      title: "Yearly VIP Subscription",
                       description:
-                        "Check out the latest manga releases this week",
-                      // image:
-                      //   "https://cdn.pixabay.com/photo/2023/05/28/05/34/ai-generated-8022486_1280.jpg",
+                        "Get unlimited access to all manga for just $12.5/year",
+                      image:
+                        "http://localhost:8080/vip/yearly_vip.jpeg",
                     },
                   ].map((promo) => (
                     <Paper
