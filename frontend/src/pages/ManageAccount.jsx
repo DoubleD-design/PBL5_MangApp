@@ -67,7 +67,11 @@ const ManageAccount = () => {
           <Box sx={{ textAlign: "center", mb: 2 }}>
             <Avatar
               sx={{ width: 100, height: 100, mx: "auto", mb: 1 }}
-              src={user?.avatarUrl || "https://via.placeholder.com/100"}
+              src={
+                user?.avatarUrl
+                  ? `${user.avatarUrl}?t=${user.updatedAt || Date.now()}`
+                  : "https://via.placeholder.com/120"
+              }
               alt="User Avatar"
             />
             <Typography variant="h6">{user.username}</Typography>
@@ -90,9 +94,21 @@ const ManageAccount = () => {
           <Divider sx={{ my: 2 }} />
           <List>
             {[
-              { section: "profile", label: "Your Profile", icon: <AccountCircle /> },
-              { section: "password", label: "Change Your Password", icon: <Lock /> },
-              { section: "comments", label: "Your Comments", icon: <Comment /> },
+              {
+                section: "profile",
+                label: "Your Profile",
+                icon: <AccountCircle />,
+              },
+              {
+                section: "password",
+                label: "Change Your Password",
+                icon: <Lock />,
+              },
+              {
+                section: "comments",
+                label: "Your Comments",
+                icon: <Comment />,
+              },
             ].map(({ section, label, icon }) => (
               <ListItem
                 button

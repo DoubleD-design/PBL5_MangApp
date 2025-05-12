@@ -48,6 +48,10 @@ const UserProfile = () => {
         avatarUrl: `${avatarUrl}?t=${Date.now()}`,
       };
       updateUser(updatedUser); // Ensure the updated user object is saved in context
+      setFormData((prev) => ({
+        ...prev,
+        avatarUrl: `${avatarUrl}?t=${Date.now()}`,
+      }));
       setAvatarFile(null);
     } catch (error) {
       console.error("Error updating avatar:", error);
@@ -98,7 +102,11 @@ const UserProfile = () => {
         <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
           <Avatar
             sx={{ width: 120, height: 120, mx: "auto", mb: 2 }}
-            src={user?.avatarUrl ?? "https://via.placeholder.com/120"}
+            src={
+              user?.avatarUrl
+                ? `${user.avatarUrl}?t=${user.updatedAt || Date.now()}`
+                : "https://via.placeholder.com/120"
+            }
             alt="User Avatar"
           />
           <Button
