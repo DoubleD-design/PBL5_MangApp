@@ -47,8 +47,23 @@ public class UserController {
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        User response = new User();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setBirthday(user.getBirthday());
+        response.setGender(user.getGender());
+        response.setAvatarUrl(user.getAvatarUrl());
+        response.setVipStatus(user.getVipStatus());
+        response.setVipStartDate(user.getVipStartDate());
+        response.setVipEndDate(user.getVipEndDate());
+        response.setCreatedAt(user.getCreatedAt());
+        response.setRole(user.getRole());
+        response.setActive(user.getActive());
+        response.setAbleToComment(user.getAbleToComment());
+
         // Ensure the avatarUrl field is included in the response
-        return ResponseEntity.ok(user); 
+        return ResponseEntity.ok(response); 
     }
 
     @PostMapping
