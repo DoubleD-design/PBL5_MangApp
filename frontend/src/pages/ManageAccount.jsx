@@ -18,10 +18,13 @@ import { useUser } from "../context/UserContext";
 import UserProfile from "./UserProfile";
 import ChangePass from "./ChangePass";
 import MyComment from "./MyComment";
+import authService from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 const ManageAccount = () => {
   const [selectedSection, setSelectedSection] = useState("profile");
   const { user, loading, error } = useUser();
+  const navigate = useNavigate();
 
   const renderContent = () => {
     switch (selectedSection) {
@@ -119,7 +122,13 @@ const ManageAccount = () => {
                 <ListItemText primary={label} />
               </ListItem>
             ))}
-            <ListItem button>
+            <ListItem
+              button
+              onClick={() => {
+                authService.logout();
+                navigate("/login");
+              }}
+            >
               <ListItemIcon>
                 <Logout />
               </ListItemIcon>

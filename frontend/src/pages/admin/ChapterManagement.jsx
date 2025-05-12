@@ -97,19 +97,28 @@ const ChapterManagement = () => {
         chapter_number: formData.chapterNumber,
         title: formData.title,
       };
-
+  
       if (dialogType === "add") {
         await chapterService.createChapter(formDataToSend, imageFiles);
       } else if (dialogType === "edit" && selectedChapter) {
         await chapterService.updateChapter(selectedChapter.id, formDataToSend, imageFiles);
       }
-
+  
       setSnackbar({ open: true, message: "Lưu chương thành công!", severity: "success" });
       handleCloseDialog();
-
-      // Reload chapters
+  
+      // Reload chapters with pages data
       const chaptersData = await chapterService.getChaptersByManga(mangaId);
-      setChapters(chaptersData);
+      
+      // Fetch pages for each chapter
+      const chaptersWithPages = await Promise.all(
+        chaptersData.map(async (chapter) => {
+          const pages = await chapterService.getPagesByChapterId(chapter.id);
+          return { ...chapter, pages };
+        })
+      );
+  
+      setChapters(chaptersWithPages);
     } catch (err) {
       setSnackbar({ open: true, message: err.message, severity: "error" });
     }

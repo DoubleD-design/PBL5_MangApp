@@ -46,49 +46,36 @@ const readingHistoryService = {
         mangaId: parseInt(mangaId),
         chapterId: parseInt(chapterId),
         chapterNumber,
+        lastReadPage, // Thêm trường này
         timestamp: new Date().toISOString(),
       };
-
-      // For authenticated users, save to API
+  
+      // For authenticated users
       if (authService.isAuthenticated()) {
-        // Get current user from localStorage
         const user = authService.getCurrentUser();
-        if (user && user.id) {
-          // Create payload with required fields for the API
-          const apiPayload = {
+        if (user?.id) {
+          // Sử dụng endpoint mới tạo history thay vì update
+          await api.post("/reading-history", {
             userId: user.id,
-            mangaId: parseInt(mangaId),
-            chapterId: parseInt(chapterId),
-            lastReadPage: lastReadPage,
-          };
-          await api.post("/reading-history", apiPayload);
-        } else {
-          console.log("Using local storage only - user ID not available");
-          // Continue with localStorage only, no error needed
+            mangaId: historyItem.mangaId,
+            chapterId: historyItem.chapterId,
+            lastReadPage: historyItem.lastReadPage // Thêm trường này
+          });
         }
       }
-
-      // Always save to localStorage as backup and for non-authenticated users
+  
+      // Xử lý localStorage
       const history = localStorage.getItem(READING_HISTORY_KEY);
       let historyArray = history ? JSON.parse(history) : [];
-
-      // Remove any existing entry for this chapter to avoid duplicates
-      historyArray = historyArray.filter(
-        (item) =>
-          !(
-            item.mangaId === historyItem.mangaId &&
-            item.chapterId === historyItem.chapterId
-          )
-      );
-
-      // Add new entry
-      historyArray.push(historyItem);
-
-      // Limit history size to prevent localStorage from getting too large
+      
+      // Thêm mới mà không xóa entry cũ
+      historyArray.unshift(historyItem); // Thêm vào đầu mảng
+      
+      // Giới hạn lịch sử
       if (historyArray.length > 100) {
-        historyArray = historyArray.slice(-100);
+        historyArray = historyArray.slice(0, 100);
       }
-
+      
       localStorage.setItem(READING_HISTORY_KEY, JSON.stringify(historyArray));
       return true;
     } catch (error) {

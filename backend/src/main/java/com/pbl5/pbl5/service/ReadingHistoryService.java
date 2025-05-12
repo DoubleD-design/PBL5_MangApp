@@ -33,25 +33,25 @@ public class ReadingHistoryService {
     public List<ReadingHistory> getReadingHistoriesByUserIdAndMangaId(Integer userId, Integer mangaId) {
         return readingHistoryRepository.findByUserIdAndMangaId(userId, mangaId);
     }
-    
+
     public ReadingHistory findOrCreateReadingHistory(Integer userId, Integer mangaId, Integer chapterId) {
-        List<ReadingHistory> existingHistories = readingHistoryRepository.findByUserIdAndMangaId(userId, mangaId);
-        
+        Optional<ReadingHistory> existingHistory =
+                readingHistoryRepository.findByUserIdAndMangaIdAndChapterId(userId, mangaId, chapterId);
+
         ReadingHistory readingHistory;
-        if (!existingHistories.isEmpty()) {
-            // Update existing history
-            readingHistory = existingHistories.get(0);
-            readingHistory.setChapterId(chapterId);
+        if (existingHistory.isPresent()) {
+            // Update thời gian đọc nếu cần
+            readingHistory = existingHistory.get();
             readingHistory.setUpdatedAt(LocalDateTime.now());
         } else {
-            // Create new history
+            // Tạo mới
             readingHistory = new ReadingHistory();
             readingHistory.setUserId(userId);
             readingHistory.setMangaId(mangaId);
             readingHistory.setChapterId(chapterId);
             readingHistory.setUpdatedAt(LocalDateTime.now());
         }
-        
+
         return readingHistoryRepository.save(readingHistory);
     }
 
