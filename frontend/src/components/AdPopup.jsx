@@ -54,6 +54,12 @@ const AdPopup = ({ onClose, triggerType = "chapter_view" }) => {
       }
     }
   };
+  //navigate("/vip-subscription");
+  const handleSubscribe = () => {
+    // Navigate to VIP subscription page
+    //navigate("/vip-subscription");
+    window.open("/vip-subscription", "_blank");
+  };
 
   // If loading or no ad available, don't render anything
   if (loading || !ad) return null;
@@ -148,7 +154,7 @@ const AdPopup = ({ onClose, triggerType = "chapter_view" }) => {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleAdClick}
+              onClick={handleSubscribe}
               sx={{ mb: 2 }}
             >
               {ad.callToAction}

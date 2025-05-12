@@ -80,7 +80,7 @@ const Navbar = () => {
     } else if (action === "editProfile") {
       navigate("/account");
     } else if (action === "vipRegistration") {
-      navigate("/vip-registration");
+      navigate("/vip-subscription");
     } else if (action === "adminDashboard") {
       navigate("/admin");
     }

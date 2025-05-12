@@ -14,6 +14,7 @@ import CategoryPage from "./pages/CategoryPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import UpdatesPage from "./pages/UpdatesPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import VipSubscription from "./pages/VipSubscription";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { Navigate } from "react-router-dom";
 import authService from "./services/authService";
@@ -92,6 +93,15 @@ function App() {
                     element={
                       <PrivateRoute>
                         <FavoritesPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  {/* VIP Subscription Route */}
+                  <Route
+                    path="/vip-subscription"
+                    element={
+                      <PrivateRoute>
+                        <VipSubscription />
                       </PrivateRoute>
                     }
                   />

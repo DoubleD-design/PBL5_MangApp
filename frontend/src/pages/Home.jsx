@@ -462,32 +462,37 @@ const Home = () => {
                       title: "Monthly VIP Subscription",
                       description:
                         "Get unlimited access to all manga for just $1.25/month",
-                      image:
-                        "http://localhost:8080/vip/monthly_vip.jpeg",
+                      image: "http://localhost:8080/vip/monthly_vip.jpeg", // 👈 Sửa thành URL thực
                     },
                     {
                       id: 2,
                       title: "Yearly VIP Subscription",
                       description:
                         "Get unlimited access to all manga for just $12.5/year",
-                      image:
-                        "http://localhost:8080/vip/yearly_vip.jpeg",
+                      image: "http://localhost:8080/vip/yearly_vip.jpeg", // 👈 Sửa thành URL thực
                     },
                   ].map((promo) => (
                     <Paper
                       key={promo.id}
                       elevation={1}
+                      component={Link}
+                      to="/vip-subscription"
                       sx={{
                         overflow: "hidden",
                         borderRadius: 2,
+                        cursor: "pointer",
+                        textDecoration: "none",
+                        color: "inherit",
+                        transition: "transform 0.2s, box-shadow 0.2s",
                         "&:hover": {
                           boxShadow: 6,
+                          transform: "translateY(-5px)",
                         },
                       }}
                     >
                       <Box
-                        // component="img"
-                        // src={promo.image}
+                        component="img"
+                        src={promo.image}
                         alt={promo.title}
                         sx={{
                           width: "100%",
@@ -502,6 +507,14 @@ const Home = () => {
                         <Typography variant="body2" color="text.secondary">
                           {promo.description}
                         </Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          sx={{ mt: 1 }}
+                        >
+                          Subscribe Now
+                        </Button>
                       </Box>
                     </Paper>
                   ))}
