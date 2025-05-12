@@ -7,6 +7,7 @@ import TeamsScreen from './teams/TeamsScreen';
 import HistoryScreen from './history/HistoryScreen';
 import FavouritesScreen from './favourites/FavouritesScreen';
 import HomeStack from './HomeStack';
+import SearchResultsScreen from './screens/SearchResultsScreen';
 
 const Tab = createBottomTabNavigator();
 

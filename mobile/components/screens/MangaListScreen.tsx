@@ -14,6 +14,8 @@ import MangaCard from './../MangaCard';
 import { Manga } from '../../types/Manga';
 import api from '../../services/api';
 import SearchBar from '../SearchBar';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GRADIENTS } from '../../utils/const';
 
 const screenWidth = Dimensions.get('window').width;
 const ITEM_WIDTH = screenWidth / 3 - 2;
@@ -82,6 +84,7 @@ const MangaListScreen: React.FC = () => {
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
   return (
+    <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
     <View style={styles.container }>
       <SearchBar />
       <Text style={styles.title}>{title}</Text>
@@ -125,6 +128,7 @@ const MangaListScreen: React.FC = () => {
         </>
       )}
     </View>
+    </LinearGradient>
   );
 };
 
@@ -162,6 +166,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
+  gradient: {
+    flex: 1, // Chiếm toàn bộ màn hình
+    justifyContent: 'center', // Canh giữa theo chiều dọc
+    alignItems: 'center', // Canh giữa theo chiều ngang
+  }
 });
 
 export default MangaListScreen;

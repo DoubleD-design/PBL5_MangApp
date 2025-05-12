@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { GRADIENTS } from '../../utils/const';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Chapter } from '../../types/Manga';
+import { Chapter, Manga } from '../../types/Manga';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../services/api';
 
@@ -22,8 +22,19 @@ const MangaDetailScreen = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [mangaInfor, setMangaInfor] = useState<Manga>(manga);
 
   useEffect(() => {
+    const fetchMangaInfor = async () => {
+      try {
+        const response = await api.get(`/manga/${mangaInfor.id}`);
+        setMangaInfor(response.data);
+      } catch (error) {
+        console.error('Error fetching chapters:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
     const fetchChapters = async () => {
       try {
         const response = await api.get(`/chapters/manga/${manga.id}`);
@@ -35,13 +46,14 @@ const MangaDetailScreen = () => {
       }
     };
 
+    fetchMangaInfor();
     fetchChapters();
-  }, [manga.id]);
+  }, [mangaInfor.id]);
 
   return (
     <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
       <ImageBackground
-        source={{ uri: manga.coverImage }}
+        source={{ uri: mangaInfor.coverImage }}
         style={[StyleSheet.absoluteFillObject, { backgroundColor: '#2c1a0e' }, { marginTop: 50 }]}
         imageStyle={{ resizeMode: 'cover', opacity: 0.2 }}
       />
@@ -50,11 +62,11 @@ const MangaDetailScreen = () => {
       </TouchableOpacity>
       <ScrollView style={styles.container}>
         <View>
-          <Text style={styles.mangaTitle}>{manga.title}</Text>
+          <Text style={styles.mangaTitle}>{mangaInfor.title}</Text>
         </View>
         <View style={{ position: 'relative', marginTop: 20 }}>
           <ImageBackground
-            source={{ uri: manga.coverImage }}
+            source={{ uri: mangaInfor.coverImage }}
             style={styles.mangaImage}
             imageStyle={{ borderRadius: 10 }}
           />
@@ -83,29 +95,29 @@ const MangaDetailScreen = () => {
         <View style={{ marginTop: 5 }}>
           <View style={styles.infoTable}>
             <View>
-              <Text style={styles.infoValue}>{manga.description}</Text>
+              <Text style={styles.infoValue}>{mangaInfor.description}</Text>
             </View>
             <View style={{ height: 1, backgroundColor: '#b5e745', marginVertical: 20, opacity: 0.3 }} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Author</Text>
-              <Text style={styles.infoValue}>{manga.author}</Text>
+              <Text style={styles.infoValue}>{mangaInfor.author}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Categories</Text>
               <Text style={styles.infoValue}>
-                {Array.isArray(manga.categories)
-                  ? manga.categories.map(c => c.name).join(', ')
+                {Array.isArray(mangaInfor.categories)
+                  ? mangaInfor.categories.map(c => c.name).join(', ')
                   : 'Unknown'}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Status</Text>
-              <Text style={styles.infoValue}>{manga.status}</Text>
+              <Text style={styles.infoValue}>{mangaInfor.status}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Views</Text>
-              <Text style={styles.infoValue}>{manga.views}</Text>
+              <Text style={styles.infoValue}>{mangaInfor.views}</Text>
             </View>
           </View>
         </View>

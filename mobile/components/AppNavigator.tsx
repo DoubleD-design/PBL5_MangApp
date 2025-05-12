@@ -4,6 +4,7 @@ import SplashScreen from './screens/SplashScreen';
 import BottomTabNavigator from './BottomTabNavigator';
 import MangaDetailScreen from './screens/MangaDetailScreen';
 import ReadingScreen from './screens/ReadingScreen';
+import SearchResultsScreen from './screens/SearchResultsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,7 @@ export default function AppNavigator() {
       <Stack.Screen name="MainApp" component={BottomTabNavigator} />
       <Stack.Screen name="MangaDetail" component={MangaDetailScreen} />
       <Stack.Screen name="Reading" component={ReadingScreen} />
+      <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
     </Stack.Navigator>
   );
 }

@@ -33,3 +33,10 @@ export interface Manga {
   categories: Category[];
   chapters: Chapter[];
 }
+
+export interface SearchRes {
+  totalItems: number;
+  totalPages: number;
+  currentPages: number;
+  content: Manga[];
+}
