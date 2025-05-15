@@ -126,8 +126,7 @@ const ManageAccount = () => {
               button
               onClick={() => {
                 authService.logout();
-                navigate("/login");
-              }}
+                navigate("/login");}}
             >
               <ListItemIcon>
                 <Logout />

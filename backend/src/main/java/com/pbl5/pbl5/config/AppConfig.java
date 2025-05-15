@@ -22,9 +22,9 @@ public class AppConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .and()
-                .authorizeHttpRequests(Authorize -> Authorize
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/manga/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
@@ -33,6 +33,8 @@ public class AppConfig {
                         .requestMatchers("/api/comments/manga/**").permitAll()
                         .requestMatchers("/api/ratings/manga/*/average").permitAll()
                         .requestMatchers("/api/ratings/manga/*").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll() // Cho phép route của OAuth2
+                        .requestMatchers("/api/logingoogle").permitAll() // OAuth2 login endpoint
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -54,7 +56,6 @@ public class AppConfig {
                                         "http://localhost:8080"
                                 )
                         );
-                        //cfg.setAllowedMethods(Arrays.asList("GET", "POST","DELETE","PUT"));
                         cfg.setAllowedMethods(Collections.singletonList("*"));
                         cfg.setAllowCredentials(true);
                         cfg.setAllowedHeaders(Collections.singletonList("*"));
@@ -65,17 +66,18 @@ public class AppConfig {
                     }
                 })
                 .and()
-                .httpBasic()
-                .and();
+                .oauth2Login() // Kích hoạt OAuth2 Login
+                .and()
+                .oauth2Login(oauth -> oauth
+                    .defaultSuccessUrl("http://localhost:5173", true) // hoặc API URL bạn muốn redirect sau khi login Google
+                )
+                .httpBasic();
 
         return http.build();
-
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
-

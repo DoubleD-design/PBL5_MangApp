@@ -107,9 +107,7 @@ const CommentSection = ({ mangaId }) => {
       const commentWithUser = {
         ...createdComment,
         username: user.username,
-        avatarUrl: user.avatarUrl,
-        // updatedAt: new Date().now(),
-      };
+        avatarUrl: user.avatarUrl,};
       // Add the new comment to the list
       setComments([commentWithUser, ...comments]);
       setNewComment("");
@@ -178,7 +176,6 @@ const CommentSection = ({ mangaId }) => {
         ...updatedComment,
         username: user.username,
         avatarUrl: user.avatarUrl,
-        // updatedAt: new Date().now(),
       };
 
       setComments((prevComments) =>
