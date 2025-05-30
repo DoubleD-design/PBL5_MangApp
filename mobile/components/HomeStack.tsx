@@ -6,6 +6,7 @@ import MostViewsListScreen from './screens/MostViewsListScreen';
 import MostFavouritesListScreen from './screens/MostFavouritesListScreen';
 import UpdateListScreen from './screens/UpdateListScreen';
 import MangaListScreen from './screens/MangaListScreen';
+import CategoryMangaListScreen from './screens/CategoryMangaListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -13,6 +14,7 @@ export default function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
+        
         <Stack.Screen name="UpdateList" component={UpdateListScreen} />
         <Stack.Screen name="MangaList" component={MangaListScreen} />
         <Stack.Screen name="MostViewsList" component={MostViewsListScreen} />

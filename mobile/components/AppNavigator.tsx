@@ -7,6 +7,7 @@ import ReadingScreen from './screens/ReadingScreen';
 import SearchResultsScreen from './screens/SearchResultsScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import LoginScreen from './screens/LoginScreen';
+import CategoryMangaListScreen from './screens/CategoryMangaListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,7 @@ export default function AppNavigator() {
       <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="CategoryMangaList" component={CategoryMangaListScreen} />
     </Stack.Navigator>
   );
 }
