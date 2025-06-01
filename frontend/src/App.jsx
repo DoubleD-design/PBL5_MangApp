@@ -25,7 +25,7 @@ import MyComment from "./pages/MyComment"; // Import the MyComment component
 import { UserProvider } from "./context/UserContext";
 import AdminDashboard from "./pages/admin/AdminDashboard"; // Import AdminDashboard component
 import ChapterManagement from "./pages/admin/ChapterManagement"; // Import ChapterManagement component
-
+import OAuth2Callback from "./pages/OAuth2Callback";
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/login" />;
@@ -123,6 +123,7 @@ function App() {
                       </AdminRoute>
                     }
                   />
+                  <Route path="/oauth2/callback" element={<OAuth2Callback />} />
                 </Routes>
               </Box>
             </Box>

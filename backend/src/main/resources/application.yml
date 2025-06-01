@@ -6,5 +6,10 @@ spring:
           google:
             client-id: ${CLIENT_ID}
             client-secret: ${CLIENT_SECRET}
+            redirect-uri: "http://localhost:8080/oauth2/callback"
+            scope: openid,profile,email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?prompt=select_account
 server:
   port: 8080

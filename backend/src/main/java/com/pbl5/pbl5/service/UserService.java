@@ -120,4 +120,8 @@ public class UserService {
     public User updateUser(User user) {
         return userRepository.save(user);
     }
+
+    public Optional<User> findByEmail(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

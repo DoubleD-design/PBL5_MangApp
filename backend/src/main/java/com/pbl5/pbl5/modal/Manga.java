@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 

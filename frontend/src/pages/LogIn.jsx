@@ -201,6 +201,7 @@ const LogIn = () => {
         <div style={styles.socialButtons}>
           <button
             style={{ ...styles.socialButton, ...styles.googleButton }}
+            onClick={authService.loginWithGoogle}
           >
             Login with Google
           </button>

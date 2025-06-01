@@ -5,12 +5,14 @@ import com.pbl5.pbl5.request.RegisterRequest;
 import com.pbl5.pbl5.response.AuthResponse;
 import com.pbl5.pbl5.service.AuthService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,13 +23,21 @@ public class AuthController {
     private AuthService authService;
     
     
-    @GetMapping("/loginGoogle")
-    public Map<String, Object> loginGoogle(OAuth2AuthenticationToken authentication) {
-        // Lấy thông tin người dùng từ Google
-        Map<String, Object> attributes = authentication.getPrincipal().getAttributes();
+    @RestController
+    public class OAuth2CallbackController {
 
-        // Trả về thông tin xác thực
-        return attributes;
+    @GetMapping("/oauth2/callback")
+        public void oauth2Callback(
+                @RequestParam("code") String code,
+                @RequestParam(value = "state", required = false) String state,
+                HttpServletResponse response) throws IOException {
+            // Sau khi nhận code, bạn có thể redirect về frontend kèm code và state
+            String redirectUrl = "http://localhost:5173/oauth2/callback?code=" + code;
+            if (state != null) {
+                redirectUrl += "&state=" + state;
+            }
+            response.sendRedirect(redirectUrl);
+        }
     }
 
     @PostMapping("/register")
@@ -40,5 +50,12 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
         AuthResponse authResponse = authService.login(loginRequest);
         return new ResponseEntity<>(authResponse, HttpStatus.OK);
+    }
+    @PostMapping("/oauth2/callback")
+    public ResponseEntity<AuthResponse> oauth2Callback(@RequestBody Map<String, String> payload) {
+        String code = payload.get("code");
+        String state = payload.get("state");
+        AuthResponse authResponse = authService.exchangeGoogleCodeForJwt(code, state);
+        return ResponseEntity.ok(authResponse);
     }
 }

@@ -34,7 +34,22 @@ const authService = {
       throw error;
     }
   },
-
+  loginWithGoogle: () => {
+    // Chuyển hướng trình duyệt tới endpoint OAuth2 của backend
+    window.location.href = "http://localhost:8080/oauth2/authorization/google?prompt=select_account";
+  },
+  exchangeGoogleCodeForJwt: async (code, state) => {
+    try {
+      const response = await api.post("/auth/oauth2/callback", { code, state });
+      localStorage.setItem("token", response.data.jwt);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      window.dispatchEvent(new Event("user-logged-in"));
+      return response.data;
+    } catch (error) {
+      console.error("Exchange code for JWT failed:", error);
+      throw error;
+    }
+  },
   // Logout user
   logout: () => {
     localStorage.removeItem("token");

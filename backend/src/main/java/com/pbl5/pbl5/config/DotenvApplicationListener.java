@@ -17,7 +17,8 @@ public class DotenvApplicationListener implements ApplicationListener<Applicatio
         System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
         System.setProperty("CONNECTION_STRING", dotenv.get("CONNECTION_STRING"));
         System.setProperty("AZURE_SAS_TOKEN", dotenv.get("AZURE_SAS_TOKEN"));
-
+        System.setProperty("CLIENT_ID", dotenv.get("CLIENT_ID"));
+        System.setProperty("CLIENT_SECRET", dotenv.get("CLIENT_SECRET"));
         System.out.println("Loaded Dotenv properties to System!");
     }
 }

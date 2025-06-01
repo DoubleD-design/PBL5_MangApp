@@ -34,7 +34,7 @@ public class AppConfig {
                         .requestMatchers("/api/ratings/manga/*/average").permitAll()
                         .requestMatchers("/api/ratings/manga/*").permitAll()
                         .requestMatchers("/oauth2/**").permitAll() // Cho phép route của OAuth2
-                        .requestMatchers("/api/logingoogle").permitAll() // OAuth2 login endpoint
+                        .requestMatchers("/api/auth/loginGoogle").permitAll() // OAuth2 login endpoint
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -69,7 +69,12 @@ public class AppConfig {
                 .oauth2Login() // Kích hoạt OAuth2 Login
                 .and()
                 .oauth2Login(oauth -> oauth
-                    .defaultSuccessUrl("http://localhost:5173", true) // hoặc API URL bạn muốn redirect sau khi login Google
+                    .authorizationEndpoint(authorization -> authorization
+                        .baseUri("/oauth2/authorization")
+                    )
+                    .redirectionEndpoint(redirection -> redirection
+                        .baseUri("/oauth2/callback/*")
+                    )
                 )
                 .httpBasic();
 

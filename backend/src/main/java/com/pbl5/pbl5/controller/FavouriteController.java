@@ -3,9 +3,10 @@ package com.pbl5.pbl5.controller;
 import com.pbl5.pbl5.modal.Favourite;
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.modal.User;
-import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.request.FavouriteRequest;
 import com.pbl5.pbl5.service.FavouriteService;
+import com.pbl5.pbl5.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +24,16 @@ public class FavouriteController {
     @Autowired
     private FavouriteService favouriteService;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping
     public ResponseEntity<List<Manga>> getUserFavoriteMangas() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        User user = userRepository.findByEmail(username)
+        User user = userService.getUserByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        // User user = userRepository.findByEmail(username)
+        //         .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Manga> mangas = favouriteService.getFavouriteMangasByUserId(user.getId());
         return new ResponseEntity<>(mangas, HttpStatus.OK);
@@ -63,8 +66,10 @@ public class FavouriteController {
         System.out.println(username);
 
         // Tìm User tương ứng
-        User user = userRepository.findByEmail(username)
+        User user = userService.getUserByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        // User user = userRepository.findByEmail(username)
+        //         .orElseThrow(() -> new RuntimeException("User not found"));
 
         Favourite favourite = new Favourite();
         favourite.setReaderId(user.getId());
