@@ -86,11 +86,17 @@ public class FavouriteController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     
-    @DeleteMapping("/user/{userId}/manga/{mangaId}")
-    public ResponseEntity<Void> deleteFavouriteByUserIdAndMangaId(
-            @PathVariable Integer userId, 
-            @PathVariable Integer mangaId) {
-        favouriteService.deleteFavouriteByUserIdAndMangaId(userId, mangaId);
+    @DeleteMapping("/manga/{mangaId}")
+    public ResponseEntity<Void> deleteFavouriteByUserIdAndMangaId( @PathVariable Integer mangaId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.getUserByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // User user = userRepository.findByEmail(username)
+        //         .orElseThrow(() -> new RuntimeException("User not found"));
+
+        favouriteService.deleteFavouriteByUserIdAndMangaId(user.getId(), mangaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

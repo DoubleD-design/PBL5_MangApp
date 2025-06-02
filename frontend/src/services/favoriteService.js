@@ -25,7 +25,7 @@ const favoriteService = {
   // Remove manga from favorites
   removeFromFavorites: async (mangaId) => {
     try {
-      const response = await api.delete(`/favourites/${mangaId}`);
+      const response = await api.delete(`/favourites/manga/${mangaId}`);
       return response.data;
     } catch (error) {
       throw error;
