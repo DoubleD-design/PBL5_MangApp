@@ -9,6 +9,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Chapter, Manga } from '../../types/Manga';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../services/api';
+import CommentSection from '../CommentSection';
+import favoriteService from '../../services/favoriteService';
 
 type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -23,12 +25,14 @@ const MangaDetailScreen = () => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [mangaInfor, setMangaInfor] = useState<Manga>(manga);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchMangaInfor = async () => {
       try {
         const response = await api.get(`/manga/${mangaInfor.id}`);
         setMangaInfor(response.data);
+        setIsFavorite(response.data.isFavorite ?? false);
       } catch (error) {
         console.error('Error fetching chapters:', error);
       } finally {
@@ -49,6 +53,24 @@ const MangaDetailScreen = () => {
     fetchMangaInfor();
     fetchChapters();
   }, [mangaInfor.id]);
+
+  const toggleFavorite = async () => {
+    try {
+      if (isFavorite) {
+        // Xóa favorite
+        await favoriteService.removeFromFavorites(mangaInfor.id)
+        setIsFavorite(false);
+      } else {
+        // Thêm favorite
+        // await api.post(`/favourites/${mangaInfor.id}`);
+        await favoriteService.addToFavorites(mangaInfor.id)
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      alert('Failed to update favorite status');
+      console.error(error);
+    }
+  };
 
   return (
     <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
@@ -87,9 +109,9 @@ const MangaDetailScreen = () => {
 
           <TouchableOpacity
             style={styles.likeButton}
-            onPress={() => alert('you liked this manga')}
+            onPress={toggleFavorite}
           >
-            <Ionicons name="heart" size={24} color="white" />
+            <Ionicons name="heart" size={24} color={isFavorite ? 'red' : 'white'} />
           </TouchableOpacity>
         </View>
         <View style={{ marginTop: 5 }}>
@@ -146,6 +168,9 @@ const MangaDetailScreen = () => {
             )}
           </View>
         </View>
+          <View>
+            <CommentSection mangaId={mangaInfor.id} />
+          </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -157,6 +182,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     flex: 1,
     marginTop: 50,
+    paddingBottom: 10,
   },
   backButton: {
     position: 'absolute',

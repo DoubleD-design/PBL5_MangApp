@@ -3,6 +3,7 @@ import api from './api';
 export interface Comment {
   id: number;
   userId: number;
+  username: string;
   mangaId: number;
   content: string;
   createdAt: string;
@@ -12,7 +13,6 @@ export interface Comment {
 }
 
 export interface CreateCommentData {
-  userId: number;
   mangaId: number;
   content: string;
 }
@@ -51,6 +51,7 @@ const commentService = {
       throw error;
     }
   },
+
 
   updateComment: async (
     commentId: number,
