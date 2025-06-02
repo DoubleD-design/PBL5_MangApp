@@ -3,53 +3,16 @@ import { View, Text, FlatList, Image, TouchableOpacity, Dimensions, ActivityIndi
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import favoriteService from '../../services/favoriteService';
 
 const { width } = Dimensions.get('window');
-
-const mangaData = [
-  {
-    id: '1',
-    title: 'Attack on Titan',
-    chapter: 'Chap 139',
-    image: require('../../assets/manga/aot.jpg'),
-  },
-  {
-    id: '2',
-    title: 'Oyasumi, Punpun',
-    chapter: 'Chap 147',
-    image: require('../../assets/manga/punpun.jpg'),
-  },
-  {
-    id: '3',
-    title: 'Shounen no Abyss',
-    chapter: 'Chap 173',
-    image: require('../../assets/manga/sna.jpg'),
-  },
-  {
-    id: '4',
-    title: 'Kimi no koto nado',
-    chapter: 'Chap 40',
-    image: require('../../assets/manga/aot.jpg'),
-  },
-  {
-    id: '5',
-    title: 'Kimetsu no Yaiba',
-    chapter: 'Chap 189',
-    image: require('../../assets/manga/kny.jpg'),
-  },
-  {
-    id: '6',
-    title: 'Takopi no genzai',
-    chapter: 'Chap 16',
-    image: require('../../assets/manga/takopi.jpg'),
-  },
-];
-
 const ITEM_WIDTH = width / 3 - 16;
 
 const FavouritesScreen = () => {
   const navigation = useNavigation();
   const [isCheckingLogin, setIsCheckingLogin] = useState(true);
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -59,52 +22,59 @@ const FavouritesScreen = () => {
         return;
       }
 
-      setIsCheckingLogin(false);
+      try {
+        const data = await favoriteService.getUserFavorites();
+        setFavorites(data);
+      } catch (error) {
+        console.error('Failed to fetch favorites:', error);
+      } finally {
+        setIsCheckingLogin(false);
+        setLoading(false);
+      }
     })();
   }, []);
 
-  if (isCheckingLogin) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#f97316" />
-        </View>
-      );
-    }
+  if (loading || isCheckingLogin) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#f97316" />
+      </View>
+    );
+  }
 
-  const renderItem = ({ item }: any) => (
-    <View style={{ width: ITEM_WIDTH, margin: 8 }}>
+  const renderItem = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('MangaDetail', { manga: item })}
+      style={styles.itemContainer}
+    >
       <Image
-        source={item.image}
-        style={{ width: '100%', height: 150, borderRadius: 12 }}
+        source={{ uri: item.coverImage || 'https://via.placeholder.com/150' }}
+        style={styles.coverImage}
         resizeMode="cover"
       />
-      <Text style={{ color: 'white', marginTop: 6, fontWeight: 'bold' }} numberOfLines={1}>
-        {item.title}
+      <Text style={styles.titleText} numberOfLines={2}>
+        {item.title || 'No Title'}
       </Text>
-      <Text style={{ color: 'white', fontSize: 12 }}>{item.chapter}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#2c1a0e' }}>
-      {/* Back Button */}
+    <View style={styles.screenContainer}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        style={{ position: 'absolute', top: 50, left: 20, zIndex: 10 }}
+        style={styles.backButton}
       >
         <Ionicons name="arrow-back" size={28} color="white" />
       </TouchableOpacity>
 
-      {/* Title */}
-      <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginTop: 50, marginBottom: 10, alignSelf: 'center' }}>
+      <Text style={styles.headerText}>
         Favourites
       </Text>
 
-      {/* Manga Grid */}
       <FlatList
-        data={mangaData}
+        data={favorites}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         numColumns={3}
         contentContainerStyle={{ paddingBottom: 16 }}
         showsVerticalScrollIndicator={false}
@@ -114,12 +84,48 @@ const FavouritesScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: '#2c1a0e',
+  },
   loadingContainer: {
     flex: 1,
     backgroundColor: '#171717',
     justifyContent: 'center',
     alignItems: 'center',
   },
-})
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 50,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  itemContainer: {
+    width: ITEM_WIDTH,
+    margin: 8,
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  coverImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 12,
+  },
+  titleText: {
+    color: 'white',
+    marginTop: 6,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 13,
+  },
+});
 
 export default FavouritesScreen;
