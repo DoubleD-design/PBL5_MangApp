@@ -127,10 +127,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   commentCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'rgba(34, 29, 25, 0.7)',
     borderRadius: 12,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 8,
+    
   },
   commentHeader: {
     flexDirection: 'row',
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#fff',
   },
   timestamp: {
     fontSize: 12,
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
   },
   commentText: {
     fontSize: 14,
-    color: '#444',
+    color: '#fff',
     lineHeight: 20,
   },
   noComments: {
