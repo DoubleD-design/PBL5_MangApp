@@ -13,10 +13,12 @@ import {
   People as PeopleIcon,
   MenuBook as MenuBookIcon,
   Comment as CommentIcon,
+  BarChart as BarChartIcon,
 } from "@mui/icons-material";
 import UserManagement from "./UserManagement";
 import MangaManagement from "./MangaManagement";
 import CommentManagement from "./CommentManagement";
+import Statistics from "./Statistics";
 
 const AdminDashboard = () => {
   const theme = useTheme();
@@ -53,6 +55,7 @@ const AdminDashboard = () => {
             <Tab icon={<PeopleIcon />} label="User Management" />
             <Tab icon={<MenuBookIcon />} label="Manga Management" />
             <Tab icon={<CommentIcon />} label="Comment Management" />
+            <Tab icon={<BarChartIcon />} label="Statistics" />
           </Tabs>
         </Box>
 
@@ -60,6 +63,7 @@ const AdminDashboard = () => {
           {activeTab === 0 && <UserManagement />}
           {activeTab === 1 && <MangaManagement />}
           {activeTab === 2 && <CommentManagement />}
+          {activeTab === 3 && <Statistics />}
         </Box>
       </Paper>
     </Container>
