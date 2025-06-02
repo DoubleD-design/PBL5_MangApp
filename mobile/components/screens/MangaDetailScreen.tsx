@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Chapter, Manga } from '../../types/Manga';
 import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../services/api';
+import CommentSection from '../CommentSection';
 
 type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -23,6 +24,7 @@ const MangaDetailScreen = () => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [mangaInfor, setMangaInfor] = useState<Manga>(manga);
+  
 
   useEffect(() => {
     const fetchMangaInfor = async () => {
@@ -146,6 +148,9 @@ const MangaDetailScreen = () => {
             )}
           </View>
         </View>
+          <View>
+            <CommentSection mangaId={mangaInfor.id} />
+          </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -157,6 +162,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     flex: 1,
     marginTop: 50,
+    paddingBottom: 10,
   },
   backButton: {
     position: 'absolute',
