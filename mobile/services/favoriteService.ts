@@ -29,16 +29,7 @@ const favoriteService = {
 
   removeFromFavorites: async (mangaId: number): Promise<{ success: boolean }> => {
     try {
-      const response = await api.delete(`/favourites/${mangaId}`);
-      return response.data;
-    } catch (error: any) {
-      throw error;
-    }
-  },
-
-  isFavorite: async (mangaId: number): Promise<{ isFavorite: boolean }> => {
-    try {
-      const response = await api.get(`/favourites/check/${mangaId}`);
+      const response = await api.delete(`/favourites/manga/${mangaId}`);
       return response.data;
     } catch (error: any) {
       throw error;

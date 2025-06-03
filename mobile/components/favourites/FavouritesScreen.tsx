@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Dimensions, ActivityIndicator, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import favoriteService from '../../services/favoriteService';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = width / 3 - 16;
@@ -14,25 +15,39 @@ const FavouritesScreen = () => {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        navigation.navigate('Login');
-        return;
-      }
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
 
-      try {
-        const data = await favoriteService.getUserFavorites();
-        setFavorites(data);
-      } catch (error) {
-        console.error('Failed to fetch favorites:', error);
-      } finally {
-        setIsCheckingLogin(false);
-        setLoading(false);
-      }
-    })();
-  }, []);
+      const fetchFavorites = async () => {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          navigation.navigate('Login');
+          return;
+        }
+
+        try {
+          const data = await favoriteService.getUserFavorites();
+          if (isActive) {
+            setFavorites(data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch favorites:', error);
+        } finally {
+          if (isActive) {
+            setIsCheckingLogin(false);
+            setLoading(false);
+          }
+        }
+      };
+
+      fetchFavorites();
+
+      return () => {
+        isActive = false; // cleanup để tránh memory leak
+      };
+    }, [])
+  );
 
   if (loading || isCheckingLogin) {
     return (

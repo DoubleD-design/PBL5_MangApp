@@ -3,7 +3,7 @@ import { RootStackParamList } from '../../types/RootStackParamList';
 import { View, Text, TouchableOpacity, ScrollView, ImageBackground, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { GRADIENTS } from '../../utils/const';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Chapter, Manga } from '../../types/Manga';
@@ -11,12 +11,12 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import api from '../../services/api';
 import CommentSection from '../CommentSection';
 import favoriteService from '../../services/favoriteService';
+import { useFocusEffect } from '@react-navigation/native';
 
 type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
-
 type MangaDetailRouteProp = RouteProp<RootStackParamList, 'MangaDetail'>;
 
-const { height } = Dimensions.get('window'); // Lấy chiều cao màn hình
+const { height } = Dimensions.get('window');
 
 const MangaDetailScreen = () => {
   const route = useRoute<MangaDetailRouteProp>();
@@ -27,43 +27,39 @@ const MangaDetailScreen = () => {
   const [mangaInfor, setMangaInfor] = useState<Manga>(manga);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchMangaInfor = async () => {
-      try {
-        const response = await api.get(`/manga/${mangaInfor.id}`);
-        setMangaInfor(response.data);
-        setIsFavorite(response.data.isFavorite ?? false);
-      } catch (error) {
-        console.error('Error fetching chapters:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    const fetchChapters = async () => {
-      try {
-        const response = await api.get(`/chapters/manga/${manga.id}`);
-        setChapters(response.data);
-      } catch (error) {
-        console.error('Error fetching chapters:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const [mangaRes, chapterRes, favorites] = await Promise.all([
+            api.get(`/manga/${manga.id}`),
+            api.get(`/chapters/manga/${manga.id}`),
+            favoriteService.getUserFavorites()
+          ]);
 
-    fetchMangaInfor();
-    fetchChapters();
-  }, [mangaInfor.id]);
+          setMangaInfor(mangaRes.data);
+          setChapters(chapterRes.data);
+
+          const isFav = favorites.some((fav) => String(fav.id) === String(manga.id));
+          setIsFavorite(isFav);
+        } catch (error) {
+          console.error('Error loading manga detail:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+    }, [manga.id])
+  );
 
   const toggleFavorite = async () => {
     try {
       if (isFavorite) {
-        // Xóa favorite
-        await favoriteService.removeFromFavorites(mangaInfor.id)
+        await favoriteService.removeFromFavorites(mangaInfor.id);
         setIsFavorite(false);
       } else {
-        // Thêm favorite
-        // await api.post(`/favourites/${mangaInfor.id}`);
-        await favoriteService.addToFavorites(mangaInfor.id)
+        await favoriteService.addToFavorites(mangaInfor.id);
         setIsFavorite(true);
       }
     } catch (error) {
@@ -98,7 +94,7 @@ const MangaDetailScreen = () => {
             style={styles.startButton}
             onPress={() => {
               if (chapters.length > 0) {
-                navigation.navigate('Reading', { chapter: chapters[0], chapters: chapters });
+                navigation.navigate('Reading', { chapter: chapters[0], chapters });
               } else {
                 alert('No chapters available.');
               }
@@ -111,7 +107,7 @@ const MangaDetailScreen = () => {
             style={styles.likeButton}
             onPress={toggleFavorite}
           >
-            <Ionicons name="heart" size={24} color={isFavorite ? 'red' : 'white'} />
+            <Ionicons name="heart" size={24} color={isFavorite ? 'rgba(228, 84, 36, 0.96)' : 'rgba(66, 57, 55, 0.96)'} />
           </TouchableOpacity>
         </View>
         <View style={{ marginTop: 5 }}>
@@ -136,7 +132,6 @@ const MangaDetailScreen = () => {
               <Text style={styles.infoLabel}>Status</Text>
               <Text style={styles.infoValue}>{mangaInfor.status}</Text>
             </View>
-
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Views</Text>
               <Text style={styles.infoValue}>{mangaInfor.views}</Text>
@@ -168,9 +163,9 @@ const MangaDetailScreen = () => {
             )}
           </View>
         </View>
-          <View>
-            <CommentSection mangaId={mangaInfor.id} />
-          </View>
+        <View>
+          <CommentSection mangaId={mangaInfor.id} />
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -214,7 +209,7 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     alignSelf: 'center',
-    backgroundColor: 'rgba(39, 148, 70, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.73)',
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
@@ -262,9 +257,9 @@ const styles = StyleSheet.create({
     textAlign: 'justify',
   },
   gradient: {
-    flex: 1, // Chiếm toàn bộ màn hình
-    justifyContent: 'center', // Canh giữa theo chiều dọc
-    alignItems: 'center', // Canh giữa theo chiều ngang
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chapterListContainer: {
     marginHorizontal: 10,
