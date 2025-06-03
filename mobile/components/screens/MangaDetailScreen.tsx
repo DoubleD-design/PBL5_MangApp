@@ -3,7 +3,7 @@ import { RootStackParamList } from '../../types/RootStackParamList';
 import { View, Text, TouchableOpacity, ScrollView, ImageBackground, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { GRADIENTS } from '../../utils/const';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Chapter, Manga } from '../../types/Manga';
@@ -12,6 +12,8 @@ import api from '../../services/api';
 import CommentSection from '../CommentSection';
 import favoriteService from '../../services/favoriteService';
 import { useFocusEffect } from '@react-navigation/native';
+import mangaService from '../../services/mangaService';
+import  StarRating from 'react-native-star-rating-widget';
 
 type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
 type MangaDetailRouteProp = RouteProp<RootStackParamList, 'MangaDetail'>;
@@ -26,19 +28,28 @@ const MangaDetailScreen = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [mangaInfor, setMangaInfor] = useState<Manga>(manga);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [ratingCount, setRatingCount] = useState<number>(0);
+  const [averageRating, setAverageRating] = useState<number>(0);
 
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
         try {
-          const [mangaRes, chapterRes, favorites] = await Promise.all([
+          const [mangaRes, chapterRes, favorites, userRatingRes, mangaRatingsRes, avgRatingRes] = await Promise.all([
             api.get(`/manga/${manga.id}`),
             api.get(`/chapters/manga/${manga.id}`),
-            favoriteService.getUserFavorites()
+            favoriteService.getUserFavorites(),
+            mangaService.getUserRating(manga.id),
+            mangaService.getMangaRatings(manga.id),
+            mangaService.getAverageRating(manga.id),
           ]);
 
           setMangaInfor(mangaRes.data);
           setChapters(chapterRes.data);
+          setUserRating(userRatingRes);
+          setRatingCount(mangaRatingsRes.length);
+          setAverageRating(avgRatingRes);
 
           const isFav = favorites.some((fav) => String(fav.id) === String(manga.id));
           setIsFavorite(isFav);
@@ -65,6 +76,23 @@ const MangaDetailScreen = () => {
     } catch (error) {
       alert('Failed to update favorite status');
       console.error(error);
+    }
+  };
+
+  const handleRatingChange = async (rating: number) => {
+    setUserRating(rating);
+
+    try {
+      await await mangaService.rateManga(manga.id, rating);
+
+      const [avg, all] = await Promise.all([
+        mangaService.getAverageRating(manga.id),
+        mangaService.getMangaRatings(manga.id),
+      ]);
+      setAverageRating(avg);
+      setRatingCount(all.length);
+    } catch (error) {
+      console.error('Error submitting rating:', error);
     }
   };
 
@@ -136,6 +164,38 @@ const MangaDetailScreen = () => {
               <Text style={styles.infoLabel}>Views</Text>
               <Text style={styles.infoValue}>{mangaInfor.views}</Text>
             </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Average Rating</Text>
+              <View style={{ flex: 1 }}>
+                <StarRating
+                  rating={averageRating}
+                  maxStars={5}
+                  starSize={20}
+                  enableHalfStar={true}
+                  starStyle={{ marginHorizontal: 2 }}
+                  animationConfig={{ scale: 1 }}
+                  onChange={() => {}}
+                />
+              </View>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Your Rating</Text>
+              <View style={{ flex: 1 }}>
+                <StarRating
+                  rating={userRating || 0}
+                  onChange={handleRatingChange}
+                  maxStars={5}
+                  starSize={20}
+                  enableHalfStar={false}
+                  starStyle={{ marginHorizontal: 2 }}
+                  animationConfig={{ scale: 1 }}
+                />
+              </View>
+            </View>
+            {/* <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Total Ratings</Text>
+              <Text style={styles.infoValue}>{ratingCount}</Text>
+            </View> */}
           </View>
         </View>
 
