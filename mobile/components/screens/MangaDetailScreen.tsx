@@ -14,6 +14,7 @@ import favoriteService from '../../services/favoriteService';
 import { useFocusEffect } from '@react-navigation/native';
 import mangaService from '../../services/mangaService';
 import  StarRating from 'react-native-star-rating-widget';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackNavigationProp = StackNavigationProp<RootStackParamList>;
 type MangaDetailRouteProp = RouteProp<RootStackParamList, 'MangaDetail'>;
@@ -64,7 +65,18 @@ const MangaDetailScreen = () => {
     }, [manga.id])
   );
 
+  const checkLogin = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      navigation.navigate('Login');
+      return false;
+    }
+    return true;
+  };
+
   const toggleFavorite = async () => {
+    const isLoggedIn = await checkLogin();
+    if (!isLoggedIn) return;
     try {
       if (isFavorite) {
         await favoriteService.removeFromFavorites(mangaInfor.id);
@@ -80,6 +92,8 @@ const MangaDetailScreen = () => {
   };
 
   const handleRatingChange = async (rating: number) => {
+    const isLoggedIn = await checkLogin();
+    if (!isLoggedIn) return;
     setUserRating(rating);
 
     try {

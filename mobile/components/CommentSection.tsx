@@ -9,6 +9,8 @@ import {
   ScrollView,
 } from 'react-native';
 import commentService, { Comment, CreateCommentData } from '../services/commentService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 interface CommentSectionProps {
   mangaId: number;
@@ -21,6 +23,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ mangaId, currentUserId 
   const [error, setError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState<string>('');
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const navigation = useNavigation();
 
   const fetchComments = async () => {
     setLoading(true);
@@ -39,7 +42,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ mangaId, currentUserId 
     fetchComments();
   }, [mangaId]);
 
+  const checkLogin = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      navigation.navigate('Login');
+      return false;
+    }
+    return true;
+  };
+
   const handleSendComment = async () => {
+    const isLoggedIn = await checkLogin();
+    if (!isLoggedIn) return;
+
     if (!newComment.trim()) return;
 
     setSubmitting(true);

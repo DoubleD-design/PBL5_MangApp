@@ -29,9 +29,9 @@ export default function BottomTabNavigator() {
               case 'Favourites':
                 iconName = 'heart-outline';
                 break;
-              case 'History':
-                iconName = 'time-outline';
-                break;
+              // case 'History':
+              //   iconName = 'time-outline';
+              //   break;
               case 'Profile':
                 iconName = 'person-outline';
                 break;
@@ -63,7 +63,7 @@ export default function BottomTabNavigator() {
         />
 
         <Tab.Screen name="Favourites" component={FavouritesScreen} />
-        <Tab.Screen name="History" component={HistoryScreen} />
+        {/* <Tab.Screen name="History" component={HistoryScreen} /> */}
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
 
