@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2c1a0e',
+    width: Dimensions.get('window').width,
   },
   title: {
     fontSize: 24,
