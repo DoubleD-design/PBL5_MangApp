@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
 
 // Interface cho dữ liệu quảng cáo (tùy vào API của bạn trả về kiểu gì thì chỉnh lại cho phù hợp)
@@ -29,7 +30,7 @@ const adService = {
   // Check if user is VIP (ad-free)
   isUserVIP: async (): Promise<boolean> => {
     try {
-      const token = localStorage.getItem("token");
+      const token = AsyncStorage.getItem("token");
 
       if (!token) return false;
 

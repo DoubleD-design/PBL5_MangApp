@@ -10,6 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Page } from '../../types/Manga';
 import axios from 'axios';
 import api from '../../services/api';
+import AdPopup from '../AdPopup';
 
 type ReadingRouteProp = RouteProp<RootStackParamList, 'Reading'>;
 
@@ -27,6 +28,8 @@ const ReadingScreen = () => {
 
   const currentIndex = chapters.findIndex((c) => c.id === chapter.id);
 
+  const [adVisible, setAdVisible] = useState(false);
+
   const goToChapter = (targetIndex: number) => {
     if (targetIndex >= 0 && targetIndex < chapters.length) {
       navigation.navigate('Reading', {
@@ -35,6 +38,11 @@ const ReadingScreen = () => {
       });
     }
   };
+  useEffect(() => {
+    if (!loading && pages.length > 0) {
+      setAdVisible(true);
+    }
+  }, [loading, pages]);
 
   useEffect(() => {
   setLoading(true);
@@ -156,6 +164,7 @@ const ReadingScreen = () => {
           </View>
         </View>
       </Modal>
+      <AdPopup visible={adVisible} onClose={() => setAdVisible(false)} />
     </View>
   );
 };

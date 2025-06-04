@@ -180,9 +180,9 @@ const MangaDetailScreen = () => {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Average Rating</Text>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                 <StarRating
-                  rating={averageRating}
+                  rating={Math.round(averageRating *2) / 2}
                   maxStars={5}
                   starSize={20}
                   enableHalfStar={true}
@@ -190,6 +190,9 @@ const MangaDetailScreen = () => {
                   animationConfig={{ scale: 1 }}
                   onChange={() => {}}
                 />
+                <Text style={styles.infoValue}>
+                  {averageRating.toFixed(1)}/5
+                </Text>
               </View>
             </View>
             <View style={styles.infoRow}>
