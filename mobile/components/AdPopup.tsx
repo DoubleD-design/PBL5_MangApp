@@ -10,15 +10,17 @@ import {
   Linking,
 } from "react-native";
 import adService from "../services/adService";
+import { virtualAndroidID } from "../utils/const";
 
 interface Ad {
   id: string;
   title: string;
   imageUrl: string;
-  targetUrl: string;
+  link: string;
   description?: string;
   callToAction?: string;
-  [key: string]: any;
+  createAt?: string;
+  isActive?: boolean;
 }
 
 interface AdPopupProps {
@@ -63,9 +65,10 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
   const handleAdClick = () => {
     if (ad) {
       adService.trackClick(ad.id);
-      if (ad.targetUrl) {
-        Linking.openURL(ad.targetUrl);
+      if (ad.link) {
+        Linking.openURL(ad.link);
       }
+      else alert("quang cao loi cmnr");
     }
   };
 
@@ -87,7 +90,7 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
 
           <TouchableOpacity onPress={handleAdClick}>
             <Image
-              source={{ uri: `http://localhost:8080${ad.imageUrl}` }}
+              source={{ uri: `http://${virtualAndroidID}:8080/ads/Vietnam_Travel_Ad_Facebook_Post.jpg` }}
               style={styles.image}
               resizeMode="cover"
             />

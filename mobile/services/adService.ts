@@ -6,8 +6,11 @@ interface Ad {
   id: string;
   title: string;
   imageUrl: string;
-  targetUrl: string;
-  [key: string]: any;
+  link: string;
+  description?: string;
+  callToAction?: string;
+  createAt?: string;
+  isActive?: boolean;
 }
 
 interface VIPStatusResponse {

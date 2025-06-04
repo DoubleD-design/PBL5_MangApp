@@ -20,3 +20,5 @@ export const GRADIENTS = {
         end: { x: 0, y: 1 },
     }
 };
+
+export const virtualAndroidID = '10.0.2.2';
