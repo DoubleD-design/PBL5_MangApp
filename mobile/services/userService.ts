@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface UserData {
   gender: string;
   birthday: string;
+  vipStatus: boolean;
   // Add more fields if needed
 }
 
@@ -24,6 +25,7 @@ interface UserProfile {
   email: string;
   gender: string;
   birthday: string;
+  vipStatus: boolean;
   [key: string]: any; // Add more fields as per the response structure
 }
 
@@ -31,7 +33,7 @@ const userService = {
   // Get user profile
   getUserProfile: async (): Promise<UserProfile> => {
     try {
-      const response = await api.get('/users/profile', {
+      const response = await api.get('/users/details', {
         headers: { Authorization: `Bearer ${AsyncStorage.getItem('token')}` },
       });
       return response.data;
@@ -102,6 +104,25 @@ const userService = {
       return response.data;
     } catch (error: any) {
       console.error('Password change failed:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  updateAvatar: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.put('/users/avatar', formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      return response.data; // Return the new avatar URL
+    } catch (error: any) {
+      console.error("Error updating avatar:", error);
       throw error;
     }
   },

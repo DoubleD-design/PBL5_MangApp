@@ -73,7 +73,8 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
   };
 
   const handleSubscribe = () => {
-    Linking.openURL("https://yourapp.com/vip-subscription");
+    // Linking.openURL("https://yourapp.com/vip-subscription");
+    alert("You clicked me");
   };
 
   if (!visible || loading || !ad) return null;

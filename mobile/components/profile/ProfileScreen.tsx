@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,26 +8,24 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-
-const userData = {
-  id: '1',
-  email: 'nth2611@gmail.com',
-  name: 'Nguyễn Thành Hiếu',
-  username: 'nth2611',
-  password: '26112004',
-  birthday: '26/11/2004',
-  gender: 'Male',
-};
+import userService from '../../services/userService'; // Cập nhật lại đường dẫn import nếu cần
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const [avatar, setAvatar] = useState('https://i.imgur.com/8Km9tLL.png');
-  const [isCheckingLogin, setIsCheckingLogin] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [avatar, setAvatar] = useState('');
+  const [username, setUsername] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState('');
+  const [vipStatus, setVipStatus] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -39,10 +37,28 @@ const ProfileScreen = () => {
 
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        alert('Ứng dụng cần quyền truy cập ảnh để thay đổi avatar!');
+        Alert.alert('Thông báo', 'Ứng dụng cần quyền truy cập ảnh để thay đổi avatar!');
       }
 
-      setIsCheckingLogin(false);
+      try {
+        const data = await userService.getUserProfile();
+        setProfile(data);
+
+        if (data.avatar) {
+          setAvatar(data.avatar);
+        } else {
+          setAvatar(null); // Không có ảnh
+        }
+
+        setUsername(data.username);
+        setBirthday(data.birthday);
+        setGender(data.gender);
+        setVipStatus(data.vipStatus)
+      } catch (error) {
+        Alert.alert('Lỗi', 'Không thể tải thông tin người dùng!');
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -55,19 +71,39 @@ const ProfileScreen = () => {
     });
 
     if (!result.canceled) {
-      setAvatar(result.assets[0].uri);
+      const imageAsset = result.assets[0];
+      setAvatar(imageAsset.uri);
+
+      const formData = {
+        uri: imageAsset.uri,
+        name: 'avatar.jpg',
+        type: 'image/jpeg',
+      };
+
+      try {
+        await userService.updateAvatar(formData);
+        Alert.alert('Thành công', 'Cập nhật avatar thành công!');
+      } catch (error) {
+        Alert.alert('Lỗi', 'Không thể cập nhật avatar!');
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      await userService.editUserProfile({ birthday, gender, vipStatus });
+      Alert.alert('Thành công', 'Đã lưu thay đổi!');
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể lưu thay đổi!');
     }
   };
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('token');
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
-  if (isCheckingLogin) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#f97316" />
@@ -77,14 +113,31 @@ const ProfileScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      
       <Text style={styles.title}>Your Profile</Text>
-
       <View style={styles.center}>
-        <View style={styles.avatarWrapper}>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+        <View style={styles.avatarContainer}>
+          {avatar ? (
+            <Image source={{ uri: avatar }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarInitial}>
+                {username ? username[0].toUpperCase() : '?'}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={styles.username}>{userData.username}</Text>
+
+        <View style={styles.usernameRow}>
+          {vipStatus && (
+            <FontAwesome5
+              name="crown"
+              size={18}
+              color="#facc15"
+              style={{ marginRight: 6 }}
+            />
+          )}
+          <Text style={styles.username}>{profile.username}</Text>
+        </View>
 
         <View style={styles.buttonRow}>
           <ButtonSmall title="Change avatar" onPress={pickImage} />
@@ -94,30 +147,35 @@ const ProfileScreen = () => {
       <View style={styles.form}>
         <InputIcon
           icon={<FontAwesome name="user" size={20} color="#aaa" />}
-          placeholder={userData.username}
+          value={username}
+          onChangeText={setUsername}
         />
         <InputIcon
           icon={<MaterialIcons name="email" size={20} color="#aaa" />}
-          value={userData.email}
+          value={profile.email}
           editable={false}
         />
         <InputIcon
-          icon={<FontAwesome name="lock" size={20} color="#aaa" />}
-          placeholder="Leave it unchanged if you don't want to change it."
-          secureTextEntry
-        />
-        <InputIcon
           icon={<FontAwesome name="calendar" size={20} color="#aaa" />}
-          placeholder={userData.birthday}
+          value={birthday}
+          onChangeText={setBirthday}
         />
         <InputIcon
           icon={<FontAwesome name="mars" size={20} color="#aaa" />}
-          placeholder={userData.gender}
+          value={gender}
+          onChangeText={setGender}
         />
       </View>
 
-      <TouchableOpacity style={styles.saveButton}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveText}>Save changes</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity
+        style={styles.vipButton}
+        onPress={() => Alert.alert('You clicked me')}
+      >
+        <Text style={styles.vipText}>VIP Registration</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -137,31 +195,77 @@ const ButtonSmall = ({ title, onPress }: { title: string; onPress?: () => void }
 
 const InputIcon = ({
   icon,
-  placeholder,
   value,
   editable = true,
-  secureTextEntry = false,
+  onChangeText,
 }: {
   icon: React.ReactNode;
-  placeholder?: string;
   value?: string;
   editable?: boolean;
-  secureTextEntry?: boolean;
+  onChangeText?: (text: string) => void;
 }) => (
   <View style={styles.inputWrapper}>
     {icon}
     <TextInput
       style={styles.input}
-      placeholder={placeholder}
       placeholderTextColor="#ccc"
       value={value}
       editable={editable}
-      secureTextEntry={secureTextEntry}
+      onChangeText={onChangeText}
     />
   </View>
 );
 
 const styles = StyleSheet.create({
+usernameRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  marginBottom: 12,
+},
+
+vipButton: {
+  backgroundColor: '#10b981', // màu xanh ngọc
+  borderRadius: 999,
+  paddingVertical: 14,
+  marginTop: 12,
+},
+vipText: {
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 16,
+  textAlign: 'center',
+},
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    overflow: 'hidden',
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#bbb',
+  },
+
+  avatarInitial: {
+    fontSize: 40,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     backgroundColor: '#171717',
@@ -197,11 +301,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-    marginBottom: 12,
   },
   buttonRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'center',
   },
   smallButton: {
