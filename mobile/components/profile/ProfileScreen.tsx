@@ -44,8 +44,8 @@ const ProfileScreen = () => {
         const data = await userService.getUserProfile();
         setProfile(data);
 
-        if (data.avatar) {
-          setAvatar(data.avatar);
+        if (data.avatarUrl) {
+          setAvatar(data.avatarUrl);
         } else {
           setAvatar(null); // Không có ảnh
         }
@@ -173,7 +173,7 @@ const ProfileScreen = () => {
       
       <TouchableOpacity
         style={styles.vipButton}
-        onPress={() => Alert.alert('You clicked me')}
+        onPress={() => navigation.navigate("VipSubscription" as never)}
       >
         <Text style={styles.vipText}>VIP Registration</Text>
       </TouchableOpacity>

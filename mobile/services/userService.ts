@@ -26,6 +26,7 @@ interface UserProfile {
   gender: string;
   birthday: string;
   vipStatus: boolean;
+  avatarUrl: string;
   [key: string]: any; // Add more fields as per the response structure
 }
 

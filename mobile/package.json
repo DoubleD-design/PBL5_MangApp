@@ -42,6 +42,7 @@
     "react-native-snap-carousel": "^3.9.1",
     "react-native-star-rating-widget": "^1.9.2",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-webview": "^13.14.1",
     "testapp": "file:"
   },
   "devDependencies": {

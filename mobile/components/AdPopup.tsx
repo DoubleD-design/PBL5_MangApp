@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import adService from "../services/adService";
 import { virtualAndroidID } from "../utils/const";
+import { useNavigation } from "@react-navigation/native";
 
 interface Ad {
   id: string;
@@ -32,6 +33,7 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
   const [ad, setAd] = useState<Ad | null>(null);
   const [loading, setLoading] = useState(true);
   const hasFetched = useRef(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!visible || hasFetched.current) return;
@@ -68,13 +70,13 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
       if (ad.link) {
         Linking.openURL(ad.link);
       }
-      else alert("quang cao loi cmnr");
+      else alert("quang cao loi");
     }
   };
 
   const handleSubscribe = () => {
     // Linking.openURL("https://yourapp.com/vip-subscription");
-    alert("You clicked me");
+    navigation.navigate("VipSubscription" as never);
   };
 
   if (!visible || loading || !ad) return null;
