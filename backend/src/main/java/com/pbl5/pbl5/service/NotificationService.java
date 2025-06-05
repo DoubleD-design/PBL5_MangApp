@@ -28,4 +28,23 @@ public class NotificationService {
     public void deleteNotification(Integer id) {
         notificationRepository.deleteById(id);
     }
+
+    public List<Notification> getNotificationsByUserId(Integer userId) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    public void markAsRead(Integer notificationId) {
+        notificationRepository.findById(notificationId).ifPresent(notification -> {
+            notification.setIsRead(true);
+            notificationRepository.save(notification);
+        });
+    }
+
+    public void markAllAsRead(Integer userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdAndIsRead(userId, false);
+        for (Notification notification : notifications) {
+            notification.setIsRead(true);
+        }
+        notificationRepository.saveAll(notifications);
+    }
 }

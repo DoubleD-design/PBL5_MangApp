@@ -17,7 +17,7 @@ const OAuth2Callback = () => {
     }
   }, [location, navigate]);
 
-  return <div>Đang xác thực Google...</div>;
+  return <div>Authenticating with Google...</div>;
 };
 
 export default OAuth2Callback;

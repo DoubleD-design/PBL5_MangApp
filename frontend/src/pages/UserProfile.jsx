@@ -168,7 +168,7 @@ const UserProfile = () => {
               SelectProps={{
                 native: true, // Use native select for consistent styling
               }}
-              InputLabelProps={{ shrink: true }} // Ensure label stays above the field
+              InputLabelProps={{ shrink: true }}
             >
               <option value="">Select</option>
               <option value="male">Male</option>

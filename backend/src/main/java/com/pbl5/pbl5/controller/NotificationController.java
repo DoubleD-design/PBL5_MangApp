@@ -1,28 +1,45 @@
 package com.pbl5.pbl5.controller;
 
+import com.pbl5.pbl5.modal.Notification;
+import com.pbl5.pbl5.service.NotificationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping("/api/notifications")
 public class NotificationController {
-    // Display notifications
-    @GetMapping("/display")
-    public String displayNotifications() {
-        // Logic to display notifications
-        return "Notifications are displayed.";
+    @Autowired
+    private NotificationService notificationService;
+
+    // Lấy tất cả notification của user
+    @GetMapping("/user/{userId}")
+    public List<Notification> getNotificationsByUser(@PathVariable Integer userId) {
+        return notificationService.getNotificationsByUserId(userId);
     }
 
-    // Send a new notification
-    @PostMapping("/send")
-    public String sendNotification(@RequestParam Long userId, @RequestParam String message) {
-        // Logic to send a new notification
-        return "Notification with message " + message + " has been sent to user with ID " + userId + ".";
+    // (Tuỳ chọn) Lấy tất cả notification (admin)
+    @GetMapping
+    public List<Notification> getAllNotifications() {
+        return notificationService.getAllNotifications();
     }
 
-    // Delete a notification
-    @DeleteMapping("/delete")
-    public String deleteNotification(@RequestParam Long notificationId) {
-        // Logic to delete a notification
-        return "Notification with ID " + notificationId + " has been deleted.";
+    // (Tuỳ chọn) Xoá notification theo id
+    @DeleteMapping("/{notificationId}")
+    public void deleteNotification(@PathVariable Integer notificationId) {
+        notificationService.deleteNotification(notificationId);
+    }
+
+    // Đánh dấu 1 thông báo là đã đọc
+    @PutMapping("/{notificationId}/read")
+    public void markAsRead(@PathVariable Integer notificationId) {
+        notificationService.markAsRead(notificationId);
+    }
+
+    // Đánh dấu tất cả thông báo của user là đã đọc
+    @PutMapping("/user/{userId}/read-all")
+    public void markAllAsRead(@PathVariable Integer userId) {
+        notificationService.markAllAsRead(userId);
     }
 }

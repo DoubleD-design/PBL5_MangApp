@@ -208,7 +208,7 @@ const ChapterManagement = () => {
         sx={{ mb: 2 }}
         variant="outlined"
       >
-        Quay lại danh sách Manga
+        Return
       </Button>
       <Typography
         variant="h4"
@@ -219,7 +219,7 @@ const ChapterManagement = () => {
           letterSpacing: 1,
         }}
       >
-        Quản lý chương: <span style={{ color: "#fff" }}>{manga?.title}</span>
+        Chapter Management: <span style={{ color: "#fff" }}>{manga?.title}</span>
       </Typography>
       <Button
         variant="contained"
@@ -227,7 +227,7 @@ const ChapterManagement = () => {
         onClick={() => handleOpenDialog("add")}
         sx={{ mb: 2, fontWeight: 600, letterSpacing: 1 }}
       >
-        Thêm chương mới
+        Add new chapter
       </Button>
       <TableContainer
         component={Paper}
@@ -246,19 +246,19 @@ const ChapterManagement = () => {
               }}
             >
               <TableCell align="center" width={60} sx={{ color: "#ff6740", fontWeight: 700 }}>
-                Số chương
+                Chapter No.
               </TableCell>
               <TableCell align="center" sx={{ color: "#ff6740", fontWeight: 700 }}>
-                Tiêu đề
+                Title
               </TableCell>
               <TableCell align="center" width={120} sx={{ color: "#ff6740", fontWeight: 700 }}>
-                Ngày tạo
+                Created At
               </TableCell>
               <TableCell align="center" width={100} sx={{ color: "#ff6740", fontWeight: 700 }}>
-                Số ảnh
+                Pages
               </TableCell>
               <TableCell align="center" width={120} sx={{ color: "#ff6740", fontWeight: 700 }}>
-                Hành động
+                Actions
               </TableCell>
             </TableRow>
           </TableHead>
@@ -286,7 +286,7 @@ const ChapterManagement = () => {
                   {new Date(chapter.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell align="center">
-                  <Tooltip title="Số lượng ảnh">
+                  <Tooltip title="Number of images">
                     <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
                       <ImageIcon fontSize="small" color="action" />
                       <Typography variant="body2" sx={{ color: "#fff" }}>
@@ -296,12 +296,12 @@ const ChapterManagement = () => {
                   </Tooltip>
                 </TableCell>
                 <TableCell align="center">
-                  <Tooltip title="Sửa chương">
+                  <Tooltip title="Edit chapter">
                     <IconButton color="primary" onClick={(e) => { e.stopPropagation(); handleOpenDialog("edit", chapter); }}>
                       <Edit />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Xóa chương">
+                  <Tooltip title="Delete chapter">
                     <IconButton color="error" onClick={(e) => { e.stopPropagation(); setDeleteDialog({ open: true, chapter }); }}>
                       <Delete />
                     </IconButton>
@@ -312,7 +312,7 @@ const ChapterManagement = () => {
             {chapters.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} align="center">
-                  <Typography color="text.secondary">Chưa có chương nào.</Typography>
+                  <Typography color="text.secondary">No chapters yet.</Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -329,12 +329,12 @@ const ChapterManagement = () => {
             letterSpacing: 1,
           }}
         >
-          {dialogType === "add" ? "Thêm chương mới" : "Sửa chương"}
+          {dialogType === "add" ? "Add New Chapter" : "Edit Chapter"}
         </DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
-            label="Tiêu đề"
+            label="Title"
             name="title"
             fullWidth
             value={formData.title}
@@ -346,7 +346,7 @@ const ChapterManagement = () => {
             component="label"
             sx={{ mb: 2, color: "#ff6740", borderColor: "#ff6740" }}
           >
-            Chọn ảnh chương
+            Choose chapter images
             <input
               type="file"
               multiple
@@ -358,7 +358,7 @@ const ChapterManagement = () => {
           {imageFiles.length > 0 && (
             <Box sx={{ mt: 1 }}>
               <Typography variant="subtitle2" gutterBottom sx={{ color: "#ff6740" }}>
-                Ảnh đã chọn:
+                Selected images:
               </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap">
                 {imageFiles.map((file, idx) => (
@@ -375,20 +375,20 @@ const ChapterManagement = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit} sx={{ background: "#ff6740" }}>
-            {dialogType === "add" ? "Thêm" : "Lưu"}
+            {dialogType === "add" ? "Add" : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, chapter: null })}>
-        <DialogTitle sx={{ color: "#ff6740", fontWeight: 700 }}>Xác nhận xóa</DialogTitle>
-        <DialogContent>Bạn có chắc chắn muốn xóa chương này không?</DialogContent>
+        <DialogTitle sx={{ color: "#ff6740", fontWeight: 700 }}>Confirm Delete</DialogTitle>
+        <DialogContent>Are you sure you want to delete this chapter?</DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, chapter: null })}>Hủy</Button>
-          <Button color="error" variant="contained" onClick={handleDelete}>Xóa</Button>
+          <Button onClick={() => setDeleteDialog({ open: false, chapter: null })}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
 
@@ -401,7 +401,7 @@ const ChapterManagement = () => {
             letterSpacing: 1,
           }}
         >
-          Xem ảnh chương
+          View Chapter Images
         </DialogTitle>
         <DialogContent>
           <Stack direction="row" spacing={2} flexWrap="wrap" alignItems="center">
@@ -447,7 +447,7 @@ const ChapterManagement = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseViewDialog}>Đóng</Button>
+          <Button onClick={handleCloseViewDialog}>Close</Button>
         </DialogActions>
       </Dialog>
 

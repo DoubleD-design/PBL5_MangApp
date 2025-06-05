@@ -1,11 +1,16 @@
 package com.pbl5.pbl5.service;
 
 import com.pbl5.pbl5.modal.Chapter;
+import com.pbl5.pbl5.modal.Favourite;
+import com.pbl5.pbl5.modal.Manga;
+import com.pbl5.pbl5.modal.Notification;
 import com.pbl5.pbl5.modal.Page;
 import com.pbl5.pbl5.repos.ChapterRepository;
+import com.pbl5.pbl5.repos.FavouriteRepository;
 import com.pbl5.pbl5.repos.PageRepository;
 import com.pbl5.pbl5.repos.ReadingHistoryRepository;
 import com.pbl5.pbl5.request.ChapterRequestDTO;
+import com.pbl5.pbl5.repos.MangaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,12 @@ public class ChapterService {
     private ReadingHistoryRepository readingHistoryRepository;
     @Autowired
     private PageService pageService;
+    @Autowired
+    private FavouriteRepository favouriteRepository; // repo cho bảng favourite
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private MangaRepository mangaRepository; // Thêm dòng này
 
     public List<Chapter> getAllChapters() {
         return chapterRepository.findAll();
@@ -54,7 +65,37 @@ public class ChapterService {
             page.setImageUrl(pageUrl);
             pageService.createPage(page);
         }
-
+        // Gửi thông báo cho user đã yêu thích truyện này
+        List<Favourite> favourites = favouriteRepository.findByMangaId(chapter.getMangaId());
+        // Lấy tên manga để đưa vào message
+        String mangaTitle = "";
+        try {
+            mangaTitle = chapter.getManga() != null ? chapter.getManga().getTitle() : "";
+        } catch (Exception e) {
+            mangaTitle = "";
+        }
+        // Nếu không lấy được từ chapter.getManga(), có thể lấy từ DB (tối ưu hơn)
+        if (mangaTitle == null || mangaTitle.isEmpty()) {
+            // Lấy từ DB
+            // Giả sử có MangaRepository, nếu không có thì bỏ qua
+            Optional<Manga> mangaOpt = mangaRepository.findById(chapter.getMangaId());
+            if (mangaOpt.isPresent()) {
+                mangaTitle = mangaOpt.get().getTitle();
+            }
+        }
+        for (Favourite fav : favourites) {
+            Notification notification = new Notification();
+            notification.setUserId(fav.getReaderId());
+            // Thông báo tiếng Anh, có tên manga và id
+            notification.setMessage(
+                "New chapter for your favorite manga: " +
+                (mangaTitle != null && !mangaTitle.isEmpty() ? mangaTitle : "ID " + chapter.getMangaId()) +
+                " - Chapter: " + chapter.getTitle()
+            );
+            notification.setIsRead(false);
+            notification.setCreatedAt(LocalDateTime.now());
+            notificationService.createNotification(notification);
+        }
         return savedChapter;
     }
     

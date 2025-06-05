@@ -2,10 +2,12 @@ package com.pbl5.pbl5.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pbl5.pbl5.modal.Chapter;
+import com.pbl5.pbl5.modal.Notification;
 import com.pbl5.pbl5.modal.Page;
 import com.pbl5.pbl5.request.ChapterRequestDTO;
 import com.pbl5.pbl5.service.AzureBlobService;
 import com.pbl5.pbl5.service.ChapterService;
+import com.pbl5.pbl5.service.NotificationService;
 import com.pbl5.pbl5.service.PageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,11 +24,13 @@ import java.util.Optional;
 public class ChapterController {
     @Autowired
     private ChapterService chapterService;
-    
     @Autowired
     private PageService pageService;
     @Autowired
     private AzureBlobService azureBlobService;
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping
     public ResponseEntity<List<Chapter>> getAllChapters() {
         List<Chapter> chapters = chapterService.getAllChapters();
@@ -47,6 +51,11 @@ public class ChapterController {
         Optional<Chapter> chapter = chapterService.getChapterByMangaIdAndChapterNumber(mangaId, chapterNumber);
         return chapter.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Notification> getNotificationsByUser(@PathVariable Integer userId) {
+        return notificationService.getNotificationsByUserId(userId);
     }
     
     @GetMapping("/{chapterId}/pages")

@@ -9,12 +9,14 @@ import {
   Container,
   Menu,
   MenuItem,
+  Badge,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import categoryService from "../services/categoryService";
 import { AccountCircle, Notifications } from "@mui/icons-material";
 import authService from "../services/authService"; // Import authService
+import notificationService from "../services/notificationService"; // Thêm dòng này
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -25,6 +27,30 @@ const Navbar = () => {
   const isAuthenticated = authService.isAuthenticated(); // Check authentication status
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const [accountAnchorEl, setAccountAnchorEl] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationLoading, setNotificationLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Tách hàm fetchNotifications để có thể gọi lại sau khi đánh dấu đã đọc
+  const fetchNotifications = async () => {
+    if (authService.isAuthenticated()) {
+      try {
+        setNotificationLoading(true);
+        const user = authService.getCurrentUser();
+        const data = await notificationService.getNotificationsByUserId(user.id);
+        setNotifications(data || []);
+        setUnreadCount((data || []).filter(n => !n.isRead).length);
+      } catch (err) {
+        setNotifications([]);
+        setUnreadCount(0);
+      } finally {
+        setNotificationLoading(false);
+      }
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -42,7 +68,40 @@ const Navbar = () => {
     };
 
     fetchCategories();
+    fetchNotifications();
+    // Có thể thêm event listener để realtime hơn nếu muốn
   }, []);
+
+  // Đánh dấu 1 thông báo là đã đọc và mở detail manga
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
+      await notificationService.markAsRead(notification.id);
+      await fetchNotifications();
+    }
+    // Parse mangaId từ message (nếu backend chưa trả về trường mangaId riêng)
+    let mangaId = null;
+    // Ưu tiên: nếu backend trả về notification.mangaId thì dùng luôn
+    if (notification.mangaId) {
+      mangaId = notification.mangaId;
+    } else {
+      // Nếu không, parse từ message theo định dạng "...(Manga ID: {id})"
+      const match = notification.message.match(/Manga ID: (\d+)/);
+      if (match) {
+        mangaId = match[1];
+      }
+    }
+    if (mangaId) {
+      navigate(`/manga/${mangaId}`);
+      handleNotificationClose();
+    }
+  };
+
+  // Đánh dấu tất cả là đã đọc
+  const handleMarkAllAsRead = async () => {
+    const user = authService.getCurrentUser();
+    await notificationService.markAllAsRead(user.id);
+    await fetchNotifications(); // Luôn lấy lại từ API để đảm bảo trạng thái đúng với DB
+  };
 
   const handleCategoryOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -266,7 +325,9 @@ const Navbar = () => {
                     },
                   }}
                 >
-                  <Notifications />
+                  <Badge badgeContent={unreadCount} color="error">
+                    <Notifications />
+                  </Badge>
                 </IconButton>
                 <Menu
                   anchorEl={notificationAnchorEl}
@@ -277,39 +338,83 @@ const Navbar = () => {
                       backgroundColor: "#1a1a1a",
                       color: "#fff",
                       marginTop: "8px",
+                      minWidth: 340,
+                      maxWidth: 400,
+                      width: 360,
+                      maxHeight: "80vh",
+                      height: 420,
+                      overflowY: "auto",
+                      boxSizing: "border-box",
+                      transition: "none",
+                    },
+                  }}
+                  MenuListProps={{
+                    sx: {
+                      p: 0,
+                      m: 0,
                     },
                   }}
                 >
-                  <MenuItem
-                    sx={{
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 103, 64, 0.1)",
-                        color: "#ff6740",
-                      },
-                    }}
-                  >
-                    Notification 1
-                  </MenuItem>
-                  <MenuItem
-                    sx={{
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 103, 64, 0.1)",
-                        color: "#ff6740",
-                      },
-                    }}
-                  >
-                    Notification 2
-                  </MenuItem>
-                  <MenuItem
-                    sx={{
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 103, 64, 0.1)",
-                        color: "#ff6740",
-                      },
-                    }}
-                  >
-                    Notification 3
-                  </MenuItem>
+                  <Box sx={{ px: 2, py: 1, display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #333" }}>
+                    <span style={{ fontWeight: 600 }}>Notifications</span>
+                    {unreadCount > 0 && (
+                      <Button
+                        size="small"
+                        color="primary"
+                        sx={{ fontSize: "0.85rem", textTransform: "none" }}
+                        onClick={handleMarkAllAsRead}
+                      >
+                        Mark all as read
+                      </Button>
+                    )}
+                  </Box>
+                  <Box sx={{ maxHeight: 370, overflowY: "auto", p: 0, m: 0 }}>
+                    {notificationLoading ? (
+                      <MenuItem>Loading...</MenuItem>
+                    ) : notifications.length === 0 ? (
+                      <MenuItem>No notifications</MenuItem>
+                    ) : (
+                      notifications.map((noti, idx) => (
+                        <MenuItem
+                          key={noti.id || idx}
+                          onClick={() => handleNotificationClick(noti)}
+                          sx={{
+                            whiteSpace: "normal",
+                            fontSize: "0.95rem",
+                            fontWeight: noti.isRead ? 400 : 700,
+                            backgroundColor: noti.isRead ? "inherit" : "rgba(255, 103, 64, 0.12)",
+                            color: noti.isRead ? "#bbb" : "#fff",
+                            borderBottom: "1px solid #222",
+                            display: "flex",
+                            alignItems: "center",
+                            minHeight: 56,
+                            "&:hover": {
+                              backgroundColor: "rgba(255, 103, 64, 0.18)",
+                              color: "#ff6740",
+                            },
+                          }}
+                        >
+                          <Box sx={{ flexGrow: 1 }}>
+                            {noti.message}
+                            <span style={{ marginLeft: 8, fontSize: "0.8em", color: "#aaa" }}>
+                              {noti.createdAt ? new Date(noti.createdAt).toLocaleString() : ""}
+                            </span>
+                          </Box>
+                          {!noti.isRead && (
+                            <span style={{
+                              display: "inline-block",
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              background: "#ff6740",
+                              marginLeft: 8,
+                              flexShrink: 0,
+                            }} />
+                          )}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Box>
                 </Menu>
 
                 {/* Account Icon */}
