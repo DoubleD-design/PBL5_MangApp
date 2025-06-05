@@ -78,20 +78,25 @@ const Navbar = () => {
       await notificationService.markAsRead(notification.id);
       await fetchNotifications();
     }
-    // Parse mangaId từ message (nếu backend chưa trả về trường mangaId riêng)
     let mangaId = null;
-    // Ưu tiên: nếu backend trả về notification.mangaId thì dùng luôn
     if (notification.mangaId) {
       mangaId = notification.mangaId;
     } else {
-      // Nếu không, parse từ message theo định dạng "...(Manga ID: {id})"
       const match = notification.message.match(/Manga ID: (\d+)/);
       if (match) {
         mangaId = match[1];
       }
     }
     if (mangaId) {
-      navigate(`/manga/${mangaId}`);
+      // If it's a comment notification, scroll to comment section
+      if (
+        notification.message &&
+        notification.message.toLowerCase().includes("new comment")
+      ) {
+        navigate(`/manga/${mangaId}#comments`);
+      } else {
+        navigate(`/manga/${mangaId}`);
+      }
       handleNotificationClose();
     }
   };

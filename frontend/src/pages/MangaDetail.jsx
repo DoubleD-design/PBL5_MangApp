@@ -125,7 +125,19 @@ const MangaDetail = () => {
     };
 
     fetchMangaDetails();
-  }, [id]); // Remove isFavorite from dependency array to prevent double execution
+  }, [id]);
+
+  // Scroll to comment section if hash is present
+  useEffect(() => {
+    if (window.location.hash === "#comments") {
+      setTimeout(() => {
+        const el = document.getElementById("comments-section");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 300);
+    }
+  }, []);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -517,7 +529,7 @@ const MangaDetail = () => {
         {/* Comments Tab */}
         <div role="tabpanel" hidden={tabValue !== 1}>
           {tabValue === 1 && (
-            <Box sx={{ p: 3 }}>
+            <Box id="comments-section" sx={{ p: 3 }}>
               {/* Import and use the CommentSection component */}
               <CommentSection mangaId={id} />
             </Box>

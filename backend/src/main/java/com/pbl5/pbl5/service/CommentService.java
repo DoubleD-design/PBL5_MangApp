@@ -1,8 +1,13 @@
 package com.pbl5.pbl5.service;
 
 import com.pbl5.pbl5.modal.Comment;
+import com.pbl5.pbl5.modal.Favourite;
+import com.pbl5.pbl5.modal.Manga;
+import com.pbl5.pbl5.modal.Notification;
 import com.pbl5.pbl5.modal.User;
 import com.pbl5.pbl5.repos.CommentRepository;
+import com.pbl5.pbl5.repos.FavouriteRepository;
+import com.pbl5.pbl5.repos.MangaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,6 +45,13 @@ public class CommentService {
 
     @Autowired
     private UserService userService;
+    // Add these for notification
+    @Autowired
+    private FavouriteRepository favouriteRepository;
+    @Autowired
+    private MangaRepository mangaRepository;
+    @Autowired
+    private NotificationService notificationService;
     
     @Caching(evict = {
         @CacheEvict(value = "comments", allEntries = true),
@@ -57,7 +69,31 @@ public class CommentService {
         }
         
         comment.setCreatedAt(LocalDateTime.now());
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        // --- Notify all users who favorited this manga (except the commenter) ---
+        List<Favourite> favourites = favouriteRepository.findByMangaId(comment.getMangaId());
+        String mangaTitle = "";
+        Optional<Manga> mangaOpt = mangaRepository.findById(comment.getMangaId());
+        if (mangaOpt.isPresent()) {
+            mangaTitle = mangaOpt.get().getTitle();
+        }
+        for (Favourite fav : favourites) {
+            if (fav.getReaderId().equals(comment.getUserId())) continue; // Don't notify the commenter
+            Notification notification = new Notification();
+            notification.setUserId(fav.getReaderId());
+            notification.setMangaId(comment.getMangaId()); // for frontend routing
+            notification.setMessage(
+                "Your favourite manga: " + (mangaTitle != null && !mangaTitle.isEmpty() ? mangaTitle : "ID " + comment.getMangaId())
+                + " has a new comment. Click to see."
+            );
+            notification.setIsRead(false);
+            notification.setCreatedAt(LocalDateTime.now());
+            notificationService.createNotification(notification);
+        }
+        // --- end notify ---
+
+        return savedComment;
     }
     
     @Caching(evict = {

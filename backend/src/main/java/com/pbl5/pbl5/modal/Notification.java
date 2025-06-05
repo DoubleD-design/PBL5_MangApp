@@ -23,6 +23,9 @@ public class Notification {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
+    @Column(name = "manga_id")
+    private Integer mangaId;
+    
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
@@ -67,6 +70,14 @@ public class Notification {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getMangaId() {
+        return mangaId;
+    }
+
+    public void setMangaId(Integer mangaId) {
+        this.mangaId = mangaId;
     }
 
     public User getUser() {

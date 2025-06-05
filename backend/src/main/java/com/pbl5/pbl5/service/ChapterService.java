@@ -90,7 +90,7 @@ public class ChapterService {
             notification.setMessage(
                 "New chapter for your favorite manga: " +
                 (mangaTitle != null && !mangaTitle.isEmpty() ? mangaTitle : "ID " + chapter.getMangaId()) +
-                " - Chapter: " + chapter.getTitle()
+                " - Chapter: " + chapter.getTitle() + ". Click to read!"
             );
             notification.setIsRead(false);
             notification.setCreatedAt(LocalDateTime.now());
