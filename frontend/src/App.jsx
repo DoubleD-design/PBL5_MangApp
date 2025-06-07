@@ -14,6 +14,7 @@ import CategoryPage from "./pages/CategoryPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import UpdatesPage from "./pages/UpdatesPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import SuggestionsPage from "./pages/SuggestionsPage";
 import VipSubscription from "./pages/VipSubscription";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { Navigate } from "react-router-dom";
@@ -93,6 +94,15 @@ function App() {
                     element={
                       <PrivateRoute>
                         <FavoritesPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  {/* Protect SuggestionsPage with PrivateRoute */}
+                  <Route
+                    path="/suggestions"
+                    element={
+                      <PrivateRoute>
+                        <SuggestionsPage />
                       </PrivateRoute>
                     }
                   />

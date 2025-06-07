@@ -75,6 +75,14 @@ public interface MangaRepository extends JpaRepository<Manga, Integer> {
     
     @Query("SELECT m FROM Manga m WHERE LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Manga> searchByTitle(@Param("keyword") String keyword);
+    
+    // Get recent manga ordered by creation date with categories
+    @Query("SELECT DISTINCT m FROM Manga m LEFT JOIN FETCH m.categories ORDER BY m.createdAt DESC")
+    List<Manga> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    
+    // Get most viewed manga with categories
+    @Query("SELECT DISTINCT m FROM Manga m LEFT JOIN FETCH m.categories ORDER BY m.views DESC")
+    List<Manga> findMostViewedMangas(Pageable pageable);
 
 }
 

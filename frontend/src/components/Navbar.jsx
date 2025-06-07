@@ -37,9 +37,11 @@ const Navbar = () => {
       try {
         setNotificationLoading(true);
         const user = authService.getCurrentUser();
-        const data = await notificationService.getNotificationsByUserId(user.id);
+        const data = await notificationService.getNotificationsByUserId(
+          user.id
+        );
         setNotifications(data || []);
-        setUnreadCount((data || []).filter(n => !n.isRead).length);
+        setUnreadCount((data || []).filter((n) => !n.isRead).length);
       } catch (err) {
         setNotifications([]);
         setUnreadCount(0);
@@ -293,6 +295,8 @@ const Navbar = () => {
             </Button>
             <Button
               color="inherit"
+              component={Link}
+              to="/suggestions"
               sx={{ mx: 1, whiteSpace: "nowrap", minWidth: "auto" }}
             >
               SUGGEST
@@ -360,7 +364,16 @@ const Navbar = () => {
                     },
                   }}
                 >
-                  <Box sx={{ px: 2, py: 1, display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #333" }}>
+                  <Box
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      borderBottom: "1px solid #333",
+                    }}
+                  >
                     <span style={{ fontWeight: 600 }}>Notifications</span>
                     {unreadCount > 0 && (
                       <Button
@@ -387,7 +400,9 @@ const Navbar = () => {
                             whiteSpace: "normal",
                             fontSize: "0.95rem",
                             fontWeight: noti.isRead ? 400 : 700,
-                            backgroundColor: noti.isRead ? "inherit" : "rgba(255, 103, 64, 0.12)",
+                            backgroundColor: noti.isRead
+                              ? "inherit"
+                              : "rgba(255, 103, 64, 0.12)",
                             color: noti.isRead ? "#bbb" : "#fff",
                             borderBottom: "1px solid #222",
                             display: "flex",
@@ -401,20 +416,30 @@ const Navbar = () => {
                         >
                           <Box sx={{ flexGrow: 1 }}>
                             {noti.message}
-                            <span style={{ marginLeft: 8, fontSize: "0.8em", color: "#aaa" }}>
-                              {noti.createdAt ? new Date(noti.createdAt).toLocaleString() : ""}
+                            <span
+                              style={{
+                                marginLeft: 8,
+                                fontSize: "0.8em",
+                                color: "#aaa",
+                              }}
+                            >
+                              {noti.createdAt
+                                ? new Date(noti.createdAt).toLocaleString()
+                                : ""}
                             </span>
                           </Box>
                           {!noti.isRead && (
-                            <span style={{
-                              display: "inline-block",
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              background: "#ff6740",
-                              marginLeft: 8,
-                              flexShrink: 0,
-                            }} />
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: 10,
+                                height: 10,
+                                borderRadius: "50%",
+                                background: "#ff6740",
+                                marginLeft: 8,
+                                flexShrink: 0,
+                              }}
+                            />
                           )}
                         </MenuItem>
                       ))
