@@ -180,6 +180,11 @@ const VipSubscription = () => {
       setError("Payment was cancelled.");
       // Remove query parameters from URL
       window.history.replaceState({}, document.title, "/vip-subscription");
+    } else if (paymentStatus === "error") {
+      const errorMessage = urlParams.get("message") || "Payment processing failed";
+      setError(decodeURIComponent(errorMessage.replace(/\+/g, ' ')));
+      // Remove query parameters from URL
+      window.history.replaceState({}, document.title, "/vip-subscription");
     }
   }, [user]);
 

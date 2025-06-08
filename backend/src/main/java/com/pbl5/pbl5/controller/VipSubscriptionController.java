@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,21 +112,27 @@ public class VipSubscriptionController {
      * @return Redirect to frontend success page
      */
     @GetMapping("/success")
-    public ResponseEntity<?> handlePaymentSuccess(@RequestParam("token") String orderId) {
+    public void handlePaymentSuccess(@RequestParam("token") String orderId, HttpServletResponse response) {
         try {
             // Capture payment when user is redirected back
             Map<String, Object> captureResponse = payPalService.captureOrder(orderId);
             
-            // Create response with payment details
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Payment completed successfully");
-            response.put("details", captureResponse);
-            
-            return ResponseEntity.ok(response);
+            // Check if payment was successful
+            if (captureResponse != null && "COMPLETED".equals(captureResponse.get("status"))) {
+                // Redirect to frontend success page
+                response.sendRedirect("http://localhost:5173/vip-subscription?status=success");
+            } else {
+                // Redirect to frontend with error
+                response.sendRedirect("http://localhost:5173/vip-subscription?status=error&message=Payment+failed");
+            }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing successful payment: " + e.getMessage());
+            try {
+                // Redirect to frontend with error
+                response.sendRedirect("http://localhost:5173/vip-subscription?status=error&message=Payment+processing+failed");
+            } catch (Exception redirectException) {
+                // If redirect fails, log the error
+                System.err.println("Failed to redirect after payment error: " + redirectException.getMessage());
+            }
         }
     }
     
@@ -134,11 +141,12 @@ public class VipSubscriptionController {
      * @return Redirect to frontend cancel page
      */
     @GetMapping("/cancel")
-    public ResponseEntity<?> handlePaymentCancel() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "cancelled");
-        response.put("message", "Payment was cancelled");
-        
-        return ResponseEntity.ok(response);
+    public void handlePaymentCancel(HttpServletResponse response) {
+        try {
+            // Redirect to frontend cancel page
+            response.sendRedirect("http://localhost:5173/vip-subscription?status=cancel");
+        } catch (Exception e) {
+            System.err.println("Failed to redirect after payment cancellation: " + e.getMessage());
+        }
     }
 }

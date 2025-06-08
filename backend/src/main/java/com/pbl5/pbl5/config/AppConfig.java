@@ -35,6 +35,7 @@ public class AppConfig {
                         .requestMatchers("/api/ratings/manga/*").permitAll()
                         .requestMatchers("/oauth2/**").permitAll() // Cho phép route của OAuth2
                         .requestMatchers("/api/auth/loginGoogle").permitAll() // OAuth2 login endpoint
+                        .requestMatchers("/api/vip-subscription/**").permitAll() // Allow PayPal return URLs
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -66,8 +67,6 @@ public class AppConfig {
                     }
                 })
                 .and()
-                .oauth2Login() // Kích hoạt OAuth2 Login
-                .and()
                 .oauth2Login(oauth -> oauth
                     .authorizationEndpoint(authorization -> authorization
                         .baseUri("/oauth2/authorization")
@@ -75,6 +74,7 @@ public class AppConfig {
                     .redirectionEndpoint(redirection -> redirection
                         .baseUri("/oauth2/callback/*")
                     )
+                    .loginPage("/oauth2/authorization/google")
                 )
                 .httpBasic();
 
