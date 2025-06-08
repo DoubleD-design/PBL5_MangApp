@@ -205,7 +205,8 @@ const LogIn = () => {
           >
             Login with Google
           </button>
-          <button
+          {/* <button
+            onClick={authService.loginWithFacebook}
             style={styles.socialButton}
           >
             Login with Facebook
@@ -214,7 +215,7 @@ const LogIn = () => {
             style={{ ...styles.socialButton, ...styles.emailButton }}
           >
             Login with Email
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
