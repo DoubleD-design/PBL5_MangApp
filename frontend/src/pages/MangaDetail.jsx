@@ -449,7 +449,6 @@ const MangaDetail = () => {
           >
             <Tab label="Chapters" id="manga-tab-0" />
             <Tab label="Reviews" id="manga-tab-1" />
-            <Tab label="Related" id="manga-tab-2" />
           </Tabs>
         </Box>
 
@@ -518,7 +517,11 @@ const MangaDetail = () => {
                     );
                   })
               ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 2 }}
+                >
                   No chapters available for this manga.
                 </Typography>
               )}
@@ -532,17 +535,6 @@ const MangaDetail = () => {
             <Box id="comments-section" sx={{ p: 3 }}>
               {/* Import and use the CommentSection component */}
               <CommentSection mangaId={id} />
-            </Box>
-          )}
-        </div>
-
-        {/* Related Tab */}
-        <div role="tabpanel" hidden={tabValue !== 2}>
-          {tabValue === 2 && (
-            <Box sx={{ p: 3 }}>
-              <Typography variant="body1">
-                Related manga will be displayed here.
-              </Typography>
             </Box>
           )}
         </div>
