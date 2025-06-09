@@ -66,6 +66,9 @@ const MangaDetail = () => {
 
   // Fetch manga details when component mounts
   useEffect(() => {
+    // Reset view counted ref when manga ID changes
+    viewCountedRef.current = false;
+    
     const fetchMangaDetails = async () => {
       try {
         setLoadingManga(true);
@@ -113,7 +116,17 @@ const MangaDetail = () => {
         // Only increment view count once per manga view session
         // Using ref instead of state to prevent double counting
         if (!viewCountedRef.current) {
-          await mangaService.incrementViews(id);
+          console.log('Incrementing views for manga ID:', id);
+          const updatedManga = await mangaService.incrementViews(id);
+          console.log('Updated manga after view increment:', updatedManga);
+          if (updatedManga) {
+            // Update the manga state with the new view count
+            setManga(prevManga => ({
+              ...prevManga,
+              views: updatedManga.views
+            }));
+            console.log('Updated manga state with new view count:', updatedManga.views);
+          }
           viewCountedRef.current = true;
         }
       } catch (err) {

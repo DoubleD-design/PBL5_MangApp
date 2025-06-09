@@ -164,11 +164,16 @@ public class MangaService {
             .toList();
     }
     
+    @Transactional
+    @CacheEvict(value = {"mangaById", "mangas"}, key = "#id")
     public Manga incrementViews(Integer id) {
         return mangaRepository.findById(id).map(manga -> {
             Integer currentViews = manga.getViews();
             manga.setViews(currentViews == null ? 1 : currentViews + 1);
-            return mangaRepository.save(manga);
+            System.out.println("Incrementing views for manga ID: " + id + " from " + currentViews + " to " + manga.getViews());
+            Manga savedManga = mangaRepository.save(manga);
+            System.out.println("Saved manga with views: " + savedManga.getViews());
+            return savedManga;
         }).orElse(null);
     }
     
