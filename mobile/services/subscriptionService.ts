@@ -1,28 +1,30 @@
 import api from "./api";
 
-type PackageType = "monthly" | "yearly" | string;
-
 interface CreateOrderResponse {
-  id: string;
-  status: string;
+  id: never;
+  links: any[];
+  success: boolean;
   approvalUrl: string;
+  orderId: string;
+  message?: string;
 }
 
 interface CapturePaymentResponse {
   success: boolean;
-  message: string;
+  message?: string;
 }
 
 interface VipStatusResponse {
+  success: boolean;
   isVip: boolean;
-  expiresAt: string;
+  expiredAt?: string;
 }
 
 const subscriptionService = {
   // Create a PayPal order for VIP subscription
   createOrder: async (
     userId: string,
-    packageType: PackageType
+    packageType: string
   ): Promise<CreateOrderResponse> => {
     try {
       const response = await api.post("/vip-subscription/create-order", {

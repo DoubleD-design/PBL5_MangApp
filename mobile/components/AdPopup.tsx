@@ -12,6 +12,7 @@ import {
 import adService from "../services/adService";
 import { virtualAndroidID } from "../utils/const";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Ad {
   id: string;
@@ -35,20 +36,33 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
   const hasFetched = useRef(false);
   const navigation = useNavigation();
 
+  const checkLogin = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      navigation.navigate('Login');
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     if (!visible || hasFetched.current) return;
 
     hasFetched.current = true;
+    
 
     const fetchAd = async () => {
       try {
         setLoading(true);
-        const isVIP = await adService.isUserVIP();
-        if (isVIP) {
+        
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const isVIP = await adService.isUserVIP();
+          if (isVIP) {
           onClose();
           return;
         }
-
+        }
         const adData = await adService.getAds();
         if (adData && adData.length > 0) {
           setAd(adData[0]);
@@ -74,7 +88,9 @@ const AdPopup: React.FC<AdPopupProps> = ({ visible, onClose }) => {
     }
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
+    const isLoggedIn = await checkLogin();
+    if (!isLoggedIn) return;
     // Linking.openURL("https://yourapp.com/vip-subscription");
     navigation.navigate("VipSubscription" as never);
   };
