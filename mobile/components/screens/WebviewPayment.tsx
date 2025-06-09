@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, ActivityIndicator, View } from "react-native";
+import { Alert, ActivityIndicator, Text, View } from "react-native";
 import WebView from "react-native-webview";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import subscriptionService from "../../services/subscriptionService";
@@ -19,35 +19,54 @@ const WebviewPayment = () => {
   const { approvalUrl, orderId } = route.params;
 
   const [loading, setLoading] = useState(false);
+  const [hasHandled, setHasHandled] = useState(false); // ngăn gọi lại nhiều lần
   const webviewRef = useRef(null);
+
+  useEffect(() => {
+    console.log("approvalUrl:", approvalUrl);
+    console.log("orderId:", orderId);
+  }, []);
 
   const handleNavigationChange = async (navState: any) => {
     const { url } = navState;
+    if (!url || hasHandled) return;
 
     if (url.includes("payment-success")) {
-      if (!loading) {
-        setLoading(true);
-        try {
-          const result = await subscriptionService.capturePayment(orderId);
-          if (result.success) {
-            Alert.alert("Success", "Your VIP subscription is now active!");
-            navigation.goBack();
-          } else {
-            Alert.alert("Error", result.message || "Payment capture failed.");
-          }
-        } catch (error) {
-          Alert.alert("Error", "Failed to complete payment.");
-        } finally {
-          setLoading(false);
+      setHasHandled(true);
+      setLoading(true);
+      try {
+        const result = await subscriptionService.capturePayment(orderId);
+        if (result.success) {
+          Alert.alert("Success", "Your VIP subscription is now active!", [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+        } else {
+          Alert.alert("Error", result.message || "Payment capture failed.");
+          setHasHandled(false); // cho retry nếu cần
         }
+      } catch (error) {
+        Alert.alert("Error", "Failed to complete payment.");
+        setHasHandled(false);
+      } finally {
+        setLoading(false);
       }
-    }
-
-    if (url.includes("payment-cancel")) {
-      Alert.alert("Cancelled", "Payment was cancelled.");
-      navigation.goBack();
+    } else if (url.includes("payment-cancel")) {
+      setHasHandled(true);
+      Alert.alert("Cancelled", "Payment was cancelled.", [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
     }
   };
+
+  if (!approvalUrl?.trim()) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: 16, color: "red" }}>
+          Error: approvalUrl is missing.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>

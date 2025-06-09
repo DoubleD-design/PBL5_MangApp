@@ -12,6 +12,7 @@ import {
 import subscriptionService from '../../services/subscriptionService';
 import { useNavigation } from '@react-navigation/native';
 import { virtualAndroidID } from '../../utils/const';
+import userService from '../../services/userService';
 
 interface SubscriptionPackage {
   id: string;
@@ -30,7 +31,7 @@ interface VipStatus {
 
 const subscriptionPackages: SubscriptionPackage[] = [
   {
-    id: 'monthly',
+    id: 'MONTHLY',
     title: 'Monthly Plan',
     price: '$1.25',
     period: 'month',
@@ -38,7 +39,7 @@ const subscriptionPackages: SubscriptionPackage[] = [
     features: ['Ad-free reading experience', 'Access to all premium manga', 'Early access to new chapters', 'High-quality images', 'Download chapters for offline reading'],
   },
   {
-    id: 'yearly',
+    id: 'YEARLY',
     title: 'Yearly Plan',
     price: '$12.5',
     period: 'year',
@@ -49,40 +50,60 @@ const subscriptionPackages: SubscriptionPackage[] = [
 ];
 
 const VipSubscriptionScreen: React.FC = () => {
-  const [vipStatus, setVipStatus] = useState<VipStatus | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [vipStatus, setVipStatus] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation();
   const userId = 'user123'; // Replace with actual userId logic
 
   useEffect(() => {
-    const fetchVipStatus = async () => {
+    (async () => {
+
       try {
-        const res = await subscriptionService.getVipStatus(userId);
-        setVipStatus(res);
-      } catch (e) {
-        console.error(e);
+        const data = await userService.getUserProfile();
+        setProfile(data);
+        setVipStatus(data.vipStatus)
+      } catch (error) {
+        Alert.alert('Lỗi', 'Không thể tải trạng thái VIP người dùng!');
       }
-    };
-    fetchVipStatus();
+    })();
   }, []);
 
   const handleSubscribe = async (pkg: SubscriptionPackage) => {
-    try {
-      setLoadingId(pkg.id);
-      const order = await subscriptionService.createOrder(userId, pkg.id);
-      if (order.approvalUrl) {
-        // navigation.navigate('WebviewPayment' as never);
-      } else {
-        throw new Error('Invalid payment link');
-      }
-    } catch (e) {
-      setError('Failed to create subscription.');
-      Alert.alert('Error', 'Subscription process failed.');
-    } finally {
-      setLoadingId(null);
+  if (!profile) {
+    Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký gói VIP!');
+    navigation.navigate('Login' as never); // hoặc điều hướng tới login screen của bạn
+    return;
+  }
+
+  try {
+    setLoadingId(pkg.id);
+    setError(null);
+
+    const response = await subscriptionService.createOrder(profile.id, pkg.id);
+    const links = response.links || [];
+    const approvalUrl = links.find((link: any) => link.rel === "approve")?.href;
+
+    if (approvalUrl) {
+      navigation.navigate("WebviewPayment", {
+        approvalUrl: response.links.find((link) => link.rel === "approve")?.href,
+        orderId: response.id,
+      });
+    } else {
+      throw new Error('Không tìm thấy liên kết thanh toán.');
     }
-  };
+  } catch (err: any) {
+    console.error('Error creating subscription:', err);
+    setError(
+      err.response?.data?.message ||
+      'Không thể tạo đăng ký. Vui lòng thử lại.'
+    );
+    Alert.alert('Lỗi', error || 'Đăng ký thất bại.');
+  } finally {
+    setLoadingId(null);
+  }
+};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -97,10 +118,10 @@ const VipSubscriptionScreen: React.FC = () => {
         Upgrade your manga experience with our VIP subscription plans
       </Text>
 
-      {vipStatus?.isVip && (
+      {vipStatus && (
         <View style={styles.vipAlert}>
           <Text style={styles.vipText}>
-            You are currently a VIP! Valid until {new Date(vipStatus.expiresAt).toLocaleDateString()}.
+            You are currently a VIP!
           </Text>
         </View>
       )}
@@ -136,7 +157,7 @@ const VipSubscriptionScreen: React.FC = () => {
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.buttonText}>
-                {vipStatus?.isVip ? 'Extend Subscription' : 'Subscribe Now'}
+                {vipStatus ? 'Extend Subscription' : 'Subscribe Now'}
               </Text>
             )}
           </TouchableOpacity>

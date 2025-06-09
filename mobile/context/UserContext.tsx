@@ -12,6 +12,7 @@ interface User {
 
 // Định nghĩa kiểu cho Context
 interface UserContextType {
+  id: string;
   user: User | null;
   loading: boolean;
   error: string | null;
