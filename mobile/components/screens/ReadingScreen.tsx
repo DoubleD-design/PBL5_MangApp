@@ -11,6 +11,7 @@ import { Page } from '../../types/Manga';
 import axios from 'axios';
 import api from '../../services/api';
 import AdPopup from '../AdPopup';
+import mangaService from '../../services/mangaService';
 
 type ReadingRouteProp = RouteProp<RootStackParamList, 'Reading'>;
 

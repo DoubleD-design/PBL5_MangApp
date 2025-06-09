@@ -51,9 +51,15 @@ const MangaDetailScreen = () => {
           setUserRating(userRatingRes);
           setRatingCount(mangaRatingsRes.length);
           setAverageRating(avgRatingRes);
-
-          const isFav = favorites.some((fav) => String(fav.id) === String(manga.id));
-          setIsFavorite(isFav);
+          const token = await AsyncStorage.getItem('token');
+          if (token) {
+            const isFav = favorites.some((fav) => String(fav.id) === String(manga.id));
+            setIsFavorite(isFav);
+          }
+          else {
+            setIsFavorite(false);
+          }
+          
         } catch (error) {
           console.error('Error loading manga detail:', error);
         } finally {
@@ -135,6 +141,7 @@ const MangaDetailScreen = () => {
           <TouchableOpacity
             style={styles.startButton}
             onPress={() => {
+              mangaService.incrementViews(mangaInfor.id);
               if (chapters.length > 0) {
                 navigation.navigate('Reading', { chapter: chapters[0], chapters });
               } else {
@@ -228,7 +235,9 @@ const MangaDetailScreen = () => {
                     <TouchableOpacity
                       key={index}
                       style={styles.chapterRow}
-                      onPress={() => navigation.navigate('Reading', { chapter, chapters })}
+                      onPress={() => {
+                        mangaService.incrementViews(mangaInfor.id);
+                        navigation.navigate('Reading', { chapter, chapters })}}
                     >
                       <Text style={styles.chapterTitle}>{chapter.title}</Text>
                     </TouchableOpacity>
