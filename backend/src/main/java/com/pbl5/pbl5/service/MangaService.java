@@ -227,7 +227,7 @@ public class MangaService {
 
         return mangaRepository.save(manga);
     }
-
+    @Transactional
     public Manga updateManga(Integer id, MangaRequestDTO dto, MultipartFile image) {
         return mangaRepository.findById(id).map(manga -> {
             // Update manga details

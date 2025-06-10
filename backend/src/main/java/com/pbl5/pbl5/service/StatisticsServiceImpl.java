@@ -2,14 +2,8 @@ package com.pbl5.pbl5.service;
 
 import com.pbl5.pbl5.modal.Manga;
 import com.pbl5.pbl5.modal.Payment;
-import com.pbl5.pbl5.modal.ReadingHistory;
-import com.pbl5.pbl5.modal.Subscription;
-import com.pbl5.pbl5.modal.User;
 import com.pbl5.pbl5.repos.MangaRepository;
-import com.pbl5.pbl5.repos.PaymentRepository;
-import com.pbl5.pbl5.repos.ReadingHistoryRepository;
 import com.pbl5.pbl5.repos.StatisticsRepository;
-import com.pbl5.pbl5.repos.SubscriptionRepository;
 import com.pbl5.pbl5.repos.UserRepository;
 import com.pbl5.pbl5.response.StatisticsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,19 +25,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     private UserRepository userRepository;
 
     @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private ReadingHistoryRepository readingHistoryRepository;
-
-    @Autowired
     private MangaRepository mangaRepository;
     
     @Autowired
     private StatisticsRepository statisticsRepository;
-    
-    @Autowired
-    private SubscriptionRepository subscriptionRepository;
 
     @Override
     public StatisticsResponse.DashboardSummary getDashboardSummary() {
