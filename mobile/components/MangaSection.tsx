@@ -11,6 +11,10 @@ import { useNavigation } from '@react-navigation/native';
 import mangaService from '../services/mangaService';
 import { Manga } from '../types/Manga';
 import MangaCard from './MangaCard'; // Đảm bảo đường dẫn đúng
+import { Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const MangaSection: React.FC<{ title: string }> = ({ title }) => {
   const [data, setData] = useState<Manga[]>([]);
@@ -95,7 +99,8 @@ const MangaSection: React.FC<{ title: string }> = ({ title }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    flex: 1,
+    width: width,
     position: 'relative',
   },
   loaderContainer: {
