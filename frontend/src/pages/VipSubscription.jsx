@@ -94,7 +94,7 @@ const VipSubscription = () => {
         "Priority customer support",
         "Participate in beta features",
       ],
-      image: `${CONFIG.BACKEND_URL}/api/vip/yearly_vip.jpeg",
+      image: `${CONFIG.BACKEND_URL}/api/vip/yearly_vip.jpeg`,
       paypalPackageType: "ANNUAL",
       recommended: true,
     },
