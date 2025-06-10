@@ -19,7 +19,7 @@ public class Pbl5Application {
         SpringApplication app = new SpringApplication(Pbl5Application.class);
         
         // Đăng ký listener này ngay từ đầu!
-        app.addListeners(new DotenvApplicationListener());
+        //app.addListeners(new DotenvApplicationListener());
 
         app.run(args);
     }
