@@ -21,4 +21,6 @@ export const GRADIENTS = {
     }
 };
 
-export const virtualAndroidID = '10.0.2.2';
+export const virtualAndroidID = '192.168.1.9'; 
+//192.168.1.9 Wifi Hieu Long
+//10.0.2.2 May ao

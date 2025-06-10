@@ -17,6 +17,9 @@ import SearchBar from '../SearchBar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GRADIENTS } from '../../utils/const';
 
+const { width } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
+
 const screenWidth = Dimensions.get('window').width;
 const ITEM_WIDTH = screenWidth / 3 - 2;
 
@@ -135,6 +138,7 @@ const MangaListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: width,
     backgroundColor: '#2c1a0e',
   },
   title: {

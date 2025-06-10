@@ -120,7 +120,7 @@ const MangaDetailScreen = () => {
     <LinearGradient {...GRADIENTS.BACKGROUND} style={styles.gradient}>
       <ImageBackground
         source={{ uri: mangaInfor.coverImage }}
-        style={[StyleSheet.absoluteFillObject, { backgroundColor: '#2c1a0e' }, { marginTop: 50 }]}
+        style={[StyleSheet.absoluteFillObject, { backgroundColor: '#2c1a0e' }]}
         imageStyle={{ resizeMode: 'cover', opacity: 0.2 }}
       />
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -262,12 +262,12 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
     flex: 1,
-    marginTop: 50,
     paddingBottom: 10,
+    height: height,
   },
   backButton: {
     position: 'absolute',
-    top: 70,
+    top: 30,
     left: 20,
     zIndex: 10,
   },

@@ -174,10 +174,10 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: '#1a1a1a' },
-  backButton: { position: 'absolute', top: 70, left: 20, zIndex: 10 },
+  backButton: { position: 'absolute', top: 30, left: 20, zIndex: 10 },
   chapterTitle: {
     fontSize: 18, fontWeight: 'bold', color: '#b5e745', textAlign: 'center',
-    marginTop: 70, marginBottom: 10,
+    marginTop: 30, marginBottom: 10,
   },
   imageList: { paddingBottom: 20 },
   navButtons: {
