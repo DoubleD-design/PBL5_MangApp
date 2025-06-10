@@ -86,7 +86,7 @@ public class ChapterService {
         for (Favourite fav : favourites) {
             Notification notification = new Notification();
             notification.setUserId(fav.getReaderId());
-            // Thông báo tiếng Anh, có tên manga và id
+            notification.setMangaId(chapter.getMangaId());
             notification.setMessage(
                 "New chapter for your favorite manga: " +
                 (mangaTitle != null && !mangaTitle.isEmpty() ? mangaTitle : "ID " + chapter.getMangaId()) +
