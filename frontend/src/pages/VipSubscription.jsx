@@ -79,7 +79,7 @@ const VipSubscription = () => {
         "High-quality images",
         "Download chapters for offline reading",
       ],
-      image: "http://localhost:8080/vip/monthly_vip.jpeg",
+      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/vip/monthly_vip.jpeg",
       paypalPackageType: "MONTHLY",
     },
     {
@@ -94,7 +94,7 @@ const VipSubscription = () => {
         "Priority customer support",
         "Participate in beta features",
       ],
-      image: "http://localhost:8080/vip/yearly_vip.jpeg",
+      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/api/vip/yearly_vip.jpeg",
       paypalPackageType: "ANNUAL",
       recommended: true,
     },

@@ -462,14 +462,14 @@ const Home = () => {
                       title: "Monthly VIP Subscription",
                       description:
                         "Get unlimited access to all manga for just $1.25/month",
-                      image: "http://localhost:8080/vip/monthly_vip.jpeg", // 👈 Sửa thành URL thực
+                      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/vip/monthly_vip.jpeg", // 👈 Sửa thành URL thực
                     },
                     {
                       id: 2,
                       title: "Yearly VIP Subscription",
                       description:
                         "Get unlimited access to all manga for just $12.5/year",
-                      image: "http://localhost:8080/vip/yearly_vip.jpeg", // 👈 Sửa thành URL thực
+                      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/vip/yearly_vip.jpeg", // 👈 Sửa thành URL thực
                     },
                   ].map((promo) => (
                     <Paper

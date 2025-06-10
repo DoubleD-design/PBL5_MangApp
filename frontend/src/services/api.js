@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,

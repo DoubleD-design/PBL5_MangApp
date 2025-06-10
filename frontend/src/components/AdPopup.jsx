@@ -126,8 +126,8 @@ const AdPopup = ({ onClose, triggerType = "chapter_view" }) => {
           <Box
             component="img"
             src={
-              `http://localhost:8080${ad.imageUrl}` ||
-              "http://localhost:8080/ads/Vietnam_Travel_Ad_Facebook_Post.jpg"
+              `https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net${ad.imageUrl}` ||
+              "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/ads/Vietnam_Travel_Ad_Facebook_Post.jpg"
             }
             alt={ad.title || "Advertisement"}
             sx={{
