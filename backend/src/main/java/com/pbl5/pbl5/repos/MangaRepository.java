@@ -72,6 +72,9 @@ public interface MangaRepository extends JpaRepository<Manga, Integer> {
     
     @Query("SELECT DISTINCT m FROM Manga m LEFT JOIN FETCH m.chapters")
     List<Manga> findAllWithChapters();
+
+    @Query("SELECT m FROM Manga m LEFT JOIN FETCH m.categories")
+    List<Manga> findAllWithCategories();
     
     @Query("SELECT m FROM Manga m WHERE LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Manga> searchByTitle(@Param("keyword") String keyword);

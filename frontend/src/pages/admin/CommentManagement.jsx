@@ -22,14 +22,7 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
-import {
-  Delete,
-  Visibility,
-  Search,
-  Refresh,
-  Flag,
-  CheckCircle,
-} from "@mui/icons-material";
+import { Delete, Visibility, Search, Refresh } from "@mui/icons-material";
 import commentService from "../../services/commentService";
 import mangaService from "../../services/mangaService";
 import authService from "../../services/authService";
@@ -154,36 +147,6 @@ const CommentManagement = () => {
           message = `Comment has been deleted`;
           break;
 
-        case "approve":
-          // Replace with actual API call to approve flagged comment
-          const approvedComment = await commentService.approveComment(
-            selectedComment.id
-          );
-          setComments(
-            comments.map((comment) =>
-              comment.id === approvedComment.id
-                ? { ...comment, flagged: false }
-                : comment
-            )
-          );
-          message = `Comment has been approved`;
-          break;
-
-        case "flag":
-          // Replace with actual API call to flag comment
-          const flaggedComment = await commentService.flagComment(
-            selectedComment.id
-          );
-          setComments(
-            comments.map((comment) =>
-              comment.id === flaggedComment.id
-                ? { ...comment, flagged: true }
-                : comment
-            )
-          );
-          message = `Comment has been flagged for review`;
-          break;
-
         default:
           break;
       }
@@ -259,7 +222,6 @@ const CommentManagement = () => {
               <TableCell>Manga</TableCell>
               <TableCell>Content Preview</TableCell>
               <TableCell>Date</TableCell>
-              <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -280,13 +242,6 @@ const CommentManagement = () => {
                 </TableCell>
                 <TableCell>{formatDate(comment.createdAt)}</TableCell>
                 <TableCell>
-                  {comment.flagged ? (
-                    <Chip label="Flagged" color="error" size="small" />
-                  ) : (
-                    <Chip label="Approved" color="success" size="small" />
-                  )}
-                </TableCell>
-                <TableCell>
                   <Box sx={{ display: "flex" }}>
                     <IconButton
                       color="primary"
@@ -295,24 +250,6 @@ const CommentManagement = () => {
                     >
                       <Visibility fontSize="small" />
                     </IconButton>
-
-                    {comment.flagged ? (
-                      <IconButton
-                        color="success"
-                        onClick={() => handleOpenDialog(comment, "approve")}
-                        title="Approve Comment"
-                      >
-                        <CheckCircle fontSize="small" />
-                      </IconButton>
-                    ) : (
-                      <IconButton
-                        color="warning"
-                        onClick={() => handleOpenDialog(comment, "flag")}
-                        title="Flag Comment"
-                      >
-                        <Flag fontSize="small" />
-                      </IconButton>
-                    )}
 
                     <IconButton
                       color="error"
@@ -353,10 +290,6 @@ const CommentManagement = () => {
                 <strong>Posted on:</strong>{" "}
                 {formatDate(selectedComment.createdAt)}
               </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                <strong>Status:</strong>{" "}
-                {selectedComment.flagged ? "Flagged" : "Approved"}
-              </Typography>
               <Box
                 sx={{
                   mt: 2,
@@ -384,19 +317,13 @@ const CommentManagement = () => {
       {/* Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>
-          {dialogType === "delete"
-            ? "Delete Comment"
-            : dialogType === "approve"
-            ? "Approve Comment"
-            : "Flag Comment"}
+          {dialogType === "delete" ? "Delete Comment" : ""}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
             {dialogType === "delete"
               ? "Are you sure you want to delete this comment? This action cannot be undone."
-              : dialogType === "approve"
-              ? "Are you sure you want to approve this comment? It will be visible to all users."
-              : "Are you sure you want to flag this comment for review? It will be marked as potentially inappropriate."}
+              : ""}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -410,7 +337,7 @@ const CommentManagement = () => {
                 ? "error"
                 : dialogType === "approve"
                 ? "success"
-                : "warning"
+                : ""
             }
             variant="contained"
           >

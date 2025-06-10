@@ -41,9 +41,12 @@ public class MangaService {
         this.pageRepository = pageRepository;
     }
     @Cacheable("mangas")
+    // public List<Manga> getAllMangas() {
+    //     // Use findAllWithChapters to eagerly fetch chapters and avoid LazyInitializationException
+    //     return mangaRepository.findAllWithChapters();
+    // }
     public List<Manga> getAllMangas() {
-        // Use findAllWithChapters to eagerly fetch chapters and avoid LazyInitializationException
-        return mangaRepository.findAllWithChapters();
+        return mangaRepository.findAllWithCategories();
     }
 
     @Cacheable(value = "mangaById", key = "#id")
@@ -194,7 +197,7 @@ public class MangaService {
         }
         return mangaRepository.findByCategoriesId(categoryId, pageable);
     }
-
+    @Transactional
     public Manga uploadAndSave(MangaRequestDTO dto, MultipartFile image, Integer adminId, boolean isUpdate, Integer mangaId) {
         String imageUrl = dto.getCoverImage();
         Manga manga;
