@@ -26,7 +26,7 @@ import MyComment from "./pages/MyComment"; // Import the MyComment component
 import { UserProvider } from "./context/UserContext";
 import AdminDashboard from "./pages/admin/AdminDashboard"; // Import AdminDashboard component
 import ChapterManagement from "./pages/admin/ChapterManagement"; // Import ChapterManagement component
-import OAuth2Callback from "./pages/OAuth2Callback";
+import GoogleCallback from "./pages/GoogleCallback";
 // PrivateRoute component
 const PrivateRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/login" />;

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import authService from "../services/authService";
 
-const OAuth2Callback = () => {
+const GoogleCallback = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,4 +20,4 @@ const OAuth2Callback = () => {
   return <div>Authenticating with Google...</div>;
 };
 
-export default OAuth2Callback;
+export default GoogleCallback;
