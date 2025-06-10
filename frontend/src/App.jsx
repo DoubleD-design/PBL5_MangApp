@@ -133,7 +133,7 @@ function App() {
                       </AdminRoute>
                     }
                   />
-                  <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+                  <Route path="/oauth2/callback" element={<GoogleCallback />} />
                 </Routes>
               </Box>
             </Box>
