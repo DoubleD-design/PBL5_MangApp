@@ -6,7 +6,7 @@ spring:
           google:
             client-id: ${CLIENT_ID}
             client-secret: ${CLIENT_SECRET}
-            redirect-uri: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/oauth2/callback"
+            redirect-uri: ${backend.url}/oauth2/callback
             scope: openid,profile,email
         provider:
           google:

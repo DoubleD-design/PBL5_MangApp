@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 import subscriptionService from "../services/subscriptionService";
 import api from "../services/api";
-
+import CONFIG from "../config";
 const VipSubscription = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ const VipSubscription = () => {
         "High-quality images",
         "Download chapters for offline reading",
       ],
-      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/vip/monthly_vip.jpeg",
+      image: `${CONFIG.BACKEND_URL}/vip/monthly_vip.jpeg`,
       paypalPackageType: "MONTHLY",
     },
     {
@@ -94,7 +94,7 @@ const VipSubscription = () => {
         "Priority customer support",
         "Participate in beta features",
       ],
-      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/api/vip/yearly_vip.jpeg",
+      image: `${CONFIG.BACKEND_URL}/api/vip/yearly_vip.jpeg",
       paypalPackageType: "ANNUAL",
       recommended: true,
     },

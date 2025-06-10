@@ -4,6 +4,7 @@ import { Close } from "@mui/icons-material";
 import adService from "../services/adService";
 import { useUser } from "../context/UserContext";
 import { useRef } from "react";
+import CONFIG from "../config";
 
 const AdPopup = ({ onClose, triggerType = "chapter_view" }) => {
   const [ad, setAd] = useState(null);
@@ -126,8 +127,8 @@ const AdPopup = ({ onClose, triggerType = "chapter_view" }) => {
           <Box
             component="img"
             src={
-              `https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net${ad.imageUrl}` ||
-              "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/ads/Vietnam_Travel_Ad_Facebook_Post.jpg"
+              `${CONFIG.BACKEND_URL}${ad.imageUrl}` ||
+              `${CONFIG.BACKEND_URL}/ads/Vietnam_Travel_Ad_Facebook_Post.jpg`
             }
             alt={ad.title || "Advertisement"}
             sx={{

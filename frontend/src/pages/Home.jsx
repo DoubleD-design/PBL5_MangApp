@@ -26,7 +26,7 @@ import FeaturedCarousel from "../components/FeaturedCarousel";
 import { Link } from "react-router-dom";
 import mangaService from "../services/mangaService";
 import categoryService from "../services/categoryService";
-
+import CONFIG from "../config";
 const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -462,14 +462,14 @@ const Home = () => {
                       title: "Monthly VIP Subscription",
                       description:
                         "Get unlimited access to all manga for just $1.25/month",
-                      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/vip/monthly_vip.jpeg", // 👈 Sửa thành URL thực
+                      image: `${CONFIG.BACKEND_URL}/vip/monthly_vip.jpeg`,
                     },
                     {
                       id: 2,
                       title: "Yearly VIP Subscription",
                       description:
                         "Get unlimited access to all manga for just $12.5/year",
-                      image: "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/vip/yearly_vip.jpeg", // 👈 Sửa thành URL thực
+                      image: `${CONFIG.BACKEND_URL}/vip/yearly_vip.jpeg`,
                     },
                   ].map((promo) => (
                     <Paper
