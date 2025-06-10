@@ -1,6 +1,7 @@
 import axios from "axios";
+import CONFIG from "../config";
 
-const API_BASE_URL = "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/api";
+const API_BASE_URL = `${CONFIG.BACKEND_URL}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

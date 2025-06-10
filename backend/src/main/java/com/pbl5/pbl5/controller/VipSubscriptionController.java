@@ -4,6 +4,7 @@ import com.pbl5.pbl5.request.VipSubscriptionRequest;
 import com.pbl5.pbl5.service.PayPalService;
 import com.pbl5.pbl5.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,15 @@ public class VipSubscriptionController {
     @Autowired
     private UserService userService;
     
+    @Value("${paypal.return.url}")
+    private String paypalReturnUrl;
+
+    @Value("${paypal.error.url}")
+    private String paypalErrorUrl;
+
+    @Value("${paypal.cancel.url}")
+    private String paypalCancelUrl;
+
     /**
      * Creates a PayPal order for VIP subscription
      * @param request VIP subscription request containing user ID and package type
@@ -120,15 +130,15 @@ public class VipSubscriptionController {
             // Check if payment was successful
             if (captureResponse != null && "COMPLETED".equals(captureResponse.get("status"))) {
                 // Redirect to frontend success page
-                response.sendRedirect("http://localhost:5173/vip-subscription?status=success");
+                response.sendRedirect(paypalReturnUrl);
             } else {
                 // Redirect to frontend with error
-                response.sendRedirect("http://localhost:5173/vip-subscription?status=error&message=Payment+failed");
+                response.sendRedirect(paypalErrorUrl+"&message=Payment+failed");
             }
         } catch (Exception e) {
             try {
                 // Redirect to frontend with error
-                response.sendRedirect("http://localhost:5173/vip-subscription?status=error&message=Payment+processing+failed");
+                response.sendRedirect(paypalErrorUrl+"&message=Payment+processing+failed");
             } catch (Exception redirectException) {
                 // If redirect fails, log the error
                 System.err.println("Failed to redirect after payment error: " + redirectException.getMessage());
@@ -144,7 +154,7 @@ public class VipSubscriptionController {
     public void handlePaymentCancel(HttpServletResponse response) {
         try {
             // Redirect to frontend cancel page
-            response.sendRedirect("http://localhost:5173/vip-subscription?status=cancel");
+            response.sendRedirect(paypalReturnUrl);
         } catch (Exception e) {
             System.err.println("Failed to redirect after payment cancellation: " + e.getMessage());
         }

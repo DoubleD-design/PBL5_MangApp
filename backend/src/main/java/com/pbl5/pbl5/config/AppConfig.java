@@ -52,6 +52,7 @@ public class AppConfig {
                                         "http://localhost:5173",
                                         "http://localhost:4000",
                                         "http://localhost:4200",
+                                        "https://pbl-5-mang-app.vercel.app",
                                         "https://shopwithzosh.vercel.app",
                                         "https://ecommerce-angular-blue.vercel.app/",
                                         "http://localhost:8080"

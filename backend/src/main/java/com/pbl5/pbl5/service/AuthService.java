@@ -44,6 +44,9 @@ public class AuthService {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String googleClientSecret;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     public AuthResponse register(RegisterRequest registerRequest) {
         // Check if username or email already exists
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
@@ -161,7 +164,7 @@ public class AuthService {
     params.add("code", code);
     params.add("client_id", googleClientId);
     params.add("client_secret", googleClientSecret);
-    params.add("redirect_uri", "http://localhost:8080/oauth2/callback");
+    params.add("redirect_uri", frontendUrl + "/oauth2/callback");
     params.add("grant_type", "authorization_code");
 
     HttpHeaders headers = new HttpHeaders();

@@ -1,5 +1,5 @@
 import api from "./api";
-
+import CONFIG from "../config";
 const authService = {
   // Login user
   login: async (credentials) => {
@@ -36,7 +36,7 @@ const authService = {
   },
   loginWithGoogle: () => {
     // Chuyển hướng trình duyệt tới endpoint OAuth2 của backend
-    window.location.href = "https://mangavn-c8fwghesfqgre2gn.eastasia-01.azurewebsites.net/oauth2/authorization/google?prompt=select_account";
+    window.location.href = `${CONFIG.BACKEND_URL}${CONFIG.GOOGLE_AUTH_URL}`;
   },
   exchangeGoogleCodeForJwt: async (code, state) => {
     try {

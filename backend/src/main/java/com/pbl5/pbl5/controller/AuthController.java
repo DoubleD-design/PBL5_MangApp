@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
     
-    
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     @RestController
     public class OAuth2CallbackController {
 
@@ -32,7 +35,7 @@ public class AuthController {
                 @RequestParam(value = "state", required = false) String state,
                 HttpServletResponse response) throws IOException {
             // Sau khi nhận code, bạn có thể redirect về frontend kèm code và state
-            String redirectUrl = "http://localhost:5173/oauth2/callback?code=" + code;
+            String redirectUrl = frontendUrl + "/oauth2/callback?code=" + code;
             if (state != null) {
                 redirectUrl += "&state=" + state;
             }
